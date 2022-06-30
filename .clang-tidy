@@ -1,0 +1,8 @@
+# See: http://clang.llvm.org/extra/clang-tidy/
+#  clang-tidy-4.0 src/pvt_engine/*.cc -- -std=c++14 -Irefactor/common/ -Irefactor/common/libswiftnav -Iinclude/ -Iinclude/libswiftnav/ -isystem -third_party/ -isystem./libfec/include/ -Ithird_party/Optional -isystem./third_party/json/src/ -isystem./third_party/eigen/
+#
+
+Checks: "-*,cert-*,google-*,misc-*,readability-*,clang-analyzer-*,modernize-*,performance-*,-clang-analyzer-alpha*,cppcoreguidelines-*,cert-*,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-modernize-pass-by-value,-modernize-deprecated-headers,-modernize-use-default-member-init,-modernize-redundant-void-arg,-modernize-use-using,-modernize-use-equals-delete,-modernize-use-equals-default,-modernize-use-bool-literals,-modernize-use-auto,-modernize-use-emplace,-cppcoreguidelines-special-member-functions,-cppcoreguidelines-pro-type-member-init,-readability-avoid-const-params-in-decls,-readability-non-const-parameter,-readability-redundant-member-init,-readability-redundant-declaration,-cert-err34-c,-cert-err58-cpp,-performance-unnecessary-value-param,-google-runtime-references,-clang-analyzer-optin.cplusplus.VirtualCall,-clang-analyzer-core.CallAndMessage,-clang-analyzer-core.UndefinedBinaryOperatorResult,-clang-analyzer-core.uninitialized.Assign,-cppcoreguidelines-owning-memory,-clang-analyzer-core.uninitialized.UndefReturn,-cert-dcl21-cpp,-modernize-return-braced-init-list,-cert-dcl03-c,-misc-static-assert,-cppcoreguidelines-pro-type-static-cast-downcast,-clang-analyzer-optin.performance.Padding,-cppcoreguidelines-pro-type-union-access"
+HeaderFilterRegex: '.*'
+AnalyzeTemporaryDtors: true
+...

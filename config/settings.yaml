@@ -1,0 +1,47 @@
+swiftnav_ros2_driver:
+  ros__parameters:
+
+    # SwiftNav GNSS Receiver Interface
+    interface: 1 # 1: TCP Client, 2: Serial, 3: File
+
+    # TCP Client (interface: 1)
+    host_ip: "192.168.0.222"
+    host_port: 55556
+    read_timeout: 2000  # [ms]
+    write_timeout: 2000 # [ms]
+
+    # Serial (interface: 2)
+    device_name: "/dev/ttyUSB0"
+    connection_str: "115200|N|8|1|N"
+
+    # File (interface: 3)
+    sbp_file: "/home/swiftnav/ros2logs/sample-drive.sbp"
+
+    # ROS2 Frame Name
+    frame_name: "swiftnav-gnss"
+
+    # Topic Publication Time Stamp Source
+    timestamp_source_gnss: True # True: use GNSS receiver reported time (default), False: use current platfrom time
+
+    # RTK Baseline Direction Offsets (Baseline Topic)
+    baseline_dir_offset_deg: 0.0    # [deg], range [-180 to 180]
+    baseline_dip_offset_deg: 0.0    # [deg], range [-90 to 90]
+
+    # Mininal Speed For Track Updates From SBP Message VEL NED COV (GPSFix Topic)
+    track_update_min_speed_mps: 0.2 # [m/s], Track and track error outputs are 'frozen' below this threshold.
+
+    # Publishers
+    enabled_publishers:
+      [
+        "gpsfix",
+        "navsatfix",
+        "twistwithcovariancestamped",
+        "baseline",
+        "timereference",
+        "imu"
+      ]
+
+    # SBP Logging
+    log_sbp_messages: False
+    log_sbp_filepath: "/home/swiftnav/ros2logs"
+
