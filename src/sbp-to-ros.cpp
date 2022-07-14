@@ -39,8 +39,8 @@ class SbpFileReader : public sbp::IReader {
 
 class NavSatFixPublisher : private sbp::PayloadHandler<msg_gps_time_t, msg_pos_ecef_t> {
   public:
-    ECEFHandler(std::shared_ptr<sbp::State> state, rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr publisher) 
-      : sbp::PayloadHandler<msg_gps_time_t, msg_pos_ecef_t>(*state), publisher_(publisher) {
+    NavSatFixPublisher(sbp::State *state, std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::NavSatFix>> publisher) 
+      : sbp::PayloadHandler<msg_gps_time_t, msg_pos_ecef_t>(state), publisher_(publisher) {
        
     }
 
@@ -60,7 +60,7 @@ class NavSatFixPublisher : private sbp::PayloadHandler<msg_gps_time_t, msg_pos_e
     }
 
   private:
-    rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr publisher_;
+    std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::NavSatFix>> publisher_;
 };
 
 class SBPROS2DriverNode : public rclcpp::Node
@@ -73,48 +73,60 @@ class SBPROS2DriverNode : public rclcpp::Node
       this->declare_parameter<std::string>("sbp_file");
       this->get_parameter<std::string>("sbp_file", sbp_file_);
 
-      /* Publisher */
-      publisher_ = this->create_publisher<sensor_msgs::msg::NavSatFix>("topic", 10);
+      std::cout << "SBP_FILE --: " << sbp_file_ << std::endl;
 
-      SbpFileReader reader(sbp_file_);
-      if (!reader.is_open()) {
+      /* Publisher */
+      auto publisher_ = this->create_publisher<sensor_msgs::msg::NavSatFix>("topic", 10);
+
+      std::cout << "Publisher" << std::endl;
+
+     reader_ = new SbpFileReader(sbp_file_.c_str());
+      if (!reader_->is_open()) {
         exit(EXIT_FAILURE);
       }
+      std::cout << "Reader" << std::endl;
+      state_.set_reader(reader_);
 
-      NavSatFixPublisher navsat_fix_publisher(state_, publisher_);
+      std::cout << "fixpublisher" << std::endl;
+      navsatfixpublisher_ = new NavSatFixPublisher(&state_, publisher_);
 
      /* SBP Callbacks */
+      sbp_thread_ = std::thread(&SBPROS2DriverNode::processSBP, this);
+
+      std::cout << "start" << std::endl;
 
     }
 
+    ~SBPROS2DriverNode(){
+        exit_requested_.store(true);
+        if (sbp_thread_.joinable()) sbp_thread_.join();
+        delete(reader_);
+        delete(navsatfixpublisher_);
+    }
+
+    void processSBP() {
+      while(!exit_requested_.load() && !reader_->eof()) {
+       state_.process(); 
+      }  
+    }
+
   private:
-    std::shared_ptr<sbp::State> state_;
+    sbp::State state_;
     std::string sbp_file_;
+    std::thread sbp_thread_;
+    std::atomic_bool exit_requested_ = false;
+    SbpFileReader* reader_;
+    NavSatFixPublisher* navsatfixpublisher_;
 
 };
 
 int main(int argc, char ** argv)
 {
   
-    printf("hello world swiftnav-ros2 package\n");
+  printf("hello world swiftnav-ros2 package\n");
 
   rclcpp::init(argc, argv);
-  std::shared_ptr<rclcpp::Node> node = std::make_shared<rclcpp::Node>("sbptoros2");
-
-  sbp::State s;
-  ECEFHandler ecef_handler(&s, node);
-  LLHFrameHandler llh_handler(&s);
- // EverythingHandler everything_handler(&s);
-
-  s.set_reader(&reader);
-
-  rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node);
-
-  while(!reader.eof()) {
-    s.process(); 
-  }
- 
+  rclcpp::spin(std::make_shared<SBPROS2DriverNode>());
   rclcpp::shutdown();
 
   return 0;
