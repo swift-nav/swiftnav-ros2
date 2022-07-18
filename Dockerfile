@@ -26,7 +26,7 @@ WORKDIR /home/dockerdev
 RUN chown -R dockerdev:dockerdev /home/dockerdev
 USER dockerdev
 
-RUN git clone https://github.com/swift-nav/libsbp.git
+RUN git clone https://github.com/swift-nav/libsbp.git && cd libsbp && git checkout v4.4.0
 WORKDIR /home/dockerdev/libsbp/c
 RUN git submodule update --init
 RUN mkdir build &&  \
@@ -35,6 +35,7 @@ RUN mkdir build &&  \
     make && \
     sudo make install
 
-WORKDIR /mnt/workspace
+WORKDIR /mnt/workspace/src/swiftnav-ros2
+RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/
 
 #CMD ["make", "all"]
