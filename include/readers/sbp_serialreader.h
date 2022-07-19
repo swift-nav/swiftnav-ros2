@@ -20,15 +20,17 @@ class SBPSerialReader : public sbp::IReader {
    * Number of data bits (8 for example) PARITY: Parity control (N: none, O:
    * Odd, E: even, M: mark, S: space) STOP BITS: Number of stop bits used (1, 2)
    * Example: 19200|N|8|1|N
+   * @param logger Logger facility to use
    */
-  SBPSerialReader(const std::string& connection_string);
+  SBPSerialReader(const std::string& connection_string,
+                  const LoggerPtr& logger) noexcept;
 
   /**
    * @brief Move Construct a new SBPSerialReader object
    *
    * @param rhs SBPSerialReader to construct from
    */
-  SBPSerialReader(SBPSerialReader&& rhs);
+  SBPSerialReader(SBPSerialReader&& rhs) noexcept;
 
   /**
    * @brief Destroy the SBPSerialReader object
@@ -50,6 +52,9 @@ class SBPSerialReader : public sbp::IReader {
   s32 read(u8* buffer, u32 buffer_length) override;
 
  private:
-  sp_port* port_; /** @brief Pointer to a libserialport structure representing a
-                     port */
+  void closePort() noexcept;
+
+  sp_port* port_;    /** @brief Pointer to a libserialport structure
+                        representing a port */
+  LoggerPtr logger_; /** @brief Logging facility */
 };

@@ -32,6 +32,8 @@ SBPTCPReader::SBPTCPReader(SBPTCPReader&& rhs) noexcept {
   closeSocket();
   socket_id_ = rhs.socket_id_;
   rhs.socket_id_ = -1;
+  logger_ = rhs.logger_;
+  rhs.logger_.reset();
 }
 
 SBPTCPReader::~SBPTCPReader() {
