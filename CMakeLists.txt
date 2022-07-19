@@ -23,15 +23,7 @@ target_include_directories(sbp-to-ros PUBLIC
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs)
 
-add_executable(cpp_example src/cpp_example.cc)
-target_link_libraries(cpp_example sbp)
-target_include_directories(cpp_example PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(cpp_example PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(cpp_example rclcpp sensor_msgs)
-
-install(TARGETS sbp-to-ros cpp_example
+install(TARGETS sbp-to-ros 
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

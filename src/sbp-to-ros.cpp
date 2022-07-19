@@ -8,8 +8,7 @@
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
 
 #include <libsbp/cpp/state.h>
-#include <libsbp/legacy/cpp/payload_handler.h>
-#include <libsbp/legacy/cpp/frame_handler.h>
+#include <libsbp/cpp/message_handler.h>
 
 
 class SbpFileReader : public sbp::IReader {
@@ -37,22 +36,21 @@ class SbpFileReader : public sbp::IReader {
   std::ifstream file_stream_;
 };
 
-class NavSatFixPublisher : private sbp::PayloadHandler<msg_gps_time_t, msg_pos_ecef_t> {
+
+class NavSatFixPublisher : private sbp::MessageHandler<sbp_msg_gps_time_t, sbp_msg_pos_ecef_t> {
   public:
     NavSatFixPublisher(sbp::State *state, std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::NavSatFix>> publisher) 
-      : sbp::PayloadHandler<msg_gps_time_t, msg_pos_ecef_t>(state), publisher_(publisher) {
+      : sbp::MessageHandler<sbp_msg_gps_time_t, sbp_msg_pos_ecef_t>(state), publisher_(publisher) {
        
     }
 
-    void handle_sbp_msg(uint16_t sender_id, uint8_t message_length, const msg_gps_time_t& msg) {
-      (void)sender_id;
-      (void)message_length;
-      std::cout << "Received new GPS_TME message with WN = " << msg.wn << ", TOW = " << msg.tow << "\n";
+    void handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg) {
+     (void)sender_id;
+     std::cout << "Received new GPS_TME message with WN = " << msg.wn << ", TOW = " << msg.tow << "\n";
     }
 
-    void handle_sbp_msg(uint16_t sender_id, uint8_t message_length, const msg_pos_ecef_t& msg) {
+    void handle_sbp_msg(uint16_t sender_id, const sbp_msg_pos_ecef_t& msg) {
       (void)sender_id;
-      (void)message_length;
       std::cout << "Received new POS_ECEF message with TOW = " << msg.tow;
       std::cout << ", (X,Y,Z) = (" << msg.x << "," << msg.y << "," << msg.z << ")\n";
       auto message = sensor_msgs::msg::NavSatFix();
@@ -80,12 +78,12 @@ class SBPROS2DriverNode : public rclcpp::Node
 
       std::cout << "Publisher" << std::endl;
 
-     reader_ = new SbpFileReader(sbp_file_.c_str());
-      if (!reader_->is_open()) {
+     reader_ptr_ = std::make_shared<SbpFileReader>(sbp_file_.c_str());
+      if (!reader_ptr_->is_open()) {
         exit(EXIT_FAILURE);
       }
       std::cout << "Reader" << std::endl;
-      state_.set_reader(reader_);
+      state_.set_reader(reader_ptr_.get());
 
       std::cout << "fixpublisher" << std::endl;
       navsatfixpublisher_ = new NavSatFixPublisher(&state_, publisher_);
@@ -100,12 +98,11 @@ class SBPROS2DriverNode : public rclcpp::Node
     ~SBPROS2DriverNode(){
         exit_requested_.store(true);
         if (sbp_thread_.joinable()) sbp_thread_.join();
-        delete(reader_);
         delete(navsatfixpublisher_);
     }
 
     void processSBP() {
-      while(!exit_requested_.load() && !reader_->eof()) {
+      while(!exit_requested_.load() && !reader_ptr_->eof()) {
        state_.process(); 
       }  
     }
@@ -115,7 +112,8 @@ class SBPROS2DriverNode : public rclcpp::Node
     std::string sbp_file_;
     std::thread sbp_thread_;
     std::atomic_bool exit_requested_ = false;
-    SbpFileReader* reader_;
+    std::unique_ptr<SbpFileReader> reader_ptr_;
+
     NavSatFixPublisher* navsatfixpublisher_;
 
 };
