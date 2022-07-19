@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libsbp/cpp/state.h>
+#include <logging/issue_logger.h>
 #include <cstdint>
 #include <string>
 
@@ -8,8 +9,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif  // _WIN32
-
-#include "issue_logger.h"
 
 /**
  * @brief Class that implements a TCP reader based on the SBP reader interface

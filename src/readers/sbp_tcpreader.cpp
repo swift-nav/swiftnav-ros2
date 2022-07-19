@@ -1,4 +1,4 @@
-#include "sbp_tcpreader.h"
+#include <readers/sbp_tcpreader.h>
 
 #include <cstring>
 
