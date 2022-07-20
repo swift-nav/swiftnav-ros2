@@ -19,6 +19,7 @@
 
 #endif  // __linux__
 
+// TODO: Add read timeout
 SBPTCPReader::SBPTCPReader(const std::string& ip, const uint16_t port,
                            const LoggerPtr& logger) noexcept
     : logger_(logger) {
