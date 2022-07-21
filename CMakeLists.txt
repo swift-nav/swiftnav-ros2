@@ -15,7 +15,9 @@ find_package(sensor_msgs REQUIRED)
 link_directories("/usr/local/lib/")
 include_directories("/usr/local/include/")
 
-add_executable(sbp-to-ros src/sbp-to-ros.cpp)
+add_executable(sbp-to-ros src/sbp-to-ros.cpp 
+                src/publishers/NavSatFixPublisher.cpp
+                src/publishers/TimeReferencePublisher.cpp)
 target_link_libraries(sbp-to-ros sbp)
 target_include_directories(sbp-to-ros PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

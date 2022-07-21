@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install --yes \
     cmake \
     doxygen \
     check \
-    clang-format-13
+    clang-format-13 \
+    libserialport-dev
 
 # Add a "dockerdev" user with sudo capabilities
 # 1000 is the first user ID issued on Ubuntu; might
