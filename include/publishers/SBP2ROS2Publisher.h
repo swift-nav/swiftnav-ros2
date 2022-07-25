@@ -9,9 +9,9 @@
 template<typename ROS2MsgType, typename... SBPMsgTypes>
 class SBP2ROS2Publisher : private sbp::MessageHandler<SBPMsgTypes...> {
   public:
-    
+
     SBP2ROS2Publisher(sbp::State *state, std::shared_ptr<rclcpp::Publisher<ROS2MsgType>> publisher, rclcpp::Node* node):
-        sbp::MessageHandler<SBPMsgTypes...>(state), publisher_(publisher), node_(node) 
+        sbp::MessageHandler<SBPMsgTypes...>(state), publisher_(publisher), node_(node)
         { }
 
   protected:

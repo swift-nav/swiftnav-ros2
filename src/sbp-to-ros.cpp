@@ -38,6 +38,18 @@ class MockedLogger : public IIssueLogger {
   }
 };
 
+class EverythingHandler : private sbp::AllMessageHandler {
+ public:
+  EverythingHandler(sbp::State* state) : sbp::AllMessageHandler(state) {}
+
+  void handle_sbp_message(uint16_t sender_id, sbp_msg_type_t msg_type,
+                          const sbp_msg_t& msg) {
+    (void)sender_id;
+    (void)msg;
+    std::cout << "Received new message, message type " << msg_type << "\n";
+  }
+};
+
 class SBPROS2DriverNode : public rclcpp::Node {
  public:
   SBPROS2DriverNode() : Node("SBPRRos2Driver") {
@@ -60,7 +72,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
       get_parameter<std::string>("host_ip", ip);
       get_parameter<uint16_t>("host_port", port);
-      tcp_reader_ = std::make_unique<SBPTCPReader>(ip, port, logger_, 100);
+      tcp_reader_ = std::make_unique<SBPTCPReader>(ip, port, logger_, 2000);
       if (!tcp_reader_->isValid()) exit(EXIT_FAILURE);
       std::cout << "Using TCP Reader\n";
     } else {
@@ -79,33 +91,34 @@ class SBPROS2DriverNode : public rclcpp::Node {
     else
       state_.set_reader(reader_ptr_.get());
 
-    // std::cout << "SBP_FILE --: " << sbp_file_ << std::endl;
-    // reader_ptr_ =
-    // std::move(std::make_unique<SbpFileReader>(sbp_file_.c_str())); if
-    // (!reader_ptr_->is_open()) {
-    //   exit(EXIT_FAILURE);
-    // }
-    // std::cout << "Reader" << std::endl;
-    // state_.set_reader(reader_ptr_.get());
-
     /* Publishers */
     if (publish_navsatfix_) {
       auto navsatfix_publisher_ =
           this->create_publisher<sensor_msgs::msg::NavSatFix>("navsatfix", 10);
-      navsatfix_publisher_ptr_ = std::move(std::make_unique<NavSatFixPublisher>(
-          &state_, navsatfix_publisher_, this));
+      navsatfix_publisher_ptr_ = std::make_unique<NavSatFixPublisher>(
+          &state_, navsatfix_publisher_, this);
+      // navsatfix_publisher_ptr_ =
+      // std::move(std::make_unique<NavSatFixPublisher>(
+      //     &state_, navsatfix_publisher_, this));
     }
     if (publish_timereference_) {
       auto timereference_publisher_ =
           this->create_publisher<sensor_msgs::msg::TimeReference>(
               "timereference", 10);
-      timereference_publisher_ptr_ =
-          std::move(std::make_unique<TimeReferencePublisher>(
-              &state_, timereference_publisher_, this));
+      timereference_publisher_ptr_ = std::make_unique<TimeReferencePublisher>(
+          &state_, timereference_publisher_, this);
+      // timereference_publisher_ptr_ =
+      //     std::move(std::make_unique<TimeReferencePublisher>(
+      //         &state_, timereference_publisher_, this));
     }
 
+    // everything_handler = std::make_shared<EverythingHandler>(&state_);
+
     /* SBP Callback processing thread */
-    sbp_thread_ = std::thread(&SBPROS2DriverNode::processSBP, this);
+    if (tcp_reader_)
+      sbp_thread_ = std::thread(&SBPROS2DriverNode::processSBPNet, this);
+    else
+      sbp_thread_ = std::thread(&SBPROS2DriverNode::processSBPFile, this);
 
     std::cout << "start" << std::endl;
   }
@@ -115,8 +128,14 @@ class SBPROS2DriverNode : public rclcpp::Node {
     if (sbp_thread_.joinable()) sbp_thread_.join();
   }
 
-  void processSBP() {
+  void processSBPFile() {
     while (!exit_requested_.load() && !reader_ptr_->eof()) {
+      state_.process();
+    }
+  }
+
+  void processSBPNet() {
+    while (!exit_requested_.load()) {
       state_.process();
     }
   }
@@ -128,6 +147,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
   std::unique_ptr<SbpFileReader> reader_ptr_;
   std::unique_ptr<SBPTCPReader> tcp_reader_;
   std::shared_ptr<MockedLogger> logger_;
+  std::shared_ptr<EverythingHandler> everything_handler;
 
   std::string sbp_file_;
   bool publish_navsatfix_{true};

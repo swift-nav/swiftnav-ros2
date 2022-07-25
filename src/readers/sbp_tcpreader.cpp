@@ -76,13 +76,14 @@ s32 SBPTCPReader::read(u8* buffer, u32 buffer_length) {
 
   result = recv(socket_id_, buffer, buffer_length, 0);
   if (result > 0) {
+    return result;
   } else if (result == 0) {
     LOG_WARN(logger_, "Connection closed by peer");
+    return -1;
   } else {
     LOG_ERROR(logger_, "Error (" << GET_SOCKET_ERROR() << ") while reading");
+    return result;
   }
-
-  return result;
 }
 
 bool SBPTCPReader::initSockets() noexcept {
