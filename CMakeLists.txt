@@ -15,17 +15,22 @@ find_package(sensor_msgs REQUIRED)
 link_directories("/usr/local/lib/")
 include_directories("/usr/local/include/")
 
-add_executable(sbp-to-ros src/sbp-to-ros.cpp 
-                src/publishers/NavSatFixPublisher.cpp
-                src/publishers/TimeReferencePublisher.cpp)
+add_executable(sbp-to-ros
+  src/sbp-to-ros.cpp
+  src/publishers/NavSatFixPublisher.cpp
+  src/publishers/TimeReferencePublisher.cpp
+  src/readers/sbp_filereader.cpp
+  src/readers/sbp_tcpreader.cpp
+  src/logging/ros_logger.cpp
+  )
 target_link_libraries(sbp-to-ros sbp)
 target_include_directories(sbp-to-ros PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs)
 
-install(TARGETS sbp-to-ros 
+install(TARGETS sbp-to-ros
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
@@ -36,8 +41,16 @@ if(BUILD_TESTING)
   # the following line skips cpplint (only works in a git repo)
   # comment the line when this package is in a git repo and when
   # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
+  #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
-endif()
+  ament_add_gtest(${PROJECT_NAME}_test
+    test/test_network.cpp
+    src/readers/sbp_tcpreader.cpp
+  )
+  target_include_directories(${PROJECT_NAME}_test PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  )
+  target_compile_features(${PROJECT_NAME}_test PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+  endif()
 
 ament_package()
