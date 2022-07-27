@@ -7,6 +7,7 @@
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
 
 #include <logging/ros_logger.h>
+#include <logging/sbp_to_ros2_logger.h>
 
 #include <libsbp/cpp/state.h>
 #include <libsbp/cpp/message_handler.h>
@@ -15,22 +16,6 @@
 #include <publishers/TimeReferencePublisher.h>
 
 #include <data_sources/sbp_data_sources.h>
-
-// Look at this as an alternative way
-// class EverythingHandler : private sbp::AllMessageHandler {
-//  public:
-//   EverythingHandler(sbp::State* state) : sbp::AllMessageHandler(state) {}
-
-//   void handle_sbp_message(uint16_t sender_id, sbp_msg_type_t msg_type,
-//                           const sbp_msg_t& msg) {
-//     (void)sender_id;
-//     (void)msg;
-//     std::cout << "Received new message, message type " << msg_type << "\n";
-//   }
-// };
-
-// everything_handler = std::make_shared<EverythingHandler>(&state_);
-// std::shared_ptr<EverythingHandler> everything_handler;
 
 /**
  * @brief Class that represents the ROS 2 driver node
@@ -47,11 +32,10 @@ class SBPROS2DriverNode : public rclcpp::Node {
     if (!reader_) exit(EXIT_FAILURE);
     state_.set_reader(reader_.get());
     createPublishers();
+    sbptoros2_ = std::make_shared<SBPToROS2Logger>(&state_, logger_);
 
     /* SBP Callback processing thread */
     sbp_thread_ = std::thread(&SBPROS2DriverNode::processSBP, this);
-
-    std::cout << "start" << std::endl;
   }
 
   /**
@@ -76,9 +60,9 @@ class SBPROS2DriverNode : public rclcpp::Node {
    * @brief Method for creating the readers (data sources)
    */
   void createReader() {
-    uint8_t interface;
+    int32_t interface;
 
-    get_parameter<uint8_t>("interface", interface);
+    get_parameter<int32_t>("interface", interface);
     switch (interface) {
       case FILE_DATA_SOURCE: {
         std::string file;
@@ -88,20 +72,19 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
       case SERIAL_DATA_SOURCE: {
         std::string device, connection_str;
-        uint32_t timeout;
+        int32_t timeout;
         get_parameter<std::string>("device_name", device);
         get_parameter<std::string>("connection_str", connection_str);
-        get_parameter<uint32_t>("timeout", timeout);
+        get_parameter<int32_t>("timeout", timeout);
         reader_ = dataSourceFactory(device, connection_str, timeout, logger_);
       } break;
 
       case TCP_DATA_SOURCE: {
         std::string ip;
-        uint16_t port;
-        uint32_t timeout;
+        int32_t port, timeout;
         get_parameter<std::string>("host_ip", ip);
-        get_parameter<uint16_t>("host_port", port);
-        get_parameter<uint32_t>("timeout", timeout);
+        get_parameter<int32_t>("host_port", port);
+        get_parameter<int32_t>("timeout", timeout);
         reader_ = dataSourceFactory(ip, port, timeout, logger_);
       } break;
 
@@ -116,10 +99,12 @@ class SBPROS2DriverNode : public rclcpp::Node {
    * @brief ROS 2 parameters declaration methods
    */
   void declareParameters() {
-    declare_parameter<std::string>("host_ip", "");
-    declare_parameter<uint16_t>("host_port", 0);
-    declare_parameter<uint8_t>("interface", 0);
+    declare_parameter<int32_t>("interface", 0);
     declare_parameter<std::string>("sbp_file", "");
+    declare_parameter<std::string>("device_name", "");
+    declare_parameter<std::string>("connection_str", "");
+    declare_parameter<std::string>("host_ip", "");
+    declare_parameter<int32_t>("host_port", 0);
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
   }
@@ -152,11 +137,10 @@ class SBPROS2DriverNode : public rclcpp::Node {
       navsatfix_publisher_; /** @brief NavSatFix ROS 2 publisher */
   std::unique_ptr<TimeReferencePublisher>
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
+  std::shared_ptr<SBPToROS2Logger> sbptoros2_;
 };
 
 int main(int argc, char** argv) {
-  printf("hello world swiftnav-ros2 package\n");
-
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<SBPROS2DriverNode>());
   rclcpp::shutdown();

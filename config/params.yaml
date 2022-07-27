@@ -1,0 +1,11 @@
+SBPRRos2Driver:
+  ros__parameters:
+    interface: 3
+    sbp_file: "/workspaces/Swift/24-185316.sbp"
+    device_name: "/dev/ttyS0"
+    connection_str: "115200|N|8|1|N"
+    host_ip: "127.0.0.1"
+    host_port: 8082
+    timeout: 2000
+    navsatfix: True
+    timereference: True

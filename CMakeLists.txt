@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(swiftnav-ros2)
+project(swiftnav_ros2_driver)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -24,6 +24,7 @@ add_executable(sbp-to-ros
   src/data_sources/sbp_tcp_datasource.cpp
   src/data_sources/sbp_data_sources.cpp
   src/logging/ros_logger.cpp
+  src/logging/sbp_to_ros2_logger.cpp
   )
 target_link_libraries(sbp-to-ros sbp serialport)
 target_include_directories(sbp-to-ros PUBLIC

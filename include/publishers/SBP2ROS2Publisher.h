@@ -22,9 +22,9 @@ class SBP2ROS2Publisher : private sbp::MessageHandler<SBPMsgTypes...> {
   protected:
    virtual void publish() = 0;
 
-   bool enabled_{true};
    ROS2MsgType msg_;
    uint32_t composition_mask_{0U};
    std::shared_ptr<rclcpp::Publisher<ROS2MsgType>> publisher_;
    rclcpp::Node* node_;
+   bool enabled_{true};
 };

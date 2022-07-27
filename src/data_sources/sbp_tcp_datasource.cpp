@@ -22,7 +22,7 @@
 
 static constexpr uint32_t CONNECT_TIMEOUT = 20;  // twenty seconds
 
-// TODO: Add read timeout
+// TODO: Add reconnection in case recv return 0
 SbpTCPDataSource::SbpTCPDataSource(const std::string& ip, const uint16_t port,
                                    const LoggerPtr& logger,
                                    const uint32_t read_timeout) noexcept
@@ -67,10 +67,10 @@ s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
   int result = select(socket_id_ + 1, &read_set, nullptr, nullptr, &timeout);
   if (result == -1) {
     LOG_ERROR(logger_,
-              "Error: " << GET_SOCKET_ERROR() << " waiting for a read");
+              "Error: " << GET_SOCKET_ERROR() << " waiting for incoming data");
     return -1;
   } else if (result == 0) {
-    LOG_WARN(logger_, "Timeout waiting to receive data from socket");
+    LOG_WARN(logger_, "Timeout waiting for incoming data from socket");
     return -1;
   }
 
