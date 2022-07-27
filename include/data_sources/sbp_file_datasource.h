@@ -4,10 +4,10 @@
 #include <fstream>
 #include <string>
 
-class SbpFileReader : public sbp::IReader {
+class SbpFileDataSource : public sbp::IReader {
  public:
-  explicit SbpFileReader(const std::string &file_path);
-  ~SbpFileReader();
+  explicit SbpFileDataSource(const std::string &file_path);
+  ~SbpFileDataSource();
 
   bool is_open() const { return file_stream_.is_open(); }
   bool eof() const;

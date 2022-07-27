@@ -1,4 +1,4 @@
-#include <readers/sbp_serialreader.h>
+#include <data_sources/sbp_serial_datasource.h>
 #include <sstream>
 #include <vector>
 
@@ -126,10 +126,10 @@ class SerialParameterSplitter {
   std::vector<std::string> token_list_;
 };
 
-SBPSerialReader::SBPSerialReader(const std::string& port_name,
-                                 const std::string& connection_string,
-                                 const LoggerPtr& logger,
-                                 const uint32_t read_timeout) noexcept
+SbpSerialDataSource::SbpSerialDataSource(const std::string& port_name,
+                                         const std::string& connection_string,
+                                         const LoggerPtr& logger,
+                                         const uint32_t read_timeout) noexcept
     : logger_(logger), read_timeout_(read_timeout) {
   if (port_name.empty()) {
     LOG_FATAL(logger_, "The port name should be specified");
@@ -166,7 +166,7 @@ SBPSerialReader::SBPSerialReader(const std::string& port_name,
                             << "\nFlow control: " << params.flow_control);
 }
 
-SBPSerialReader::SBPSerialReader(SBPSerialReader&& rhs) noexcept {
+SbpSerialDataSource::SbpSerialDataSource(SbpSerialDataSource&& rhs) noexcept {
   port_ = rhs.port_;
   rhs.port_ = nullptr;
   logger_ = rhs.logger_;
@@ -174,14 +174,14 @@ SBPSerialReader::SBPSerialReader(SBPSerialReader&& rhs) noexcept {
   read_timeout_ = rhs.read_timeout_;
 }
 
-SBPSerialReader::~SBPSerialReader() { closePort(); }
+SbpSerialDataSource::~SbpSerialDataSource() { closePort(); }
 
-s32 SBPSerialReader::read(u8* buffer, u32 buffer_length) {
+s32 SbpSerialDataSource::read(u8* buffer, u32 buffer_length) {
   if (!port_) {
-    LOG_FATAL(logger_, "Called read in an uninitialized SBPSerialReader");
+    LOG_FATAL(logger_, "Called read in an uninitialized SbpSerialDataSource");
     return -1;
   } else if (!buffer) {
-    LOG_FATAL(logger_, "Called SBPSerialReader::read with a NULL buffer");
+    LOG_FATAL(logger_, "Called SbpSerialDataSource::read with a NULL buffer");
     return -1;
   }
 
@@ -196,7 +196,7 @@ s32 SBPSerialReader::read(u8* buffer, u32 buffer_length) {
   return result;
 }
 
-void SBPSerialReader::closePort() noexcept {
+void SbpSerialDataSource::closePort() noexcept {
   if (port_) {
     std::string port_name(sp_get_port_name(port_));
     if (sp_close(port_) != SP_OK) {
@@ -210,7 +210,7 @@ void SBPSerialReader::closePort() noexcept {
   }
 }
 
-bool SBPSerialReader::setPortSettings(
+bool SbpSerialDataSource::setPortSettings(
     const SerialParameterSplitter& params) noexcept {
   sp_return result;
 

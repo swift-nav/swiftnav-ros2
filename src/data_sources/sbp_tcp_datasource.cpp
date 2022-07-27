@@ -1,4 +1,4 @@
-#include <readers/sbp_tcpreader.h>
+#include <data_sources/sbp_tcp_datasource.h>
 
 #include <cstring>
 
@@ -23,9 +23,9 @@
 static constexpr uint32_t CONNECT_TIMEOUT = 20;  // twenty seconds
 
 // TODO: Add read timeout
-SBPTCPReader::SBPTCPReader(const std::string& ip, const uint16_t port,
-                           const LoggerPtr& logger,
-                           const uint32_t read_timeout) noexcept
+SbpTCPDataSource::SbpTCPDataSource(const std::string& ip, const uint16_t port,
+                                   const LoggerPtr& logger,
+                                   const uint32_t read_timeout) noexcept
     : logger_(logger), read_timeout_(read_timeout) {
   LOG_DEBUG(logger_,
             "Creating TCP Reader for ip: " << ip << " and port: " << port);
@@ -33,7 +33,7 @@ SBPTCPReader::SBPTCPReader(const std::string& ip, const uint16_t port,
   openSocket(ip, port);
 }
 
-SBPTCPReader::SBPTCPReader(SBPTCPReader&& rhs) noexcept {
+SbpTCPDataSource::SbpTCPDataSource(SbpTCPDataSource&& rhs) noexcept {
   closeSocket();
   socket_id_ = rhs.socket_id_;
   rhs.socket_id_ = -1;
@@ -41,19 +41,19 @@ SBPTCPReader::SBPTCPReader(SBPTCPReader&& rhs) noexcept {
   rhs.logger_.reset();
 }
 
-SBPTCPReader::~SBPTCPReader() {
+SbpTCPDataSource::~SbpTCPDataSource() {
   closeSocket();
   deinitSockets();
   LOG_DEBUG(logger_, "TCP reader finished");
 }
 
-s32 SBPTCPReader::read(u8* buffer, u32 buffer_length) {
+s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
   if (!buffer) {
-    LOG_ERROR(logger_, "Buffer passed to SBPTCPReader::read is NULL");
+    LOG_ERROR(logger_, "Buffer passed to SbpTCPDataSource::read is NULL");
     return -1;
   } else if (!isValid()) {
     LOG_ERROR(logger_,
-              "Read operation requested on an uninitialized SBPTCPReader");
+              "Read operation requested on an uninitialized SbpTCPDataSource");
     return -1;
   }
 
@@ -86,7 +86,7 @@ s32 SBPTCPReader::read(u8* buffer, u32 buffer_length) {
   }
 }
 
-bool SBPTCPReader::initSockets() noexcept {
+bool SbpTCPDataSource::initSockets() noexcept {
 #if defined(__linux__)
   return true;
 #else
@@ -100,7 +100,7 @@ bool SBPTCPReader::initSockets() noexcept {
 #endif  // __linux__
 }
 
-void SBPTCPReader::deinitSockets() noexcept {
+void SbpTCPDataSource::deinitSockets() noexcept {
 #if defined(__linux__)
 
 #else
@@ -108,7 +108,7 @@ void SBPTCPReader::deinitSockets() noexcept {
 #endif  // __linux__
 }
 
-void SBPTCPReader::closeSocket() noexcept {
+void SbpTCPDataSource::closeSocket() noexcept {
   if (isValid())
 #if defined(__linux__)
     close(socket_id_);
@@ -119,7 +119,7 @@ void SBPTCPReader::closeSocket() noexcept {
 #endif  // __linux__
 }
 
-bool SBPTCPReader::isValid() const noexcept {
+bool SbpTCPDataSource::isValid() const noexcept {
 #if defined(__linux__)
   return (socket_id_ != -1);
 #else
@@ -127,8 +127,8 @@ bool SBPTCPReader::isValid() const noexcept {
 #endif  // __linux__
 }
 
-void SBPTCPReader::openSocket(const std::string& ip,
-                              const uint16_t port) noexcept {
+void SbpTCPDataSource::openSocket(const std::string& ip,
+                                  const uint16_t port) noexcept {
   socket_id_ = socket(AF_INET, SOCK_STREAM, 0);
   if (!isValid()) {
     LOG_FATAL(logger_, "socket() failed. (" << GET_SOCKET_ERROR() << ")");
@@ -150,7 +150,7 @@ void SBPTCPReader::openSocket(const std::string& ip,
   }
 }
 
-bool SBPTCPReader::setNonBlocking() noexcept {
+bool SbpTCPDataSource::setNonBlocking() noexcept {
 #if defined(_WIN32)
   if (socket_id_ == INVALID_SOCKET) return false;
   unsigned long mode = 1;
@@ -163,8 +163,8 @@ bool SBPTCPReader::setNonBlocking() noexcept {
 #endif
 }
 
-bool SBPTCPReader::connectSocket(const std::string& ip,
-                                 const uint16_t port) noexcept {
+bool SbpTCPDataSource::connectSocket(const std::string& ip,
+                                     const uint16_t port) noexcept {
   struct sockaddr_in server;
 
   LOG_INFO(logger_, "Connecting...");

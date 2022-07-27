@@ -19,11 +19,13 @@ add_executable(sbp-to-ros
   src/sbp-to-ros.cpp
   src/publishers/NavSatFixPublisher.cpp
   src/publishers/TimeReferencePublisher.cpp
-  src/readers/sbp_filereader.cpp
-  src/readers/sbp_tcpreader.cpp
+  src/data_sources/sbp_file_datasource.cpp
+  src/data_sources/sbp_serial_datasource.cpp
+  src/data_sources/sbp_tcp_datasource.cpp
+  src/data_sources/sbp_data_sources.cpp
   src/logging/ros_logger.cpp
   )
-target_link_libraries(sbp-to-ros sbp)
+target_link_libraries(sbp-to-ros sbp serialport)
 target_include_directories(sbp-to-ros PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -45,7 +47,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
   ament_add_gtest(${PROJECT_NAME}_test
     test/test_network.cpp
-    src/readers/sbp_tcpreader.cpp
+    src/data_sources/sbp_tcp_datasource.cpp
   )
   target_include_directories(${PROJECT_NAME}_test PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

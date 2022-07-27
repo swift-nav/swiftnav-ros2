@@ -1,19 +1,19 @@
-#include <readers/sbp_filereader.h>
+#include <data_sources/sbp_file_datasource.h>
 
-SbpFileReader::SbpFileReader(const std::string &file_path) {
+SbpFileDataSource::SbpFileDataSource(const std::string &file_path) {
   file_stream_ = std::ifstream(file_path, std::ios::binary | std::ios_base::in);
 }
 
-SbpFileReader::~SbpFileReader() { file_stream_.close(); }
+SbpFileDataSource::~SbpFileDataSource() { file_stream_.close(); }
 
-bool SbpFileReader::eof() const {
+bool SbpFileDataSource::eof() const {
   if (file_stream_.is_open())
     return file_stream_.eof();
   else
     return true;
 }
 
-s32 SbpFileReader::read(u8 *buffer, u32 buffer_length) {
+s32 SbpFileDataSource::read(u8 *buffer, u32 buffer_length) {
   auto start_index = file_stream_.tellg();
   if (start_index == -1) {
     return -1;

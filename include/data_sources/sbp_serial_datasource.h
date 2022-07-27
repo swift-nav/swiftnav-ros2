@@ -9,10 +9,10 @@
  * @brief Class that implements a Serial Port reader based on the SBP reader
  * interface
  */
-class SBPSerialReader : public sbp::IReader {
+class SbpSerialDataSource : public sbp::IReader {
  public:
   /**
-   * @brief Construct a new SBPSerialReader object
+   * @brief Construct a new SbpSerialDataSource object
    *
    * @param port_name String containing the name of the serial port to use
    * @param connection_string String containing the data needed to open the
@@ -27,25 +27,26 @@ class SBPSerialReader : public sbp::IReader {
    * start. If 0 (default) the read operation blocks until the requested
    * number of bytes is read or an error occurs
    */
-  SBPSerialReader(const std::string& port_name,
-                  const std::string& connection_string, const LoggerPtr& logger,
-                  const uint32_t read_timeout = 0U) noexcept;
+  SbpSerialDataSource(const std::string& port_name,
+                      const std::string& connection_string,
+                      const LoggerPtr& logger,
+                      const uint32_t read_timeout = 0U) noexcept;
 
   /**
-   * @brief Move Construct a new SBPSerialReader object
+   * @brief Move Construct a new SbpSerialDataSource object
    *
-   * @param rhs SBPSerialReader to construct from
+   * @param rhs SbpSerialDataSource to construct from
    */
-  SBPSerialReader(SBPSerialReader&& rhs) noexcept;
+  SbpSerialDataSource(SbpSerialDataSource&& rhs) noexcept;
 
   /**
-   * @brief Destroy the SBPSerialReader object
+   * @brief Destroy the SbpSerialDataSource object
    */
-  virtual ~SBPSerialReader();
+  virtual ~SbpSerialDataSource();
 
   // Deleted methods
-  SBPSerialReader() = delete;
-  SBPSerialReader(const SBPSerialReader& rhs) = delete;
+  SbpSerialDataSource() = delete;
+  SbpSerialDataSource(const SbpSerialDataSource& rhs) = delete;
 
   /**
    * @brief Method to read data from the serial connection
@@ -72,8 +73,8 @@ class SBPSerialReader : public sbp::IReader {
    */
   bool setPortSettings(const class SerialParameterSplitter& params) noexcept;
 
-  sp_port* port_;    /** @brief Pointer to a libserialport structure
-                        representing a port */
-  LoggerPtr logger_; /** @brief Logging facility */
+  sp_port* port_;             /** @brief Pointer to a libserialport structure
+                                 representing a port */
+  LoggerPtr logger_;          /** @brief Logging facility */
   uint32_t read_timeout_{0U}; /** @brief read timeout in ms */
 };

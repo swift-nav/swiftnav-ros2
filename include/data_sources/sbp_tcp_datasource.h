@@ -14,10 +14,10 @@
  * @brief Class that implements a TCP reader based on the SBP reader interface
  * (IReader)
  */
-class SBPTCPReader : public sbp::IReader {
+class SbpTCPDataSource : public sbp::IReader {
  public:
   /**
-   * @brief Construct a new SBPTCPReader object
+   * @brief Construct a new SbpTCPDataSource object
    *
    * @param ip IP address to connect to. It could be in IPV4 or IPV6 format
    * @param port TCP port to connect to
@@ -26,25 +26,25 @@ class SBPTCPReader : public sbp::IReader {
    * then the read operation blocks until the requested number of bytes have
    * read or an error ocurred
    */
-  SBPTCPReader(const std::string& ip, const uint16_t port,
-               const LoggerPtr& logger,
-               const uint32_t read_timeout = 0) noexcept;
+  SbpTCPDataSource(const std::string& ip, const uint16_t port,
+                   const LoggerPtr& logger,
+                   const uint32_t read_timeout = 0) noexcept;
 
   /**
-   * @brief Move Construct a new SBPTCPReader object
+   * @brief Move Construct a new SbpTCPDataSource object
    *
-   * @param rhs SBPTCPReader to construct from
+   * @param rhs SbpTCPDataSource to construct from
    */
-  SBPTCPReader(SBPTCPReader&& rhs) noexcept;
+  SbpTCPDataSource(SbpTCPDataSource&& rhs) noexcept;
 
   /**
-   * @brief Destroy the SBPTCPReader object
+   * @brief Destroy the SbpTCPDataSource object
    */
-  virtual ~SBPTCPReader();
+  virtual ~SbpTCPDataSource();
 
   // Deleted methods
-  SBPTCPReader() = delete;
-  SBPTCPReader(const SBPTCPReader& rhs) = delete;
+  SbpTCPDataSource() = delete;
+  SbpTCPDataSource(const SbpTCPDataSource& rhs) = delete;
 
   /**
    * @brief Method to read data from the TCP connection
