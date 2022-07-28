@@ -8,14 +8,16 @@
 
 #include <publishers/SBP2ROS2Publisher.h>
 
+/**
+ * @brief Class that merges SBP messages into ROS 2 NavSatFix
+ */
 class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
                                                     sbp_msg_measurement_state_t,
                                                     sbp_msg_pos_llh_cov_t> {
  public:
-  NavSatFixPublisher(
-      sbp::State* state,
-      std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::NavSatFix>> publisher,
-      rclcpp::Node* node, const bool enabled);
+  NavSatFixPublisher() = delete;
+  NavSatFixPublisher(sbp::State* state, const std::string& topic_name,
+                     rclcpp::Node* node, const bool enabled);
 
   void handle_sbp_msg(uint16_t sender_id,
                       const sbp_msg_measurement_state_t& msg);

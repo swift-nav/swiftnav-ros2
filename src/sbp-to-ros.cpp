@@ -4,7 +4,6 @@
 #include <memory>
 
 #include <rclcpp/rclcpp.hpp>
-#include "sensor_msgs/msg/nav_sat_fix.hpp"
 
 #include <logging/ros_logger.h>
 #include <logging/sbp_to_ros2_logger.h>
@@ -116,16 +115,12 @@ class SBPROS2DriverNode : public rclcpp::Node {
     bool enabled;
 
     get_parameter<bool>("navsatfix", enabled);
-    auto navsatfix_publisher =
-        create_publisher<sensor_msgs::msg::NavSatFix>("navsatfix", 10);
     navsatfix_publisher_ = std::make_unique<NavSatFixPublisher>(
-        &state_, navsatfix_publisher, this, enabled);
+        &state_, "navsatfix", this, enabled);
 
     get_parameter<bool>("timereference", enabled);
-    auto timereference_publisher =
-        create_publisher<sensor_msgs::msg::TimeReference>("timereference", 10);
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
-        &state_, timereference_publisher, this, enabled);
+        &state_, "timereference", this, enabled);
   }
 
   sbp::State state_;           /** @brief SBP state object */
@@ -137,7 +132,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
       navsatfix_publisher_; /** @brief NavSatFix ROS 2 publisher */
   std::unique_ptr<TimeReferencePublisher>
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
-  std::shared_ptr<SBPToROS2Logger> sbptoros2_;
+  std::shared_ptr<SBPToROS2Logger>
+      sbptoros2_; /** @brief SBP to ROS2 logging object */
 };
 
 int main(int argc, char** argv) {

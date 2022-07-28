@@ -4,13 +4,12 @@
 constexpr uint32_t MEASUREMENT_STATE = 0x00000001;
 constexpr uint32_t POS_LLH_COV = 0x00000002;
 
-NavSatFixPublisher::NavSatFixPublisher(
-    sbp::State* state,
-    std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::NavSatFix>> publisher,
-    rclcpp::Node* node, const bool enabled)
+NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
+                                       const std::string& topic_name,
+                                       rclcpp::Node* node, const bool enabled)
     : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
                         sbp_msg_measurement_state_t, sbp_msg_pos_llh_cov_t>(
-          state, publisher, node, enabled) {}
+          state, topic_name, node, enabled) {}
 
 void NavSatFixPublisher::handle_sbp_msg(
     uint16_t sender_id, const sbp_msg_measurement_state_t& /*msg*/) {
@@ -29,7 +28,6 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void NavSatFixPublisher::publish() {
   if (enabled_ && (composition_mask_ == MEASUREMENT_STATE + POS_LLH_COV)) {
-    std::cout << "NavSatFix->Lat: " << msg_.latitude << std::endl;
     msg_.header.stamp = node_->now();
     publisher_->publish(msg_);
     composition_mask_ = 0U;
