@@ -3,9 +3,13 @@
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
 #include <logging/ros_logger.h>
+#include <logging/sbp_file_logger.h>
+
+#include <memory>
 
 /**
- * @brief Class to forward SBP messages to ROS 2 logging system
+ * @brief Class to forward SBP messages to ROS 2 logging system. It also creates
+ * an SBP dump file
  */
 class SBPToROS2Logger : private sbp::AllMessageHandler {
  public:
@@ -16,9 +20,11 @@ class SBPToROS2Logger : private sbp::AllMessageHandler {
    *
    * @param state SBP state object
    * @param logger ROS 2 logging object
+   * @param log_messages Flag that enables/disables SBP file logging
+   * @param log_path Path where to put the log file
    */
-  SBPToROS2Logger(sbp::State* state, const LoggerPtr& logger)
-      : sbp::AllMessageHandler(state), ros_logger_(logger) {}
+  SBPToROS2Logger(sbp::State* state, const LoggerPtr& logger,
+                  const bool log_messages, const std::string& log_path);
 
   /**
    * @brief Callback function for processiing SBP messages
@@ -32,4 +38,6 @@ class SBPToROS2Logger : private sbp::AllMessageHandler {
 
  private:
   LoggerPtr ros_logger_; /** @brief ROS logging object */
+  std::unique_ptr<SbpFileLogger>
+      file_logger_; /** @brief SBP file logger object */
 };

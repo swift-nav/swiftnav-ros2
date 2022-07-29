@@ -9,3 +9,5 @@ SBPRRos2Driver:
     timeout: 2000
     navsatfix: True
     timereference: True
+    log_sbp_messages: True
+    log_sbp_filepath: "/workspaces/Swift/"

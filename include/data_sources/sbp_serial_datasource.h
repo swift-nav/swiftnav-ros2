@@ -58,6 +58,14 @@ class SbpSerialDataSource : public sbp::IReader {
    */
   s32 read(u8* buffer, u32 buffer_length) override;
 
+  /**
+   * @brief Determines if the object is valid
+   *
+   * @return true Object is valid
+   * @return false Object isn't valid
+   */
+  bool isValid() const noexcept;
+
  private:
   /**
    * @brief Method to close the port and release the resources

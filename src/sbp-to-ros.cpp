@@ -16,6 +16,8 @@
 
 #include <data_sources/sbp_data_sources.h>
 
+// TODO: Do we need to catch exceptions or not?
+
 /**
  * @brief Class that represents the ROS 2 driver node
  */
@@ -31,7 +33,14 @@ class SBPROS2DriverNode : public rclcpp::Node {
     if (!reader_) exit(EXIT_FAILURE);
     state_.set_reader(reader_.get());
     createPublishers();
-    sbptoros2_ = std::make_shared<SBPToROS2Logger>(&state_, logger_);
+
+    bool log_sbp_messages;
+    std::string log_path;
+
+    get_parameter<bool>("log_sbp_messages", log_sbp_messages);
+    get_parameter<std::string>("log_sbp_filepath", log_path);
+    sbptoros2_ = std::make_shared<SBPToROS2Logger>(&state_, logger_,
+                                                   log_sbp_messages, log_path);
 
     /* SBP Callback processing thread */
     sbp_thread_ = std::thread(&SBPROS2DriverNode::processSBP, this);
@@ -106,6 +115,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<int32_t>("host_port", 0);
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
+    declare_parameter<bool>("log_sbp_messages", false);
+    declare_parameter<std::string>("log_sbp_filepath", "");
   }
 
   /**

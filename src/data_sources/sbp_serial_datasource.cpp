@@ -196,6 +196,10 @@ s32 SbpSerialDataSource::read(u8* buffer, u32 buffer_length) {
   return result;
 }
 
+bool SbpSerialDataSource::isValid() const noexcept {
+  return port_ ? true : false;
+}
+
 void SbpSerialDataSource::closePort() noexcept {
   if (port_) {
     std::string port_name(sp_get_port_name(port_));

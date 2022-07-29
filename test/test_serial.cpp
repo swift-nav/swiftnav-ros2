@@ -1,6 +1,8 @@
-#include <data_sources/sbp_tcp_datasource.h>
+#include <data_sources/sbp_serial_datasource.h>
 #include <gtest/gtest.h>
 #include <iostream>
+
+// TODO: Make the devices name right
 
 // *************************************************************************
 // Dummy console implementation of a Logger
@@ -24,36 +26,43 @@ class MockedLogger : public IIssueLogger {
 };
 
 // *************************************************************************
-// TCPReader
-TEST(TCPReader, ConnectWithUnexistentIP) {
+// SerialReader
+TEST(SerialReader, ConnectWithUnexistentDevice) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpTCPDataSource reader("0.0.0.11", 8082, logger, 100);
+  SbpSerialDataSource reader("/dev/ttyTAM32", "19200|N|8|1|N", logger, 2000);
   ASSERT_FALSE(reader.isValid());
 }
 
-TEST(TCPReader, ConnectWithExistentIP) {
+TEST(SerialReader, ConnectWithExistentDeviceButInvalidConnStr) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpTCPDataSource reader("127.0.0.1", 8082, logger, 100);
-  ASSERT_TRUE(reader.isValid());
-}
-
-TEST(TCPReader, ReadPackageWithInvalidReader) {
-  auto logger = std::make_shared<MockedLogger>();
-  SbpTCPDataSource reader("0.0.0.1", 8082, logger, 100);
+  SbpSerialDataSource reader("/dev/ttyTAM32", "19200|T|8|1|W", logger, 2000);
   ASSERT_FALSE(reader.isValid());
-  ASSERT_EQ(-1, reader.read(nullptr, 100));
 }
 
-TEST(TCPReader, ReadPackageWithNullBuffer) {
+TEST(SerialReader, ConnectWithExistentDevice) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpTCPDataSource reader("127.0.0.1", 8082, logger, 100);
+  SbpSerialDataSource reader("/dev/ttyTAM32", "19200|N|8|1|N", logger, 2000);
+  ASSERT_TRUE(reader.isValid());
+}
+
+TEST(SerialReader, ReadPackageWithInvalidReader) {
+  auto logger = std::make_shared<MockedLogger>();
+  SbpSerialDataSource reader("/dev/ttyTAM32", "19200|N|8|1|N", logger, 2000);
+  ASSERT_FALSE(reader.isValid());
+  u8 buffer[100];
+  ASSERT_EQ(-1, reader.read(buffer, 100));
+}
+
+TEST(SerialReader, ReadPackageWithNullBuffer) {
+  auto logger = std::make_shared<MockedLogger>();
+  SbpSerialDataSource reader("/dev/ttyTAM32", "19200|N|8|1|N", logger, 2000);
   ASSERT_TRUE(reader.isValid());
   ASSERT_EQ(-1, reader.read(nullptr, 100));
 }
 
-TEST(TCPReader, ReadPackageOK) {
+TEST(SerialReader, ReadPackageOK) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpTCPDataSource reader("127.0.0.1", 8082, logger, 100);
+  SbpSerialDataSource reader("/dev/ttyTAM32", "19200|N|8|1|N", logger, 2000);
   ASSERT_TRUE(reader.isValid());
   u8 buffer[100];
   const int32_t result = reader.read(buffer, 100);

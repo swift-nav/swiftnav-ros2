@@ -25,6 +25,7 @@ add_executable(sbp-to-ros
   src/data_sources/sbp_data_sources.cpp
   src/logging/ros_logger.cpp
   src/logging/sbp_to_ros2_logger.cpp
+  src/logging/sbp_file_logger.cpp
   )
 target_link_libraries(sbp-to-ros sbp serialport)
 target_include_directories(sbp-to-ros PUBLIC
@@ -48,12 +49,16 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
   ament_add_gtest(${PROJECT_NAME}_test
     test/test_network.cpp
+    test/test_serial.cpp
+    test/test_main.cpp
     src/data_sources/sbp_tcp_datasource.cpp
+    src/data_sources/sbp_serial_datasource.cpp
   )
   target_include_directories(${PROJECT_NAME}_test PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
   target_compile_features(${PROJECT_NAME}_test PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+  target_link_libraries(${PROJECT_NAME}_test serialport)
   endif()
 
 ament_package()
