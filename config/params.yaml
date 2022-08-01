@@ -10,4 +10,4 @@ SBPRRos2Driver:
     navsatfix: True
     timereference: True
     log_sbp_messages: True
-    log_sbp_filepath: "/workspaces/Swift/"
+    log_sbp_filepath: "/workspaces/Swift"

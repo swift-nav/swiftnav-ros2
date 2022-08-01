@@ -4,7 +4,8 @@ SBPToROS2Logger::SBPToROS2Logger(sbp::State* state, const LoggerPtr& logger,
                                  const bool log_messages,
                                  const std::string& log_path)
     : sbp::AllMessageHandler(state), ros_logger_(logger) {
-  if (log_messages) file_logger_ = std::make_unique<SbpFileLogger>(log_path);
+  if (log_messages)
+    file_logger_ = std::make_unique<SbpFileLogger>(log_path, logger);
 }
 
 void SBPToROS2Logger::handle_sbp_message(uint16_t sender_id,

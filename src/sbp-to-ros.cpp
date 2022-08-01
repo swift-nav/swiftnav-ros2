@@ -75,7 +75,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
       case FILE_DATA_SOURCE: {
         std::string file;
         get_parameter<std::string>("sbp_file", file);
-        reader_ = dataSourceFactory(file);
+        reader_ = dataSourceFactory(file, logger_);
       } break;
 
       case SERIAL_DATA_SOURCE: {

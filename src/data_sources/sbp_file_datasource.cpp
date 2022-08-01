@@ -1,7 +1,11 @@
 #include <data_sources/sbp_file_datasource.h>
 
-SbpFileDataSource::SbpFileDataSource(const std::string &file_path) {
+SbpFileDataSource::SbpFileDataSource(const std::string &file_path,
+                                     const LoggerPtr &logger)
+    : logger_(logger) {
   file_stream_ = std::ifstream(file_path, std::ios::binary | std::ios_base::in);
+  if (!file_stream_.is_open())
+    LOG_FATAL(logger_, "File: " << file_path << " couldn't be open");
 }
 
 SbpFileDataSource::~SbpFileDataSource() { file_stream_.close(); }

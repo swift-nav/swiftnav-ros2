@@ -1,8 +1,8 @@
 #include <data_sources/sbp_data_sources.h>
 
 std::shared_ptr<SbpFileDataSource> dataSourceFactory(
-    const std::string& sbp_file_path) {
-  return std::make_shared<SbpFileDataSource>(sbp_file_path);
+    const std::string& sbp_file_path, const LoggerPtr& logger) {
+  return std::make_shared<SbpFileDataSource>(sbp_file_path, logger);
 }
 
 std::shared_ptr<SbpSerialDataSource> dataSourceFactory(

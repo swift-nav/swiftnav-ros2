@@ -15,7 +15,7 @@ enum DataSources {
 };
 
 std::shared_ptr<SbpFileDataSource> dataSourceFactory(
-    const std::string& sbp_file_path);
+    const std::string& sbp_file_path, const LoggerPtr& logger);
 std::shared_ptr<SbpSerialDataSource> dataSourceFactory(
     const std::string& device_name, const std::string& connection_str,
     const uint32_t timeout, const LoggerPtr& logger);

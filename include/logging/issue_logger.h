@@ -3,36 +3,19 @@
 #include <memory>
 #include <sstream>
 
-#define LOG_DEBUG(logger, str) \
-  if (logger) {                \
-    std::stringstream ss;      \
-    ss << str;                 \
-    logger->logDebug(ss);      \
-  }
-#define LOG_INFO(logger, str) \
-  if (logger) {               \
-    std::stringstream ss;     \
-    ss << str;                \
-    logger->logInfo(ss);      \
-  }
-#define LOG_WARN(logger, str) \
-  if (logger) {               \
-    std::stringstream ss;     \
-    ss << str;                \
-    logger->logWarning(ss);   \
-  }
-#define LOG_ERROR(logger, str) \
-  if (logger) {                \
-    std::stringstream ss;      \
-    ss << str;                 \
-    logger->logError(ss);      \
-  }
-#define LOG_FATAL(logger, str) \
-  if (logger) {                \
-    std::stringstream ss;      \
-    ss << str;                 \
-    logger->logFatal(ss);      \
-  }
+#define LOG_FUNC(logger, str, fn) \
+  do {                            \
+    if (logger) {                 \
+      std::stringstream ss;       \
+      ss << str;                  \
+      logger->fn(ss);             \
+    }                             \
+  } while (0)
+#define LOG_DEBUG(logger, str) LOG_FUNC(logger, str, logDebug)
+#define LOG_INFO(logger, str) LOG_FUNC(logger, str, logInfo)
+#define LOG_WARN(logger, str) LOG_FUNC(logger, str, logWarning)
+#define LOG_ERROR(logger, str) LOG_FUNC(logger, str, logError)
+#define LOG_FATAL(logger, str) LOG_FUNC(logger, str, logFatal)
 
 class IIssueLogger {
  public:

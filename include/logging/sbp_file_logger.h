@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libsbp/cpp/state.h>
+#include <logging/issue_logger.h>
 #include <cstdint>
 #include <cstdio>
 #include <string>
@@ -16,8 +17,9 @@ class SbpFileLogger : public sbp::IWriter {
    * @brief Construct a new Sbp File Logger object
    *
    * @param file_path Path where to create SBP dumps
+   * @param logger Message logging facility
    */
-  explicit SbpFileLogger(const std::string& file_path);
+  SbpFileLogger(const std::string& file_path, const LoggerPtr& logger);
 
   /**
    * @brief Destroy the Sbp File Logger object
@@ -43,5 +45,6 @@ class SbpFileLogger : public sbp::IWriter {
 
  private:
   sbp::State state_; /** @brief SBP State object */
-  FILE* file_;       /** FILE where to write the data */
+  FILE* file_;       /** @brief FILE where to write the data */
+  LoggerPtr logger_; /** @brief Message logging facility */
 };
