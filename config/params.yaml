@@ -1,4 +1,4 @@
-SBPRRos2Driver:
+SBPRos2Driver:
   ros__parameters:
     interface: 3
     sbp_file: "/workspaces/Swift/24-185316.sbp"

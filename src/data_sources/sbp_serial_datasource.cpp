@@ -40,17 +40,22 @@ class SerialParameterSplitter {
   bool isValid() const noexcept {
     // Test speed
     switch (speed) {
+      case 1200:
+      case 2400:
+      case 4800:
       case 9600:
       case 19200:
-      case 28800:
       case 38400:
       case 57600:
       case 115200:
-        break;
+      case 230400:
+      case 460800:
+      case 921600:
+      break;
 
-      default:
-        return false;
-        break;
+    default:
+      return false;
+      break;
     }
 
     // Test data bits

@@ -26,7 +26,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
   /**
    * @brief Construct a new SBPROS2DriverNode object
    */
-  SBPROS2DriverNode() : Node("SBPRRos2Driver") {
+  SBPROS2DriverNode() : Node("SBPRos2Driver") {
     declareParameters();
     logger_ = std::make_shared<ROSLogger>();
     createReader();

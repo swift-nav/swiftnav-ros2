@@ -1,5 +1,8 @@
 #include <publishers/TimeReferencePublisher.h>
 
+static constexpr uint32_t TOW_MS = 1000U;
+static constexpr uint32_t MS_TO_NS = 1000000;
+
 TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
                                                const std::string& topic_name,
                                                rclcpp::Node* node,
@@ -10,8 +13,8 @@ TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
 void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg) {
  (void)sender_id;
 
- msg_.time_ref.sec = msg.tow / 1000;
- msg_.time_ref.nanosec = msg.ns_residual;
+ msg_.time_ref.sec = msg.tow / TOW_MS;
+ msg_.time_ref.nanosec = ((msg.tow % TOW_MS) * MS_TO_NS) + msg.ns_residual;
  publish();
 }
 
