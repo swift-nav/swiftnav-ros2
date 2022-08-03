@@ -34,8 +34,20 @@ target_include_directories(sbp-to-ros PUBLIC
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs)
 
-install(TARGETS sbp-to-ros
-  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS
+  sbp-to-ros
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
