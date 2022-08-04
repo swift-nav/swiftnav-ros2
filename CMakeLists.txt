@@ -11,6 +11,7 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 link_directories("/usr/local/lib/")
 include_directories("/usr/local/include/")
@@ -32,7 +33,7 @@ target_include_directories(sbp-to-ros PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs)
+ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs nav_msgs)
 
 install(TARGETS
   sbp-to-ros

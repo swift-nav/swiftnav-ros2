@@ -1,12 +1,8 @@
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <nav_msgs/msg/odometry.hpp>
-
-#include <libsbp/cpp/state.h>
-
-
 #include <string>
+
+#include <rclcpp/rclcpp.hpp>
 
 template<typename ROS2MsgType>
 class ROS22SBPSubscriber {
