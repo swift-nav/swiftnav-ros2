@@ -28,6 +28,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
    */
   SBPROS2DriverNode() : Node("SBPRos2Driver") {
     declareParameters();
+    get_parameter<std::string>("frame_name", frame_);
     logger_ = std::make_shared<ROSLogger>();
     createReader();
     if (!reader_) exit(EXIT_FAILURE);
@@ -117,6 +118,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<bool>("timereference", true);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
+    declare_parameter<std::string>("frame_name", "gps");
   }
 
   /**
@@ -127,11 +129,11 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
     get_parameter<bool>("navsatfix", enabled);
     navsatfix_publisher_ = std::make_unique<NavSatFixPublisher>(
-        &state_, "navsatfix", this, enabled);
+        &state_, "navsatfix", this, enabled, frame_);
 
     get_parameter<bool>("timereference", enabled);
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
-        &state_, "timereference", this, enabled);
+        &state_, "timereference", this, enabled, frame_);
   }
 
   sbp::State state_;           /** @brief SBP state object */
@@ -145,6 +147,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
   std::shared_ptr<SBPToROS2Logger>
       sbptoros2_; /** @brief SBP to ROS2 logging object */
+  std::string frame_;
 };
 
 int main(int argc, char** argv) {
