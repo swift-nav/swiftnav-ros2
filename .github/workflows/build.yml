@@ -1,57 +1,27 @@
-name: CI
-
 on:
-  pull_request: ~
   push:
     branches:
-      - 'master'
-    tags:
-      - 'v*'
-      - '*.*.*'
-
+      - master
+      - staging
+  pull_request:
+    types: [opened, synchronize, reopened]
+name: SonarCloud
 jobs:
-  ubuntu-gcc6:
-    runs-on: ubuntu-22.04
-    env:
-      SONAR_SCANNER_VERSION: 4.7.0.2747
-      SONAR_SERVER_URL: "https://sonarcloud.io"
+  sonarcloud:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
-          submodules: recursive
-          ssh-key: ${{ secrets.SSH_KEY }}
-      - name: Download and set up sonar-scanner
-        env:
-          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
-        run: |
-          mkdir -p $HOME/.sonar
-          curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
-          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-          echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
-      - name: Run sonar-scanner
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
-          SONAR_ORGANIZATION: swift-nav
-          SONAR_PROJECT_KEY: swiftnav-ros2
-          SONAR_PROJECT_NAME: swiftnav-ros2
-
-        run: |
-          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}"
-
-
-      - name: Install gcc-6
-        run: |
-          sudo apt-get update && \
-          sudo apt-get install build-essential software-properties-common cmake pkg-config doxygen check clang-format-13 libserialport-dev ament-cmake -y && \
-          sudo add-apt-repository universe -y && \
-          sudo apt install curl gnupg lsb-release -y && \
-          sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null && \
-          sudo apt update -y && \
-          sudo apt install ros-humble-desktop -y
-      - name: Run build
-        run: |
-          mkdir build
-          cmake -S . -B build
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_AUTO }}
+        with:
+          args: >
+            -Dsonar.organization=swift-nav
+            -Dsonar.projectKey=swift-swiftnav-ros2
+            -Dsonar.sources=.
+            -Dsonar.verbose=true
+            -Dsonar.c.file.suffixes=- -Dsonar.cpp.file.suffixes=-
