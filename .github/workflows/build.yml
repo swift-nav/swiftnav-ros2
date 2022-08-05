@@ -12,7 +12,7 @@ on:
 jobs:
 
   ubuntu-gcc6:
-    runs-on: ubuntu-22.04
+    runs-on: osrf/ros:humble-desktop
     env:
       SONAR_SCANNER_VERSION: 4.7.0.2747
       SONAR_SERVER_URL: "https://sonarcloud.io"
