@@ -1,14 +1,10 @@
-name: CI
-
 on:
-  pull_request: ~
   push:
     branches:
-      - 'master'
-    tags:
-      - 'v*'
-      - '*.*.*'
-
+      - master
+      - staging
+  pull_request:
+    types: [opened, synchronize, reopened]
 name: SonarCloud
 jobs:
   sonarcloud:
