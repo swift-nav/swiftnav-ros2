@@ -33,6 +33,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          SONAR_ORGANIZATION: swift-nav
+          SONAR_PROJECT_KEY: swiftnav-ros2
+          SONAR_PROJECT_NAME: swiftnav-ros2
+
         run: |
           sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}"
 
