@@ -33,7 +33,7 @@ jobs:
       - name: Install gcc-6
         run: |
           sudo apt-get update && \
-          sudo apt-get install build-essential software-properties-common cmake pkg-config doxygen check-y && \
+          sudo apt-get install build-essential software-properties-common cmake pkg-config doxygen check -y && \
           sudo clang-format-13 -y && \
           libserialport-dev
       - name: Run build
