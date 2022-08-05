@@ -12,7 +12,7 @@ on:
 jobs:
 
   ubuntu-gcc6:
-    runs-on: osrf/ros:humble-desktop
+    runs-on: ubuntu-22.04
     env:
       SONAR_SCANNER_VERSION: 4.7.0.2747
       SONAR_SERVER_URL: "https://sonarcloud.io"
@@ -33,7 +33,13 @@ jobs:
       - name: Install gcc-6
         run: |
           sudo apt-get update && \
-          sudo apt-get install build-essential software-properties-common cmake pkg-config doxygen check clang-format-13 libserialport-dev ament-cmake -y
+          sudo apt-get install build-essential software-properties-common cmake pkg-config doxygen check clang-format-13 libserialport-dev ament-cmake -y && \
+          sudo add-apt-repository universe -y && \
+          sudo apt install curl gnupg lsb-release -y && \
+          sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null && \
+          sudo apt update -y && \
+          sudo apt install ros-humble-desktop -y && \
       - name: Run build
         run: |
           mkdir build
