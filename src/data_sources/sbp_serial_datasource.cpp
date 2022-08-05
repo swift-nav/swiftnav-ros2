@@ -119,8 +119,8 @@ class SerialParameterSplitter {
   void setValues() noexcept {
     try {
       speed = std::stoul(token_list_[0]);
-      data_bits = std::stoul(token_list_[1]);
-      parity = std::toupper(token_list_[2][0]);
+      parity = std::toupper(token_list_[1][0]);
+      data_bits = std::stoul(token_list_[2]);
       stop_bits = std::stoul(token_list_[3]);
       flow_control = std::toupper(token_list_[4][0]);
       token_list_.clear();

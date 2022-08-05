@@ -8,6 +8,8 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
 - [Building the ROS2 driver](#building-the-ros2-driver)
 - [ROS2 driver configuration](#ros2-driver-configuration)
 - [Adding a new SBP message to ROS2 topic translation](#adding-a-new-sbp-message-to-ros2-topic-translation)
+    - [Step 1 (Add a new class to publishers)](#step-1-add-a-new-class-to-publishers)
+
 - [Adding a new ROS2 topic to SBP message transaltion](#adding-a-new-ros2-topic-to-sbp-message-transaltion)
 
 
