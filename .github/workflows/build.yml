@@ -5,67 +5,38 @@ on:
   push:
     branches:
       - 'master'
-      - 'starling-v*-release'
-      - 'v*-release'
     tags:
       - 'v*'
-      - 'starling-v*'
       - '*.*.*'
 
 jobs:
 
   ubuntu-gcc6:
     runs-on: ubuntu-22.04
+    env:
+      SONAR_SCANNER_VERSION: 4.7.0.2747
+      SONAR_SERVER_URL: "https://sonarcloud.io"
     steps:
-
       - name: Checkout source
         uses: actions/checkout@v2
         with:
           submodules: recursive
           ssh-key: ${{ secrets.SSH_KEY }}
-
+      - name: Download and set up sonar-scanner
+        env:
+          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
+        run: |
+          mkdir -p $HOME/.sonar
+          curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
+          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
       - name: Install gcc-6
         run: |
           sudo apt-get update && \
-          sudo apt-get install build-essential software-properties-common -y && \
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
-          sudo apt-get update && \
-          sudo apt-get install gcc-6 g++-6 -y && \
-          gcc -v
+          sudo apt-get install build-essential software-properties-common cmake pkg-config doxygen check-y && \
+          sudo clang-format-13 -y && \
+          libserialport-dev
       - name: Run build
-        env:
-          CC: gcc-6
-          CXX: g++-6
-          TESTENV: gcc6
-          GCCVER: "6"
         run: |
-          bash ./ci-build.sh
-  ubuntu-codecov:
-    runs-on: ubuntu-18.04
-    steps:
-
-      - name: Checkout source
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          submodules: recursive
-          ssh-key: ${{ secrets.SSH_KEY }}
-
-      - name: Install llvm-cov
-        run: |
-          sudo apt-get update && sudo apt-get install llvm -y
-      - name: Run build
-        env:
-          CC: clang
-          CXX: clang++
-          TESTENV: codecov
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORGANIZATION: swift-nav
-          SONAR_PROJECT_KEY: swiftnav-ros2
-          SONAR_PROJECT_NAME: swiftnav-ros2
-          SONAR_HOST_URL: https://sonarcloud.io
-          SONAR_SCANNER_VERSION: 4.2.0.1873
-
-        run: |
-          bash ./ci-build.sh
+          mkdir build
+          cmake -S . -B build
