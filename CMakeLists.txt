@@ -18,8 +18,6 @@ include_directories("/usr/local/include/")
 
 add_executable(sbp-to-ros
   src/sbp-to-ros.cpp
-  src/publishers/NavSatFixPublisher.cpp
-  src/publishers/TimeReferencePublisher.cpp
   src/data_sources/sbp_file_datasource.cpp
   src/data_sources/sbp_serial_datasource.cpp
   src/data_sources/sbp_tcp_datasource.cpp
@@ -27,6 +25,10 @@ add_executable(sbp-to-ros
   src/logging/ros_logger.cpp
   src/logging/sbp_to_ros2_logger.cpp
   src/logging/sbp_file_logger.cpp
+  src/publishers/NavSatFixPublisher.cpp
+  src/publishers/TimeReferencePublisher.cpp
+  src/subscribers/IMUSubscriber.cpp
+  src/subscribers/OdometrySubscriber.cpp
   )
 target_link_libraries(sbp-to-ros sbp serialport)
 target_include_directories(sbp-to-ros PUBLIC
