@@ -76,10 +76,10 @@ class SbpSerialDataSource : public sbp::IReader {
    * @brief Method to configure the port
    *
    * @param params Object containing the parameters to set
-   * @return true If the setting was OK
-   * @return false If the settings failed
+   * @return String containing the error. Empty if OK
    */
-  bool setPortSettings(const class SerialParameterSplitter& params) noexcept;
+  std::string setPortSettings(
+      const class SerialParameterSplitter& params) noexcept;
 
   sp_port* port_;             /** @brief Pointer to a libserialport structure
                                  representing a port */

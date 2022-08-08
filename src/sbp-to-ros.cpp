@@ -16,7 +16,8 @@
 
 #include <data_sources/sbp_data_sources.h>
 
-// TODO: Do we need to catch exceptions or not?
+static constexpr int64_t LOG_TIME_DELAY =
+    2LL * 1000000000LL;  // 2 seconds expressed as nanoseconds
 
 /**
  * @brief Class that represents the ROS 2 driver node
@@ -29,7 +30,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
   SBPROS2DriverNode() : Node("SBPRos2Driver") {
     declareParameters();
     get_parameter<std::string>("frame_name", frame_);
-    logger_ = std::make_shared<ROSLogger>();
+    logger_ = std::make_shared<ROSLogger>(LOG_TIME_DELAY);
+
     createReader();
     if (!reader_) exit(EXIT_FAILURE);
     state_.set_reader(reader_.get());

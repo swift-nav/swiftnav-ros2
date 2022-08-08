@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstdlib>
 #include <memory>
 #include <sstream>
 
+// Logging macros
 #define LOG_FUNC(logger, str, fn) \
   do {                            \
     if (logger) {                 \
@@ -16,6 +18,15 @@
 #define LOG_WARN(logger, str) LOG_FUNC(logger, str, logWarning)
 #define LOG_ERROR(logger, str) LOG_FUNC(logger, str, logError)
 #define LOG_FATAL(logger, str) LOG_FUNC(logger, str, logFatal)
+
+// Contract checking macros
+#define ASSERT_COND(cond, logger, str) \
+  do {                                 \
+    if (!(cond)) {                     \
+      LOG_FATAL(logger, str);          \
+      exit(1);                         \
+    }                                  \
+  } while (0)
 
 /**
  * @brief Abstract base class for a logging facility

@@ -68,10 +68,9 @@ class SbpTCPDataSource : public sbp::IReader {
   /**
    * @brief Method to init the socket system.
    *
-   * @return true Sockets ready for use
-   * @return false Sockets not reaady for use
+   * @return String containig the error. Empty if OK
    */
-  bool initSockets() noexcept;
+  std::string initSockets() noexcept;
 
   /**
    * @brief Method to clean and free socket system resources
