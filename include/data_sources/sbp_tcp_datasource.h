@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libsbp/cpp/state.h>
+#include <data_sources/sbp_data_source.h>
 #include <logging/issue_logger.h>
 #include <cstdint>
 #include <string>
@@ -14,7 +14,7 @@
  * @brief Class that implements a TCP reader based on the SBP reader interface
  * (IReader)
  */
-class SbpTCPDataSource : public sbp::IReader {
+class SbpTCPDataSource : public SbpDataSource {
  public:
   /**
    * @brief Construct a new SbpTCPDataSource object
@@ -55,6 +55,15 @@ class SbpTCPDataSource : public sbp::IReader {
    * @return Number of bytes actually readed
    */
   s32 read(u8* buffer, u32 buffer_length) override;
+
+  /**
+   * @brief Method to write data to the TCP connection
+   *
+   * @param buffer Buffer containing the data to write
+   * @param buffer_length Number of bytes to write
+   * @return Number of bytes actually written
+   */
+  s32 write(const u8* buffer, u32 buffer_length) override;
 
   /**
    * @brief Method to determine if the internal socket is valid or not
@@ -115,5 +124,6 @@ class SbpTCPDataSource : public sbp::IReader {
 #endif  // _WIN32
 
   LoggerPtr logger_;      /** @brief Logging facility */
-  uint32_t read_timeout_; /** @brief Read timeout in ms */
+  uint32_t read_timeout_{0U};  /** @brief Read timeout in ms */
+  uint32_t write_timeout_{0U}; /** @brief Write timeout in ms */
 };

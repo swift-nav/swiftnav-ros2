@@ -54,6 +54,7 @@ s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
   struct timeval timeout {
     0, read_timeout_ * 1000
   };
+
   fd_set read_set;
   FD_ZERO(&read_set);
   FD_SET(socket_id_, &read_set);
@@ -76,6 +77,41 @@ s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
     return -1;
   } else {
     LOG_ERROR(logger_, "Error (" << GET_SOCKET_ERROR() << ") while reading");
+    return result;
+  }
+}
+
+s32 SbpTCPDataSource::write(const u8* buffer, u32 buffer_length) {
+  ASSERT_COND(buffer, logger_,
+              "Buffer passed to SbpTCPDataSource::read is NULL");
+  ASSERT_COND(isValid(), logger_,
+              "Read operation requested on an uninitialized SbpTCPDataSource");
+
+  struct timeval timeout {
+    0, write_timeout_ * 1000
+  };
+
+  fd_set write_set;
+  FD_ZERO(&write_set);
+  FD_SET(socket_id_, &write_set);
+
+  int result = select(socket_id_ + 1, nullptr, &write_set, nullptr, &timeout);
+  if (result == -1) {
+    LOG_ERROR(logger_,
+              "Error: " << GET_SOCKET_ERROR()
+                        << " waiting for the socket to be ready to write data");
+    return -1;
+  } else if (result == 0) {
+    LOG_WARN(logger_,
+             "Timeout waiting for the socket to be ready to write data");
+    return -1;
+  }
+
+  result = send(socket_id_, buffer, buffer_length, 0);
+  if (result > 0) {
+    return result;
+  } else {
+    LOG_ERROR(logger_, "Error (" << GET_SOCKET_ERROR() << ") while writing");
     return result;
   }
 }

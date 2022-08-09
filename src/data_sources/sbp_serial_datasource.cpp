@@ -181,6 +181,22 @@ s32 SbpSerialDataSource::read(u8* buffer, u32 buffer_length) {
   return result;
 }
 
+s32 SbpSerialDataSource::write(const u8* buffer, u32 buffer_length) {
+  ASSERT_COND(port_, logger_,
+              "Called write in an uninitialized SbpSerialDataSource");
+  ASSERT_COND(buffer, logger_,
+              "Called SbpSerialDataSource::write with a NULL buffer");
+  const auto result =
+      sp_blocking_write(port_, buffer, buffer_length, write_timeout_);
+  if (result < 0) {
+    LOG_ERROR(logger_,
+              "Error (" << result << ") while writing to the serial port");
+    return -1;
+  }
+
+  return result;
+}
+
 bool SbpSerialDataSource::isValid() const noexcept {
   return port_ ? true : false;
 }

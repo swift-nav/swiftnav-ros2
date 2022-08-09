@@ -33,8 +33,9 @@ class SBPROS2DriverNode : public rclcpp::Node {
     logger_ = std::make_shared<ROSLogger>(LOG_TIME_DELAY);
 
     createReader();
-    if (!reader_) exit(EXIT_FAILURE);
-    state_.set_reader(reader_.get());
+    if (!data_source_) exit(EXIT_FAILURE);
+    state_.set_reader(data_source_.get());
+    state_.set_writer(data_source_.get());
     createPublishers();
 
     bool log_sbp_messages;
@@ -78,7 +79,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
       case FILE_DATA_SOURCE: {
         std::string file;
         get_parameter<std::string>("sbp_file", file);
-        reader_ = dataSourceFactory(file, logger_);
+        data_source_ = dataSourceFactory(file, logger_);
       } break;
 
       case SERIAL_DATA_SOURCE: {
@@ -87,7 +88,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
         get_parameter<std::string>("device_name", device);
         get_parameter<std::string>("connection_str", connection_str);
         get_parameter<int32_t>("timeout", timeout);
-        reader_ = dataSourceFactory(device, connection_str, timeout, logger_);
+        data_source_ =
+            dataSourceFactory(device, connection_str, timeout, logger_);
       } break;
 
       case TCP_DATA_SOURCE: {
@@ -96,7 +98,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
         get_parameter<std::string>("host_ip", ip);
         get_parameter<int32_t>("host_port", port);
         get_parameter<int32_t>("timeout", timeout);
-        reader_ = dataSourceFactory(ip, port, timeout, logger_);
+        data_source_ = dataSourceFactory(ip, port, timeout, logger_);
       } break;
 
       default:
@@ -141,7 +143,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
   sbp::State state_;           /** @brief SBP state object */
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */
   bool exit_requested_{false}; /** @brief Thread stopping flag */
-  std::shared_ptr<sbp::IReader> reader_; /** @brief data source object */
+  std::shared_ptr<SbpDataSource> data_source_; /** @brief data source object */
   std::shared_ptr<ROSLogger> logger_;    /** @brief ROS 2 logging object */
   std::unique_ptr<NavSatFixPublisher>
       navsatfix_publisher_; /** @brief NavSatFix ROS 2 publisher */
