@@ -1,4 +1,5 @@
 #include <data_sources/sbp_serial_datasource.h>
+#include <utils.h>
 #include <sstream>
 #include <vector>
 
@@ -23,7 +24,7 @@ class SerialParameterSplitter {
   SerialParameterSplitter(const std::string& str,
                           const LoggerPtr& logger) noexcept {
     split(str);
-    ASSERT_COND(token_list_.size() == 5, logger, "Malformed string");
+    ASSERT_COND(token_list_.size() == 5U, logger, "Malformed string");
     setValues();
   }
 
@@ -147,6 +148,7 @@ SbpSerialDataSource::SbpSerialDataSource(const std::string& port_name,
       "Cannot open port : " << sp_get_port_name(port_) << " error: " << result);
   const std::string error = setPortSettings(params);
   ASSERT_COND(error.empty(), logger_, error);
+  write_timeout_ = (2U * ((params.speed / 10U) * sizeof(sbp_msg_t))) * 1_ms;
   LOG_INFO(logger_, "Port " << port_name << " opened with:\nBaud rate: "
                             << params.speed << "\nParity: " << params.parity
                             << "\nData bits: " << params.data_bits
@@ -160,6 +162,9 @@ SbpSerialDataSource::SbpSerialDataSource(SbpSerialDataSource&& rhs) noexcept {
   logger_ = rhs.logger_;
   rhs.logger_.reset();
   read_timeout_ = rhs.read_timeout_;
+  rhs.read_timeout_ = 0U;
+  write_timeout_ = rhs.write_timeout_;
+  rhs.write_timeout_ = 0U;
 }
 
 SbpSerialDataSource::~SbpSerialDataSource() { closePort(); }

@@ -25,7 +25,9 @@ static constexpr uint32_t CONNECT_TIMEOUT = 20;  // twenty seconds
 SbpTCPDataSource::SbpTCPDataSource(const std::string& ip, const uint16_t port,
                                    const LoggerPtr& logger,
                                    const uint32_t read_timeout) noexcept
-    : logger_(logger), read_timeout_(read_timeout) {
+    : logger_(logger),
+      read_timeout_(read_timeout),
+      write_timeout_(read_timeout) {
   const std::string error = initSockets();
   ASSERT_COND(error.empty(), logger_, error);
   openSocket(ip, port);
@@ -36,6 +38,10 @@ SbpTCPDataSource::SbpTCPDataSource(SbpTCPDataSource&& rhs) noexcept {
   socket_id_ = rhs.socket_id_;
   rhs.socket_id_ = -1;
   logger_ = rhs.logger_;
+  read_timeout_ = rhs.read_timeout_;
+  rhs.read_timeout_ = 0U;
+  write_timeout_ = rhs.write_timeout_;
+  rhs.write_timeout_ = 0U;
   rhs.logger_.reset();
 }
 

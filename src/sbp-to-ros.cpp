@@ -15,9 +15,9 @@
 #include <publishers/TimeReferencePublisher.h>
 
 #include <data_sources/sbp_data_sources.h>
+#include <utils.h>
 
-static constexpr int64_t LOG_TIME_DELAY =
-    2LL * 1000000000LL;  // 2 seconds expressed as nanoseconds
+static const int64_t LOG_TIME_DELAY = 2_ns;
 
 /**
  * @brief Class that represents the ROS 2 driver node
