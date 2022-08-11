@@ -148,6 +148,7 @@ SbpSerialDataSource::SbpSerialDataSource(const std::string& port_name,
       "Cannot open port : " << sp_get_port_name(port_) << " error: " << result);
   const std::string error = setPortSettings(params);
   ASSERT_COND(error.empty(), logger_, error);
+  sp_flush(port_, SP_BUF_BOTH);
   write_timeout_ = (2U * ((params.speed / 10U) * sizeof(sbp_msg_t))) * 1_ms;
   LOG_INFO(logger_, "Port " << port_name << " opened with:\nBaud rate: "
                             << params.speed << "\nParity: " << params.parity
@@ -175,8 +176,7 @@ s32 SbpSerialDataSource::read(u8* buffer, u32 buffer_length) {
   ASSERT_COND(buffer, logger_,
               "Called SbpSerialDataSource::read with a NULL buffer");
 
-  const auto result =
-      sp_blocking_read(port_, buffer, buffer_length, read_timeout_);
+  const auto result = sp_nonblocking_read(port_, buffer, buffer_length);
   if (result < 0) {
     LOG_ERROR(logger_,
               "Error (" << result << ") while reading the serial port");

@@ -118,6 +118,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<std::string>("connection_str", "");
     declare_parameter<std::string>("host_ip", "");
     declare_parameter<int32_t>("host_port", 0);
+    declare_parameter<int32_t>("timeout", 0);
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
     declare_parameter<bool>("log_sbp_messages", false);
