@@ -65,15 +65,19 @@ if(BUILD_TESTING)
   ament_add_gtest(${PROJECT_NAME}_test
     test/test_network.cpp
     test/test_serial.cpp
+    test/test_subscribers.cpp
     test/test_main.cpp
     src/data_sources/sbp_tcp_datasource.cpp
     src/data_sources/sbp_serial_datasource.cpp
+    src/subscribers/IMUSubscriber.cpp
+    src/subscribers/OdometrySubscriber.cpp
   )
   target_include_directories(${PROJECT_NAME}_test PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
   target_compile_features(${PROJECT_NAME}_test PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-  target_link_libraries(${PROJECT_NAME}_test serialport)
-  endif()
+  target_link_libraries(${PROJECT_NAME}_test sbp serialport)
+  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs)
+endif()
 
 ament_package()

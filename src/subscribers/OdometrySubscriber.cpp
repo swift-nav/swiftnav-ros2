@@ -1,12 +1,10 @@
 #include<subscribers/OdometrySubscriber.h>
 
-OdometrySubscriber::OdometrySubscriber(rclcpp::Node* node, 
-                             sbp::State* state,
-                             const std::string& topic_name,
-                             const bool enabled)
-    : ROS22SBPSubscriber(node, state, topic_name, enabled)
-{
-}
+OdometrySubscriber::OdometrySubscriber(rclcpp::Node* node, sbp::State* state,
+                                       const std::string& topic_name,
+                                       const bool enabled,
+                                       const LoggerPtr& logger)
+    : ROS22SBPSubscriber(node, state, topic_name, enabled, logger) {}
 
 void OdometrySubscriber::topic_callback(const nav_msgs::msg::Odometry & msg)
 {
@@ -17,5 +15,5 @@ void OdometrySubscriber::topic_callback(const nav_msgs::msg::Odometry & msg)
 
     sbp_msg_type_t msg_type = SbpMsgOdometry;
 
-    this->send_message(msg_type, sbp_msg);
+    send_message(msg_type, sbp_msg);
 }
