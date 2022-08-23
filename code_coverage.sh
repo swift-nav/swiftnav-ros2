@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+# set -e
 
 mkdir build
 cd build
