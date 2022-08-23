@@ -21,11 +21,6 @@ on:
       - master
   pull_request:
     types: [opened, synchronize, reopened]
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  run: |
-    echo 123
 jobs:
   build:
     name: Build
