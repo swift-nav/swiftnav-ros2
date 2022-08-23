@@ -27,6 +27,7 @@ jobs:
         env:
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
         run: |
+          echo $GITHUB_PATH
           sudo apt-get update
           sudo apt-get install unzip
           mkdir -p $HOME/.sonar
