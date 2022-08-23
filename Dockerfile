@@ -45,6 +45,4 @@ USER dockerdev
 WORKDIR /mnt/workspace/src/swiftnav-ros2
 RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/
 
-
-
 #CMD ["make", "all"]

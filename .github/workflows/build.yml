@@ -58,8 +58,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           docker build -t swiftnav-ros2 - < Dockerfile
-          sudo apt install gcovr
-          gcovr -j 8 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
+          docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 -i -t swiftnav-ros2:latest /bin/bash ./code_coverage.sh
       # - name: Run sonar-scanner
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
