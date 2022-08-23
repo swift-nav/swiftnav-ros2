@@ -53,6 +53,7 @@ jobs:
       #     unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
       #     echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
       - name: Run gcov
+        uses: actions/checkout@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
