@@ -36,9 +36,16 @@ jobs:
           curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip ${{ env.BUILD_WRAPPER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
           echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
-      - name: Run sonar-scanner
+      - name: Run gcov
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          sonar-scanner -X --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}" -Dsonar.projectKey=swift-nav_swiftnav-ros2 -Dsonar.organization=swift-nav -Dsonar.cfamily.cache.enabled=false
+          apt install gcovr
+          gcovr -j 8 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
+      # - name: Run sonar-scanner
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   run: |
+      #     sonar-scanner -X --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}" -Dsonar.projectKey=swift-nav_swiftnav-ros2 -Dsonar.organization=swift-nav -Dsonar.cfamily.cache.enabled=false
