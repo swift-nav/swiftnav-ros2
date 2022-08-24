@@ -1,5 +1,8 @@
 FROM osrf/ros:humble-desktop
 
+ARG GITHUB_PATH
+ENV env_GITHUB_PATH=$GITHUB_PATH
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV CC=gcc-11
@@ -36,11 +39,15 @@ RUN mkdir build &&  \
     make && \
     sudo make install
 
-USER root
+RUN sudo apt-get -y install gcovr
 
-RUN apt-get -y install gcovr
+RUN echo $HOME
 
-USER dockerdev
+RUN sudo apt-get install unzip
+
+RUN mkdir $HOME/.sonar
+RUN curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+RUN unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
 
 WORKDIR /mnt/workspace/src/swiftnav-ros2
 RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/

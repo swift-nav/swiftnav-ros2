@@ -2,15 +2,12 @@
 
 # set -e
 
-export BUILD_WRAPPER_DOWNLOAD_URL=https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-
-curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip $BUILD_WRAPPER_DOWNLOAD_URL
-unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
-echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
+export PATH=$HOME/.sonar/build-wrapper-linux-x86:$PATH
 
 mkdir build
 cd build
 export CFLAGS="--coverage"
 cmake ..
-make test
-gcovr -j 8 --gcov-executable gcov --sonarqube ./code_coverage.xml --root .
+# make test
+build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory make test
+# gcovr -j 8 --gcov-executable gcov --sonarqube ./code_coverage.xml --root .
