@@ -53,6 +53,12 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
+  find_package(rclcpp REQUIRED)
+  find_package(sensor_msgs REQUIRED)
+  find_package(nav_msgs REQUIRED)
+  link_directories("/usr/local/lib/")
+  include_directories("/usr/local/include/")
+
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files
@@ -67,6 +73,8 @@ if(BUILD_TESTING)
     test/test_serial.cpp
     test/test_subscribers.cpp
     test/test_main.cpp
+    src/publishers/TimeReferencePublisher.cpp
+    test/publishers/test_time_reference_publisher.cpp
     src/data_sources/sbp_tcp_datasource.cpp
     src/data_sources/sbp_serial_datasource.cpp
     src/subscribers/IMUSubscriber.cpp

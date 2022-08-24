@@ -9,12 +9,12 @@
 #include <publishers/SBP2ROS2Publisher.h>
 
 /**
- * @brief Class that listens for sbp_msg_measurement_state_t and sbp_msg_pos_llh_cov_t, 
+ * @brief Class that listens for sbp_msg_obs_t and sbp_msg_pos_llh_cov_t, 
  * publishing a sensor_msgs::msg::NavSatFix ros2 message.
  *   
 */
 class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
-                                                    sbp_msg_measurement_state_t,
+                                                    sbp_msg_obs_t,
                                                     sbp_msg_pos_llh_cov_t> {
  public:
   NavSatFixPublisher() = delete;
@@ -64,10 +64,10 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    *  BDS2 B1, BDS2 B2, BDS3 B2a => SERVICE_COMPASS
    * 
    * @param sender_id Ignored
-   * @param msg Incoming sbp_msg_measurement_state_t 
+   * @param msg Incoming sbp_msg_obs_t 
    */
   void handle_sbp_msg(uint16_t sender_id,
-                      const sbp_msg_measurement_state_t& msg);
+                      const sbp_msg_obs_t& msg);
 
   /**
    * @brief Handles a sbp_msg_pos_llh_cov_t message. It gets the latitude, longitude
@@ -75,7 +75,7 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    * status flag.
    * 
    * @param sender_id Ignored
-   * @param msg Incoming sbp_msg_measurement_state_t 
+   * @param msg Incoming sbp_msg_pos_llh_cov_t 
    */
   void handle_sbp_msg(uint16_t sender_id, const sbp_msg_pos_llh_cov_t& msg);
 
@@ -126,4 +126,6 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    * @param msg sbp_msg_pos_llh_cov_t
    */
   void loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg);
+
+  sbp_msg_obs_t sbp_msg_obs_;
 };

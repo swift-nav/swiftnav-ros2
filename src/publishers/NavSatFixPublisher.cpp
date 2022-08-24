@@ -3,21 +3,26 @@
 
 #include <bitset>
 
-constexpr uint32_t MEASUREMENT_STATE = 0x00000001;
-constexpr uint32_t POS_LLH_COV = 0x00000002;
 constexpr uint32_t STATUS_MASK = 0x00000111;
+constexpr uint32_t MAX_TIME_DIFF = 2000;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        const std::string& topic_name,
                                        rclcpp::Node* node, const bool enabled, 
                                        const std::string& frame)
     : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
-                        sbp_msg_measurement_state_t, sbp_msg_pos_llh_cov_t>(
-          state, topic_name, node, enabled, frame) {}
+                        sbp_msg_obs_t, sbp_msg_pos_llh_cov_t>(
+          state, topic_name, node, enabled, frame) {
+            sbp_msg_obs_.header.t.tow = 0;
+          }
 
 void NavSatFixPublisher::handle_sbp_msg(
-    uint16_t sender_id, const sbp_msg_measurement_state_t& msg) {
+    uint16_t sender_id, const sbp_msg_obs_t& msg) {
   (void)sender_id;
+
+  if (msg.header.t.tow != sbp_msg_obs_.header.t.tow){
+    msg_ = sensor_msgs::msg::NavSatFix();
+  }
 
   /**
    * As per sbp lib documentation:
@@ -42,27 +47,27 @@ void NavSatFixPublisher::handle_sbp_msg(
    * SERVICE_GALILEO=8
    * 
    */
-  for (sbp_measurement_state_t state: msg.states) {
-    if (state.mesid.code == 0 || 
-        state.mesid.code == 1 ||
-        state.mesid.code == 2 ||
-        state.mesid.code == 5 ||
-        state.mesid.code == 6 ) {
-      msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-    } else if (state.mesid.code == 3 ||
-               state.mesid.code == 4 ) {
-      msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS;
-    } else if (state.mesid.code == 14 ||
-               state.mesid.code == 20 ) {
-      msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO;
-    } else if (state.mesid.code == 12 ||
-               state.mesid.code == 13 ||
-               state.mesid.code == 47 ) {
-      msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS;
-    }
-  }
+  // for (sbp_measurement_state_t state: msg.states) {
+  //   if (state.mesid.code == 0 || 
+  //       state.mesid.code == 1 ||
+  //       state.mesid.code == 2 ||
+  //       state.mesid.code == 5 ||
+  //       state.mesid.code == 6 ) {
+  //     msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
+  //   } else if (state.mesid.code == 3 ||
+  //              state.mesid.code == 4 ) {
+  //     msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS;
+  //   } else if (state.mesid.code == 14 ||
+  //              state.mesid.code == 20 ) {
+  //     msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO;
+  //   } else if (state.mesid.code == 12 ||
+  //              state.mesid.code == 13 ||
+  //              state.mesid.code == 47 ) {
+  //     msg_.status.service = sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS;
+  //   }
+  // }
 
-  composition_mask_ |= MEASUREMENT_STATE;
+  sbp_msg_obs_ = msg;
   publish();
 }
 
@@ -70,6 +75,16 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_pos_llh_cov_t& msg) {
   (void)sender_id;
   
+  // OBS msg has not arrived yet.
+  if (sbp_msg_obs_.header.t.tow == 0) {
+    return;
+  }
+
+  // Last received OBS msg tow is too old
+  if ( (sbp_msg_obs_.header.t.tow - msg.tow) > MAX_TIME_DIFF ) {
+    return;
+  }
+
   loadCovarianceMatrix(msg);
   loadStatusFlag(msg);
 
@@ -77,7 +92,6 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   msg_.longitude = msg.lon;
   msg_.altitude = msg.height;
 
-  composition_mask_ |= POS_LLH_COV;
   publish();
 }
 
@@ -113,13 +127,11 @@ void NavSatFixPublisher::loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg) {
 
 
 void NavSatFixPublisher::publish() {
-  if (enabled_ && (composition_mask_ == MEASUREMENT_STATE + POS_LLH_COV)) {
+  if (enabled_) {
 
     msg_.header.stamp = node_->now();
     msg_.header.frame_id = frame_; 
 
     publisher_->publish(msg_);
-    composition_mask_ = 0U;
-    msg_ = sensor_msgs::msg::NavSatFix(); // TODO remove?
   }
 }
