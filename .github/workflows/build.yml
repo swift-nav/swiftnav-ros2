@@ -54,7 +54,7 @@ jobs:
           # cmake ..
           # make test
           # gcovr -j 8 --gcov-executable gcov --sonarqube ./code_coverage.xml --root .
-          docker build -t swiftnav-ros2 --build-arg UID=$UID - < Dockerfile
+          docker build -t swiftnav-ros2 --build-arg UID=$UID GITHUB_TOKEN_arg=$GITHUB_TOKEN SONAR_TOKEN_arg=$SONAR_TOKEN - < Dockerfile
           docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh
           cat ./build/code_coverage.xml
           cat build/build_wrapper_output_directory/build-wrapper-dump.json
