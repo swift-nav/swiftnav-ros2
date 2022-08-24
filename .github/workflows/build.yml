@@ -46,6 +46,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          sudo apt-get -y update
+          sudo apt-get -y install ament-cmake
           ls -l /opt/ros/humble
           bash /opt/ros/humble/setup.bash
           mkdir build
