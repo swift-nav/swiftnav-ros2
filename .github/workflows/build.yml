@@ -62,4 +62,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          sonar-scanner -X -Dsonar.host.url="${{ env.SONAR_SERVER_URL }}" -Dsonar.projectKey=swift-nav_swiftnav-ros2 -Dsonar.organization=swift-nav -Dsonar.cfamily.cache.enabled=false -Dsonar.coverageReportPaths=./build/code_coverage.xml
+          sonar-scanner -X -Dsonar.host.url="${{ env.SONAR_SERVER_URL }}" -Dsonar.cfamily.build-wrapper-output="build/build_wrapper_output_directory" -Dsonar.projectKey=swift-nav_swiftnav-ros2 -Dsonar.organization=swift-nav -Dsonar.cfamily.cache.enabled=false -Dsonar.coverageReportPaths=./build/code_coverage.xml
