@@ -45,7 +45,12 @@ RUN echo $HOME
 
 RUN sudo apt-get install unzip
 
-RUN mkdir $HOME/.sonar
+ARG SONAR_SCANNER_VERSION=4.7.0.2747
+
+RUN mkdir -p $HOME/.sonar
+RUN curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
+RUN unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+
 RUN curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
 RUN unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
 
