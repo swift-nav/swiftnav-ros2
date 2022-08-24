@@ -8,6 +8,6 @@ mkdir build
 cd build
 export CFLAGS="--coverage"
 cmake ..
-# make test
-build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory make test
-# gcovr -j 8 --gcov-executable gcov --sonarqube ./code_coverage.xml --root .
+build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory make -j6 all
+make test
+gcovr -j 8 --gcov-executable gcov --sonarqube ./code_coverage.xml --root .
