@@ -13,9 +13,12 @@ build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory make -j6 all
 make test
 gcovr -j 8 --gcov-executable gcov --sonarqube ./code_coverage.xml --root .
 
-sonar-scanner -X -Dsonar.host.url="https://sonarcloud.io" \
+sonar-scanner -X -Dproject.settings=../.github/workflows/sonar-project.properties \
                  -Dsonar.cfamily.build-wrapper-output="build_wrapper_output_directory" \
-                 -Dsonar.projectKey=swift-nav_swiftnav-ros2 \
-                 -Dsonar.organization=swift-nav \
                  -Dsonar.cfamily.cache.enabled=false \
-                 -Dsonar.coverageReportPaths=./code_coverage.xml
+                 -Dsonar.cfamily.compile-commands=./compile_commands.json \
+                 -Dsonar.coverageReportPaths=./code_coverage.xml \
+                 -Dsonar.organization=swift-nav \
+                 -Dsonar.projectKey=swift-nav_swiftnav-ros2 \
+                 -Dsonar.host.url="https://sonarcloud.io" \
+                 -Dsonar.pullrequest.branch=sokhealy/sonarcloud
