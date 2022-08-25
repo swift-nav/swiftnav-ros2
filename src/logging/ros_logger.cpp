@@ -2,6 +2,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 void ROSLogger::logDebug(const std::stringstream& ss) {
+  (void)ss;
   RCLCPP_DEBUG(rclcpp::get_logger("rclcpp"), ss.str().c_str());
 }
 

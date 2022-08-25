@@ -14,6 +14,7 @@ NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
 void NavSatFixPublisher::handle_sbp_msg(
     uint16_t sender_id, const sbp_msg_measurement_state_t& /*msg*/) {
   (void)sender_id;
+
   composition_mask_ |= MEASUREMENT_STATE;
   publish();
 }
@@ -21,6 +22,7 @@ void NavSatFixPublisher::handle_sbp_msg(
 void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_pos_llh_cov_t& msg) {
   (void)sender_id;
+  (void)msg;
   msg_.latitude = msg.lat;
   composition_mask_ |= POS_LLH_COV;
   publish();
