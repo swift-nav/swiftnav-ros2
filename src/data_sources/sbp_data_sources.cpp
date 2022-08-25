@@ -19,8 +19,3 @@ std::shared_ptr<SbpTCPDataSource> dataSourceFactory(const std::string& host_ip,
   return std::make_shared<SbpTCPDataSource>(host_ip, host_port, logger,
                                             timeout);
 }
-
-int testFun(const std::string& host_ip) {
-  (void)host_ip;
-  return 1;
-}

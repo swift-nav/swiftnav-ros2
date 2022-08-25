@@ -51,11 +51,11 @@ class SerialParameterSplitter {
       case 230400:
       case 460800:
       case 921600:
-      break;
+        break;
 
-    default:
-      return false;
-      break;
+      default:
+        return false;
+        break;
     }
 
     // Test data bits
@@ -296,4 +296,9 @@ bool SbpSerialDataSource::setPortSettings(
   }
 
   return true;
+}
+
+int testFun(const std::string& host_ip) {
+  (void)host_ip;
+  return 1;
 }

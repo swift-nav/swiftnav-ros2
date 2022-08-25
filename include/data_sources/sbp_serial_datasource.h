@@ -86,3 +86,5 @@ class SbpSerialDataSource : public sbp::IReader {
   LoggerPtr logger_;          /** @brief Logging facility */
   uint32_t read_timeout_{0U}; /** @brief read timeout in ms */
 };
+
+int testFun(const std::string& host_ip);
