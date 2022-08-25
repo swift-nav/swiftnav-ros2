@@ -21,4 +21,5 @@ sonar-scanner -X -Dproject.settings=../.github/workflows/sonar-project.propertie
                  -Dsonar.organization=swift-nav \
                  -Dsonar.projectKey=swift-nav_swiftnav-ros2 \
                  -Dsonar.host.url="https://sonarcloud.io" \
-                 -Dsonar.pullrequest.branch=sokhealy/sonarcloud
+                 -Dsonar.pullrequest.branch=sokhealy/sonarcloud \
+                 -Dsonar.pullrequest.key=8
