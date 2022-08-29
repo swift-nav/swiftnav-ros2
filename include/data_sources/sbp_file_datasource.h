@@ -1,11 +1,11 @@
 #pragma once
 
-#include <libsbp/cpp/state.h>
+#include <data_sources/sbp_data_source.h>
 #include <logging/issue_logger.h>
 #include <fstream>
 #include <string>
 
-class SbpFileDataSource : public sbp::IReader {
+class SbpFileDataSource : public SbpDataSource {
  public:
   SbpFileDataSource() = delete;
 

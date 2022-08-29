@@ -12,7 +12,7 @@ class TimeReferencePublisher : public SBP2ROS2Publisher<sensor_msgs::msg::TimeRe
   public:
    TimeReferencePublisher() = delete;
    TimeReferencePublisher(sbp::State* state, const std::string& topic_name,
-                          rclcpp::Node* node, const bool enabled);
+                          rclcpp::Node* node, const bool enabled, const std::string& frame);
 
    void handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg);
 
