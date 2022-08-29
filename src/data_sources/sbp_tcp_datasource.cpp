@@ -22,14 +22,14 @@
 
 static constexpr uint32_t CONNECT_TIMEOUT = 20;  // twenty seconds
 
-// TODO: Add reconnection in case recv return 0
 SbpTCPDataSource::SbpTCPDataSource(const std::string& ip, const uint16_t port,
                                    const LoggerPtr& logger,
                                    const uint32_t read_timeout) noexcept
-    : logger_(logger), read_timeout_(read_timeout) {
-  LOG_DEBUG(logger_,
-            "Creating TCP Reader for ip: " << ip << " and port: " << port);
-  if (!initSockets()) return;
+    : logger_(logger),
+      read_timeout_(read_timeout),
+      write_timeout_(read_timeout) {
+  const std::string error = initSockets();
+  ASSERT_COND(error.empty(), logger_, error);
   openSocket(ip, port);
 }
 
@@ -38,6 +38,10 @@ SbpTCPDataSource::SbpTCPDataSource(SbpTCPDataSource&& rhs) noexcept {
   socket_id_ = rhs.socket_id_;
   rhs.socket_id_ = -1;
   logger_ = rhs.logger_;
+  read_timeout_ = rhs.read_timeout_;
+  rhs.read_timeout_ = 0U;
+  write_timeout_ = rhs.write_timeout_;
+  rhs.write_timeout_ = 0U;
   rhs.logger_.reset();
 }
 
@@ -48,18 +52,15 @@ SbpTCPDataSource::~SbpTCPDataSource() {
 }
 
 s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
-  if (!buffer) {
-    LOG_ERROR(logger_, "Buffer passed to SbpTCPDataSource::read is NULL");
-    return -1;
-  } else if (!isValid()) {
-    LOG_ERROR(logger_,
+  ASSERT_COND(buffer, logger_,
+              "Buffer passed to SbpTCPDataSource::read is NULL");
+  ASSERT_COND(isValid(), logger_,
               "Read operation requested on an uninitialized SbpTCPDataSource");
-    return -1;
-  }
 
   struct timeval timeout {
     0, read_timeout_ * 1000
   };
+
   fd_set read_set;
   FD_ZERO(&read_set);
   FD_SET(socket_id_, &read_set);
@@ -86,17 +87,50 @@ s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
   }
 }
 
-bool SbpTCPDataSource::initSockets() noexcept {
+s32 SbpTCPDataSource::write(const u8* buffer, u32 buffer_length) {
+  ASSERT_COND(buffer, logger_,
+              "Buffer passed to SbpTCPDataSource::read is NULL");
+  ASSERT_COND(isValid(), logger_,
+              "Read operation requested on an uninitialized SbpTCPDataSource");
+
+  struct timeval timeout {
+    0, write_timeout_ * 1000
+  };
+
+  fd_set write_set;
+  FD_ZERO(&write_set);
+  FD_SET(socket_id_, &write_set);
+
+  int result = select(socket_id_ + 1, nullptr, &write_set, nullptr, &timeout);
+  if (result == -1) {
+    LOG_ERROR(logger_,
+              "Error: " << GET_SOCKET_ERROR()
+                        << " waiting for the socket to be ready to write data");
+    return -1;
+  } else if (result == 0) {
+    LOG_WARN(logger_,
+             "Timeout waiting for the socket to be ready to write data");
+    return -1;
+  }
+
+  result = send(socket_id_, buffer, buffer_length, 0);
+  if (result > 0) {
+    return result;
+  } else {
+    LOG_ERROR(logger_, "Error (" << GET_SOCKET_ERROR() << ") while writing");
+    return result;
+  }
+}
+
+std::string SbpTCPDataSource::initSockets() noexcept {
 #if defined(__linux__)
-  return true;
+  return {};
 #else
   WSADATA d;
-  if (WSAStartup(MAKEWORD(2, 2), &d)) {
-    LOG_FATAL(logger_, "Failed to initialize sockets");
-    return false;
-  } else {
-    return true;
-  }
+  if (WSAStartup(MAKEWORD(2, 2), &d))
+    return std::string("Failed to initialize sockets");
+  else
+    return {};
 #endif  // __linux__
 }
 
@@ -131,24 +165,13 @@ void SbpTCPDataSource::openSocket(const std::string& ip,
                                   const uint16_t port) noexcept {
   (void)ip;
   socket_id_ = socket(AF_INET, SOCK_STREAM, 0);
-  if (!isValid()) {
-    LOG_FATAL(logger_, "socket() failed. (" << GET_SOCKET_ERROR() << ")");
-    return;
-  }
-
-  if (!setNonBlocking()) {
-    LOG_FATAL(logger_, "Can't make the socket non-blocking");
-    closeSocket();
-    return;
-  }
-
-  if (!connectSocket(ip, port)) {
-    LOG_FATAL(logger_, "Error: " << GET_SOCKET_ERROR()
-                                 << " trying to connect the socket");
-    closeSocket();
-  } else {
-    LOG_INFO(logger_, "Connected!");
-  }
+  ASSERT_COND(isValid(), logger_,
+              "socket() failed. (" << GET_SOCKET_ERROR() << ")");
+  ASSERT_COND(setNonBlocking(), logger_, "Can't make the socket non-blocking");
+  ASSERT_COND(
+      connectSocket(ip, port), logger_,
+      "Error: " << GET_SOCKET_ERROR() << " trying to connect the socket");
+  LOG_INFO(logger_, "Connected!");
 }
 
 bool SbpTCPDataSource::setNonBlocking() noexcept {

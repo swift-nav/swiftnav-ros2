@@ -15,8 +15,9 @@
 #include <publishers/TimeReferencePublisher.h>
 
 #include <data_sources/sbp_data_sources.h>
+#include <utils.h>
 
-// TODO: Do we need to catch exceptions or not?
+static const int64_t LOG_TIME_DELAY = 2_ns;
 
 /**
  * @brief Class that represents the ROS 2 driver node
@@ -28,10 +29,13 @@ class SBPROS2DriverNode : public rclcpp::Node {
    */
   SBPROS2DriverNode() : Node("SBPRos2Driver") {
     declareParameters();
-    logger_ = std::make_shared<ROSLogger>();
+    get_parameter<std::string>("frame_name", frame_);
+    logger_ = std::make_shared<ROSLogger>(LOG_TIME_DELAY);
+
     createReader();
-    if (!reader_) exit(EXIT_FAILURE);
-    state_.set_reader(reader_.get());
+    if (!data_source_) exit(EXIT_FAILURE);
+    state_.set_reader(data_source_.get());
+    state_.set_writer(data_source_.get());
     createPublishers();
 
     bool log_sbp_messages;
@@ -75,7 +79,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
       case FILE_DATA_SOURCE: {
         std::string file;
         get_parameter<std::string>("sbp_file", file);
-        reader_ = dataSourceFactory(file, logger_);
+        data_source_ = dataSourceFactory(file, logger_);
       } break;
 
       case SERIAL_DATA_SOURCE: {
@@ -84,7 +88,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
         get_parameter<std::string>("device_name", device);
         get_parameter<std::string>("connection_str", connection_str);
         get_parameter<int32_t>("timeout", timeout);
-        reader_ = dataSourceFactory(device, connection_str, timeout, logger_);
+        data_source_ =
+            dataSourceFactory(device, connection_str, timeout, logger_);
       } break;
 
       case TCP_DATA_SOURCE: {
@@ -93,7 +98,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
         get_parameter<std::string>("host_ip", ip);
         get_parameter<int32_t>("host_port", port);
         get_parameter<int32_t>("timeout", timeout);
-        reader_ = dataSourceFactory(ip, port, timeout, logger_);
+        data_source_ = dataSourceFactory(ip, port, timeout, logger_);
       } break;
 
       default:
@@ -113,10 +118,12 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<std::string>("connection_str", "");
     declare_parameter<std::string>("host_ip", "");
     declare_parameter<int32_t>("host_port", 0);
+    declare_parameter<int32_t>("timeout", 0);
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
+    declare_parameter<std::string>("frame_name", "gps");
   }
 
   /**
@@ -127,17 +134,17 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
     get_parameter<bool>("navsatfix", enabled);
     navsatfix_publisher_ = std::make_unique<NavSatFixPublisher>(
-        &state_, "navsatfix", this, enabled);
+        &state_, "navsatfix", this, enabled, frame_);
 
     get_parameter<bool>("timereference", enabled);
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
-        &state_, "timereference", this, enabled);
+        &state_, "timereference", this, enabled, frame_);
   }
 
   sbp::State state_;           /** @brief SBP state object */
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */
   bool exit_requested_{false}; /** @brief Thread stopping flag */
-  std::shared_ptr<sbp::IReader> reader_; /** @brief data source object */
+  std::shared_ptr<SbpDataSource> data_source_; /** @brief data source object */
   std::shared_ptr<ROSLogger> logger_;    /** @brief ROS 2 logging object */
   std::unique_ptr<NavSatFixPublisher>
       navsatfix_publisher_; /** @brief NavSatFix ROS 2 publisher */
@@ -145,6 +152,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
   std::shared_ptr<SBPToROS2Logger>
       sbptoros2_; /** @brief SBP to ROS2 logging object */
+  std::string frame_;
 };
 
 int main(int argc, char** argv) {

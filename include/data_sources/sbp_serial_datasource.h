@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libsbp/cpp/state.h>
+#include <data_sources/sbp_data_source.h>
 #include <libserialport.h>
 #include <logging/issue_logger.h>
 #include <string>
@@ -9,7 +9,7 @@
  * @brief Class that implements a Serial Port reader based on the SBP reader
  * interface
  */
-class SbpSerialDataSource : public sbp::IReader {
+class SbpSerialDataSource : public SbpDataSource {
  public:
   /**
    * @brief Construct a new SbpSerialDataSource object
@@ -59,6 +59,15 @@ class SbpSerialDataSource : public sbp::IReader {
   s32 read(u8* buffer, u32 buffer_length) override;
 
   /**
+   * @brief Method to write data to the serial connection
+   *
+   * @param buffer Buffer containing the data to write
+   * @param buffer_length Number of bytes to write
+   * @return Number of bytes actually written
+   */
+  s32 write(const u8* buffer, u32 buffer_length) override;
+
+  /**
    * @brief Determines if the object is valid
    *
    * @return true Object is valid
@@ -76,15 +85,16 @@ class SbpSerialDataSource : public sbp::IReader {
    * @brief Method to configure the port
    *
    * @param params Object containing the parameters to set
-   * @return true If the setting was OK
-   * @return false If the settings failed
+   * @return String containing the error. Empty if OK
    */
-  bool setPortSettings(const class SerialParameterSplitter& params) noexcept;
+  std::string setPortSettings(
+      const class SerialParameterSplitter& params) noexcept;
 
   sp_port* port_;             /** @brief Pointer to a libserialport structure
                                  representing a port */
   LoggerPtr logger_;          /** @brief Logging facility */
   uint32_t read_timeout_{0U}; /** @brief read timeout in ms */
+  uint32_t write_timeout_{0U}; /** @brief write timeout in ms */
 };
 
 int testFun(const std::string& host_ip);

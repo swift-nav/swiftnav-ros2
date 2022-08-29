@@ -1,4 +1,5 @@
 #include <data_sources/sbp_serial_datasource.h>
+#include <utils.h>
 #include <sstream>
 #include <vector>
 
@@ -23,11 +24,7 @@ class SerialParameterSplitter {
   SerialParameterSplitter(const std::string& str,
                           const LoggerPtr& logger) noexcept {
     split(str);
-    if (token_list_.size() != 5) {
-      LOG_ERROR(logger, "Malformed string: " << str);
-      return;
-    }
-
+    ASSERT_COND(token_list_.size() == 5U, logger, "Malformed string");
     setValues();
   }
 
@@ -119,8 +116,8 @@ class SerialParameterSplitter {
   void setValues() noexcept {
     try {
       speed = std::stoul(token_list_[0]);
-      data_bits = std::stoul(token_list_[1]);
-      parity = std::toupper(token_list_[2][0]);
+      parity = std::toupper(token_list_[1][0]);
+      data_bits = std::stoul(token_list_[2]);
       stop_bits = std::stoul(token_list_[3]);
       flow_control = std::toupper(token_list_[4][0]);
       token_list_.clear();
@@ -136,34 +133,23 @@ SbpSerialDataSource::SbpSerialDataSource(const std::string& port_name,
                                          const LoggerPtr& logger,
                                          const uint32_t read_timeout) noexcept
     : logger_(logger), read_timeout_(read_timeout) {
-  if (port_name.empty()) {
-    LOG_FATAL(logger_, "The port name should be specified");
-    return;
-  }
+  ASSERT_COND(!port_name.empty(), logger_, "The port name should be specified");
 
   SerialParameterSplitter params(connection_string, logger_);
-  if (!params.isValid()) {
-    LOG_FATAL(logger_,
+  ASSERT_COND(params.isValid(), logger_,
               "Invalid data in connection string: " << connection_string);
-    return;
-  }
 
   sp_return result = sp_get_port_by_name(port_name.c_str(), &port_);
-  if (result != SP_OK) {
-    LOG_FATAL(logger_, "No serial port named " << port_name);
-    return;
-  }
+  ASSERT_COND(result == SP_OK, logger_, "No serial port named " << port_name);
 
   result = sp_open(port_, SP_MODE_READ);
-  if (result != SP_OK) {
-    LOG_FATAL(logger_, "Cannot open port : " << sp_get_port_name(port_)
-                                             << " error: " << result);
-    if (result == SP_ERR_FAIL) LOG_FATAL(logger_, sp_last_error_message());
-    closePort();
-    return;
-  }
-
-  if (!setPortSettings(params)) closePort();
+  ASSERT_COND(
+      result == SP_OK, logger_,
+      "Cannot open port : " << sp_get_port_name(port_) << " error: " << result);
+  const std::string error = setPortSettings(params);
+  ASSERT_COND(error.empty(), logger_, error);
+  sp_flush(port_, SP_BUF_BOTH);
+  write_timeout_ = (2U * ((params.speed / 10U) * sizeof(sbp_msg_t))) * 1_ms;
   LOG_INFO(logger_, "Port " << port_name << " opened with:\nBaud rate: "
                             << params.speed << "\nParity: " << params.parity
                             << "\nData bits: " << params.data_bits
@@ -177,24 +163,39 @@ SbpSerialDataSource::SbpSerialDataSource(SbpSerialDataSource&& rhs) noexcept {
   logger_ = rhs.logger_;
   rhs.logger_.reset();
   read_timeout_ = rhs.read_timeout_;
+  rhs.read_timeout_ = 0U;
+  write_timeout_ = rhs.write_timeout_;
+  rhs.write_timeout_ = 0U;
 }
 
 SbpSerialDataSource::~SbpSerialDataSource() { closePort(); }
 
 s32 SbpSerialDataSource::read(u8* buffer, u32 buffer_length) {
-  if (!port_) {
-    LOG_FATAL(logger_, "Called read in an uninitialized SbpSerialDataSource");
-    return -1;
-  } else if (!buffer) {
-    LOG_FATAL(logger_, "Called SbpSerialDataSource::read with a NULL buffer");
-    return -1;
-  }
+  ASSERT_COND(port_, logger_,
+              "Called read in an uninitialized SbpSerialDataSource");
+  ASSERT_COND(buffer, logger_,
+              "Called SbpSerialDataSource::read with a NULL buffer");
 
-  const auto result =
-      sp_blocking_read(port_, buffer, buffer_length, read_timeout_);
+  const auto result = sp_nonblocking_read(port_, buffer, buffer_length);
   if (result < 0) {
     LOG_ERROR(logger_,
               "Error (" << result << ") while reading the serial port");
+    return -1;
+  }
+
+  return result;
+}
+
+s32 SbpSerialDataSource::write(const u8* buffer, u32 buffer_length) {
+  ASSERT_COND(port_, logger_,
+              "Called write in an uninitialized SbpSerialDataSource");
+  ASSERT_COND(buffer, logger_,
+              "Called SbpSerialDataSource::write with a NULL buffer");
+  const auto result =
+      sp_blocking_write(port_, buffer, buffer_length, write_timeout_);
+  if (result < 0) {
+    LOG_ERROR(logger_,
+              "Error (" << result << ") while writing to the serial port");
     return -1;
   }
 
@@ -219,11 +220,11 @@ void SbpSerialDataSource::closePort() noexcept {
   }
 }
 
-bool SbpSerialDataSource::setPortSettings(
+std::string SbpSerialDataSource::setPortSettings(
     const SerialParameterSplitter& params) noexcept {
   sp_return result;
 
-  sp_flowcontrol flow_control;
+  sp_flowcontrol flow_control = SP_FLOWCONTROL_NONE;
   switch (params.flow_control) {
     case 'N':
       flow_control = SP_FLOWCONTROL_NONE;
@@ -243,18 +244,14 @@ bool SbpSerialDataSource::setPortSettings(
   }
 
   result = sp_set_flowcontrol(port_, flow_control);
-  if (result != SP_OK) {
-    LOG_FATAL(logger_, "Cannot set flow control: " << result);
-    return false;
-  }
+  if (result != SP_OK)
+    return (std::string("Cannot set flow control: ") + std::to_string(result));
 
   result = sp_set_bits(port_, params.data_bits);
-  if (result != SP_OK) {
-    LOG_FATAL(logger_, "Cannot set data bits: " << result);
-    return false;
-  }
+  if (result != SP_OK)
+    return (std::string("Cannot set data bits: ") + std::to_string(result));
 
-  sp_parity parity;
+  sp_parity parity = SP_PARITY_INVALID;
   switch (params.parity) {
     case 'N':
       parity = SP_PARITY_NONE;
@@ -278,24 +275,18 @@ bool SbpSerialDataSource::setPortSettings(
   }
 
   result = sp_set_parity(port_, parity);
-  if (result != SP_OK) {
-    LOG_FATAL(logger_, "Cannot set parity: " << result);
-    return false;
-  }
+  if (result != SP_OK)
+    return (std::string("Cannot set parity: ") + std::to_string(result));
 
   result = sp_set_stopbits(port_, params.stop_bits);
-  if (result != SP_OK) {
-    LOG_FATAL(logger_, "Cannot set stop bits: " << result);
-    return false;
-  }
+  if (result != SP_OK)
+    return (std::string("Cannot set stop bits: ") + std::to_string(result));
 
   result = sp_set_baudrate(port_, params.speed);
-  if (result != SP_OK) {
-    LOG_FATAL(logger_, "Cannot set baud rate: " << result);
-    return false;
-  }
+  if (result != SP_OK)
+    return (std::string("Cannot set baud rate: ") + std::to_string(result));
 
-  return true;
+  return {};
 }
 
 int testFun(const std::string& host_ip) {
