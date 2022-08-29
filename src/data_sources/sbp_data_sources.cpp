@@ -8,7 +8,6 @@ std::shared_ptr<SbpFileDataSource> dataSourceFactory(
 std::shared_ptr<SbpSerialDataSource> dataSourceFactory(
     const std::string& device_name, const std::string& connection_str,
     const uint32_t timeout, const LoggerPtr& logger) {
-  (void)device_name;
   return std::make_shared<SbpSerialDataSource>(device_name, connection_str,
                                                logger, timeout);
 }

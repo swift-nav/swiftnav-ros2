@@ -96,5 +96,3 @@ class SbpSerialDataSource : public SbpDataSource {
   uint32_t read_timeout_{0U}; /** @brief read timeout in ms */
   uint32_t write_timeout_{0U}; /** @brief write timeout in ms */
 };
-
-int testFun(const std::string& host_ip);

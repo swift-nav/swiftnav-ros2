@@ -163,7 +163,6 @@ bool SbpTCPDataSource::isValid() const noexcept {
 
 void SbpTCPDataSource::openSocket(const std::string& ip,
                                   const uint16_t port) noexcept {
-  (void)ip;
   socket_id_ = socket(AF_INET, SOCK_STREAM, 0);
   ASSERT_COND(isValid(), logger_,
               "socket() failed. (" << GET_SOCKET_ERROR() << ")");

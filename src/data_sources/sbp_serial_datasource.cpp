@@ -288,8 +288,3 @@ std::string SbpSerialDataSource::setPortSettings(
 
   return {};
 }
-
-int testFun(const std::string& host_ip) {
-  (void)host_ip;
-  return 1;
-}

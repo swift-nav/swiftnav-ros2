@@ -47,7 +47,6 @@ SbpFileLogger::~SbpFileLogger() {
 
 void SbpFileLogger::insert(const sbp_msg_type_t msg_type,
                            const sbp_msg_t& msg) {
-  (void)msg_type;
   state_.send_message(0, msg_type, msg);
 }
 
