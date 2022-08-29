@@ -184,9 +184,11 @@ void NavSatFixPublisher::loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg) {
   // STATUS_SBAS_FIX=1 Satellite based augmentation
   // STATUS_GBAS_FIX=2 Ground based augmentation
   uint8_t status = msg.flags & STATUS_MASK;
-  if(status == 0) {
+  if(status == 0 || status == 5) {
     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;
-  } else if (status >= 2 && status <= 5) {
+  } else if (status == 1) {
+    msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;
+  } else if (status >= 2 && status <= 4) {
     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX;
   } else if (status == 6) {
     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_SBAS_FIX;
