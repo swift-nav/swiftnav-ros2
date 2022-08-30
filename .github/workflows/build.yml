@@ -35,12 +35,12 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Code coverage
         env:
-          PR_NAME: ${{ github.head_ref }}
+          PR_BRANCH_NAME: ${{ github.head_ref }}
         run: |
           PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
           docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg SONAR_SCANNER_VERSION=$SONAR_SCANNER_VERSION - < Dockerfile
           docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $GITHUB_TOKEN \
                                                                                                                      $SONAR_TOKEN \
                                                                                                                      $PARALLEL_JOBS \
-                                                                                                                     $PR_NAME \
+                                                                                                                     $PR_BRANCH_NAME \
                                                                                                                      $PR_NUMBER
