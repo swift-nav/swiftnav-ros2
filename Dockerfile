@@ -1,13 +1,12 @@
 FROM osrf/ros:humble-desktop
 
-ARG GITHUB_PATH
-ENV env_GITHUB_PATH=$GITHUB_PATH
-
 ARG GITHUB_TOKEN_arg
 ENV GITHUB_TOKEN=$GITHUB_TOKEN_arg
 
 ARG SONAR_TOKEN_arg
 ENV SONAR_TOKEN=$SONAR_TOKEN_arg
+
+ARG SONAR_SCANNER_VERSION=4.7.0.2747
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -45,22 +44,18 @@ RUN mkdir build &&  \
     make && \
     sudo make install
 
+# Install code coverage tool
 RUN sudo apt-get -y install gcovr
 
-RUN echo $HOME
-
-RUN sudo apt-get install unzip
-
-ARG SONAR_SCANNER_VERSION=4.7.0.2747
-
+# Download and set up sonar-scanner
+RUN sudo apt-get -y install unzip
 RUN mkdir -p $HOME/.sonar
 RUN curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
 RUN unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
 
-RUN curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-RUN unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
-
 WORKDIR /mnt/workspace/src/swiftnav-ros2
 RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/
+
+ENV PATH="${PATH}:/home/dockerdev/.sonar/sonar-scanner-4.7.0.2747-linux/bin"
 
 #CMD ["make", "all"]

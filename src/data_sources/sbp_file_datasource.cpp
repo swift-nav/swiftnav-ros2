@@ -18,6 +18,7 @@ bool SbpFileDataSource::eof() const {
 }
 
 s32 SbpFileDataSource::read(u8 *buffer, u32 buffer_length) {
+  (void)buffer;
   auto start_index = file_stream_.tellg();
   if (start_index == -1) {
     return -1;
