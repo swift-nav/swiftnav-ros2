@@ -5,6 +5,12 @@ on:
       - master
   pull_request:
     types: [opened, synchronize, reopened]
+env:
+  SONAR_SCANNER_VERSION: 4.7.0.2747
+  SONAR_SERVER_URL: "https://sonarcloud.io"
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  PARALLEL_JOBS: 2
 jobs:
   build-master:
     name: Build
