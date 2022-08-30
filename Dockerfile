@@ -51,5 +51,4 @@ ENV PATH="${PATH}:/home/dockerdev/.sonar/sonar-scanner-4.7.0.2747-linux/bin"
 WORKDIR /mnt/workspace/src/swiftnav-ros2
 RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/
 
-
 #CMD ["make", "all"]

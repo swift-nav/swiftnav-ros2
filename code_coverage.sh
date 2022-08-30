@@ -20,10 +20,10 @@ make -j$3 all
 make -j$3 test
 
 cd ..
-gcovr -j $1 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
+gcovr -j $3 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
 
-# if 
 if [ -n "$4" ] && [ -n "$5" ]; then
+    # pull request build
     sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
                      -Dsonar.cfamily.cache.enabled=false \
                      -Dsonar.cfamily.compile-commands=./build/compile_commands.json \
@@ -34,6 +34,7 @@ if [ -n "$4" ] && [ -n "$5" ]; then
                      -Dsonar.pullrequest.branch=$4 \
                      -Dsonar.pullrequest.key=$5
 else
+    # master build
     sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
                      -Dsonar.cfamily.cache.enabled=false \
                      -Dsonar.cfamily.compile-commands=./build/compile_commands.json \
