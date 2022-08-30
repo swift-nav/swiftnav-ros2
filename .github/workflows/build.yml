@@ -21,16 +21,12 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: Code coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           PARALLEL_JOBS: 2
-          BRANCH: ${{ steps.extract_branch.outputs.branch }}
+          BRANCH: ${{ github.head_ref }}
         run: |
           PR_NAME=${GITHUB_REF##*/}
           echo PR_NAME
