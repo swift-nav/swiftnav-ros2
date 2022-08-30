@@ -30,6 +30,6 @@ jobs:
           echo PR_NAME
           echo ${GITHUB_REF##*/}
           echo PR_NUMBER
-          echo $PR_NUMBER
+          echo $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
           # docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg GITHUB_TOKEN_arg=$GITHUB_TOKEN --build-arg SONAR_TOKEN_arg=$SONAR_TOKEN - < Dockerfile
           # docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh 2 ${GITHUB_REF##*/} $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
