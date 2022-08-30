@@ -25,11 +25,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          PR_NAME: ${{GITHUB_REF##*/}}
-          PR_NUMBER: $(jq --raw-output .pull_request.number "${{GITHUB_EVENT_PATH}}")
+          PR_NUMBER: (jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
         run: |
           echo PR_NAME
-          echo $PR_NAME
+          echo ${GITHUB_REF##*/}
           echo PR_NUMBER
           echo $PR_NUMBER
           # docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg GITHUB_TOKEN_arg=$GITHUB_TOKEN --build-arg SONAR_TOKEN_arg=$SONAR_TOKEN - < Dockerfile
