@@ -22,7 +22,8 @@ make -j$3 test
 cd ..
 gcovr -j $1 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
 
-if [ -n "$2" ] && [ -n "$3" ]; then
+# if 
+if [ -n "$4" ] && [ -n "$5" ]; then
     sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
                      -Dsonar.cfamily.cache.enabled=false \
                      -Dsonar.cfamily.compile-commands=./build/compile_commands.json \
