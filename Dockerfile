@@ -44,9 +44,9 @@ RUN sudo apt-get -y install gcovr
 # Download and set up sonar-scanner
 RUN sudo apt-get -y install unzip
 RUN mkdir -p $HOME/.sonar
-RUN curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
+RUN curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip
 RUN unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-ENV PATH="${PATH}:/home/dockerdev/.sonar/sonar-scanner-4.7.0.2747-linux/bin"
+ENV PATH="${PATH}:/home/dockerdev/.sonar/sonar-scanner-${SONAR_SCANNER_VERSION}-linux/bin"
 
 WORKDIR /mnt/workspace/src/swiftnav-ros2
 RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/
