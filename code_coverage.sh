@@ -17,7 +17,8 @@ make -j$1 test
 cd ..
 gcovr -j $1 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
 
-sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
+if [ -n "$2" ] && [ -n "$3" ]; then
+    sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
                  -Dsonar.cfamily.cache.enabled=false \
                  -Dsonar.cfamily.compile-commands=./build/compile_commands.json \
                  -Dsonar.coverageReportPaths=./build/code_coverage.xml \
@@ -26,3 +27,13 @@ sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
                  -Dsonar.host.url="https://sonarcloud.io" \
                  -Dsonar.pullrequest.branch=$2 \
                  -Dsonar.pullrequest.key=$3
+else
+    sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
+                 -Dsonar.cfamily.cache.enabled=false \
+                 -Dsonar.cfamily.compile-commands=./build/compile_commands.json \
+                 -Dsonar.coverageReportPaths=./build/code_coverage.xml \
+                 -Dsonar.organization=swift-nav \
+                 -Dsonar.projectKey=swift-nav_swiftnav-ros2 \
+                 -Dsonar.host.url="https://sonarcloud.io" \
+                 -Dsonar.branch.name=master
+fi
