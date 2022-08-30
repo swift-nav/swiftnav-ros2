@@ -5,7 +5,7 @@
 # 2 - pull request branch name
 # 3 - pull request number
 
-set -e
+# set -e
 
 mkdir -p build
 cd build
