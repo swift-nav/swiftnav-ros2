@@ -74,6 +74,8 @@ if(BUILD_TESTING)
     test/test_subscribers.cpp
     test/test_main.cpp
     src/publishers/TimeReferencePublisher.cpp
+    src/publishers/NavSatFixPublisher.cpp
+    test/publishers/test_nav_sat_fix_publisher.cpp
     test/publishers/test_time_reference_publisher.cpp
     src/data_sources/sbp_tcp_datasource.cpp
     src/data_sources/sbp_serial_datasource.cpp

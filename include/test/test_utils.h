@@ -1,3 +1,5 @@
+#pragma once
+
 #include<chrono>
 
 #include <rclcpp/exceptions.hpp>
@@ -6,7 +8,7 @@
 static const int g_max_loops = 200;
 static const std::chrono::milliseconds g_sleep_per_loop(10);
 
-void wait_for_message_to_be_received(
+void inline wait_for_message_to_be_received(
   bool & is_received,
   const std::shared_ptr<rclcpp::Node> & node)
 {
