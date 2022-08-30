@@ -9,7 +9,7 @@ env:
   SONAR_SCANNER_VERSION: 4.7.0.2747
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  PARALLEL_JOBS: 2
+  PARALLEL_THREADS: 2
 jobs:
   build-master:
     name: Build master
@@ -24,7 +24,7 @@ jobs:
           docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg SONAR_SCANNER_VERSION=$SONAR_SCANNER_VERSION - < Dockerfile
           docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $GITHUB_TOKEN \
                                                                                                                      $SONAR_TOKEN \
-                                                                                                                     $PARALLEL_JOBS
+                                                                                                                     $PARALLEL_THREADS
   build-pr:
     name: Build pull request
     runs-on: ubuntu-latest
@@ -41,6 +41,6 @@ jobs:
           docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg SONAR_SCANNER_VERSION=$SONAR_SCANNER_VERSION - < Dockerfile
           docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $GITHUB_TOKEN \
                                                                                                                      $SONAR_TOKEN \
-                                                                                                                     $PARALLEL_JOBS \
+                                                                                                                     $PARALLEL_THREADS \
                                                                                                                      $PR_BRANCH_NAME \
                                                                                                                      $PR_NUMBER

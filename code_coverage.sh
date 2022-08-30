@@ -3,7 +3,7 @@
 # arguments:
 # 1 - github token
 # 2 - sonar token
-# 3 - number of jobs to use in parallel
+# 3 - number of threads to use in parallel
 # 4 - pull request branch name
 # 5 - pull request number
 
