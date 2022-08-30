@@ -26,13 +26,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           PARALLEL_JOBS: 2
-          BRANCH: ${{ github.head_ref }}
+          PR_NAME: ${{ github.head_ref }}
+          PR_NUMBER: $(jq --raw-output .pull_request.number "github.ref")
         run: |
-          PR_NAME=${GITHUB_REF##*/}
-          echo PR_NAME
-          echo $PR_NAME
-          echo BRANCH
-          echo $BRANCH
-          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo PR_NUMBER
+          echo $PR_NUMBER
+          # PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
           # docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg GITHUB_TOKEN_arg=$GITHUB_TOKEN --build-arg SONAR_TOKEN_arg=$SONAR_TOKEN - < Dockerfile
           # docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $PARALLEL_JOBS $PR_NAME $PR_NUMBER
