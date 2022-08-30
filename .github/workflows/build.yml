@@ -7,13 +7,12 @@ on:
     types: [opened, synchronize, reopened]
 env:
   SONAR_SCANNER_VERSION: 4.7.0.2747
-  SONAR_SERVER_URL: "https://sonarcloud.io"
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   PARALLEL_JOBS: 2
 jobs:
   build-master:
-    name: Build
+    name: Build master
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
@@ -22,10 +21,12 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Code coverage
         run: |
-          docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg GITHUB_TOKEN_arg=$GITHUB_TOKEN --build-arg SONAR_TOKEN_arg=$SONAR_TOKEN - < Dockerfile
-          docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $PARALLEL_JOBS
+          docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg SONAR_SCANNER_VERSION=$SONAR_SCANNER_VERSION - < Dockerfile
+          docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $GITHUB_TOKEN \
+                                                                                                                     $SONAR_TOKEN \
+                                                                                                                     $PARALLEL_JOBS
   build-pr:
-    name: Build
+    name: Build pull request
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
     steps:
@@ -37,5 +38,9 @@ jobs:
           PR_NAME: ${{ github.head_ref }}
         run: |
           PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg GITHUB_TOKEN_arg=$GITHUB_TOKEN --build-arg SONAR_TOKEN_arg=$SONAR_TOKEN - < Dockerfile
-          docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $PARALLEL_JOBS $PR_NAME $PR_NUMBER
+          docker build -t swiftnav-ros2 --build-arg UID=$UID --build-arg SONAR_SCANNER_VERSION=$SONAR_SCANNER_VERSION - < Dockerfile
+          docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $GITHUB_TOKEN \
+                                                                                                                     $SONAR_TOKEN \
+                                                                                                                     $PARALLEL_JOBS \
+                                                                                                                     $PR_NAME \
+                                                                                                                     $PR_NUMBER
