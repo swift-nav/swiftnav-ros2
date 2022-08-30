@@ -1,16 +1,21 @@
 #!/bin/bash
 
+# arguments:
+# 1 - number of jobs to use in parallel
+# 2 - pull request branch name
+# 3 - pull request number
+
 set -e
 
-mkdir build
+mkdir -p build
 cd build
 cmake -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage ..
 
-make -j2 all
-make -j2 test
+make -j$1 all
+make -j$1 test
 
 cd ..
-gcovr -j 2 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
+gcovr -j $1 --gcov-executable gcov --sonarqube ./build/code_coverage.xml --root . ./build
 
 sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
                  -Dsonar.cfamily.cache.enabled=false \
@@ -19,5 +24,5 @@ sonar-scanner -X -Dproject.settings=.github/workflows/sonar-project.properties \
                  -Dsonar.organization=swift-nav \
                  -Dsonar.projectKey=swift-nav_swiftnav-ros2 \
                  -Dsonar.host.url="https://sonarcloud.io" \
-                 -Dsonar.pullrequest.branch=sokhealy/sonarcloud \
-                 -Dsonar.pullrequest.key=8
+                 -Dsonar.pullrequest.branch=$2 \
+                 -Dsonar.pullrequest.key=$3
