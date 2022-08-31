@@ -5,7 +5,7 @@ SBPRos2Driver:
     device_name: "/dev/ttySAM3"
     connection_str: "115200|N|8|1|N"
     host_ip: "127.0.0.1"
-    host_port: 8082
+    host_port: 55555
     timeout: 2000
     navsatfix: True
     timereference: True

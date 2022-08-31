@@ -42,7 +42,7 @@ class ROS22SBPSubscriber {
 
   protected:
    /**
-    * @brief Method to publish the topic
+    * @brief Method to send message to connected Swift device
     */
    virtual void topic_callback(const ROS2MsgType & msg) = 0;
    virtual s8 send_message(const sbp_msg_type_t msg_type, const sbp_msg_t& msg)

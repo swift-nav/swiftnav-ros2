@@ -17,7 +17,7 @@
 #include <data_sources/sbp_data_sources.h>
 #include <utils.h>
 
-static const int64_t LOG_TIME_DELAY = 2_ns;
+static const int64_t LOG_REPUBLISH_DELAY = 2_ns;
 
 /**
  * @brief Class that represents the ROS 2 driver node
@@ -30,7 +30,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
   SBPROS2DriverNode() : Node("SBPRos2Driver") {
     declareParameters();
     get_parameter<std::string>("frame_name", frame_);
-    logger_ = std::make_shared<ROSLogger>(LOG_TIME_DELAY);
+    logger_ = std::make_shared<ROSLogger>(LOG_REPUBLISH_DELAY);
 
     createReader();
     if (!data_source_) exit(EXIT_FAILURE);

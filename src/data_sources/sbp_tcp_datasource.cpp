@@ -21,6 +21,8 @@
 #endif  // __linux__
 
 static constexpr uint32_t CONNECT_TIMEOUT = 20;  // twenty seconds
+static constexpr uint32_t MS_TO_US = 1000;
+static constexpr uint32_t S_TO_MS = 1000;
 
 SbpTCPDataSource::SbpTCPDataSource(const std::string& ip, const uint16_t port,
                                    const LoggerPtr& logger,
@@ -94,7 +96,7 @@ s32 SbpTCPDataSource::write(const u8* buffer, u32 buffer_length) {
               "Read operation requested on an uninitialized SbpTCPDataSource");
 
   struct timeval timeout {
-    0, write_timeout_ * 1000
+    (write_timeout_ / S_TO_MS), (write_timeout_ % S_TO_MS) * MS_TO_US
   };
 
   fd_set write_set;
