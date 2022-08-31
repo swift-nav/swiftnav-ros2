@@ -13,7 +13,5 @@ void OdometrySubscriber::topic_callback(const nav_msgs::msg::Odometry & msg)
     sbp_msg.odometry.velocity = msg.twist.twist.linear.x * 1000;
     sbp_msg.odometry.flags = 2;
 
-    sbp_msg_type_t msg_type = SbpMsgOdometry;
-
-    send_message(msg_type, sbp_msg);
+    if (enabled_) send_message(SbpMsgOdometry, sbp_msg);
 }

@@ -11,6 +11,9 @@ constexpr char VALID_PORT[] = "/dev/ttyS0";
 constexpr char INVALID_PORT[] = "/dev/ttyTAM32";
 #endif  // _WIN32
 
+constexpr char VALID_CONNSTR[] = "115200|N|8|1|N";
+constexpr char INVALID_CONNSTR[] = "19200|T|8|1|W";
+
 // *************************************************************************
 // Dummy console implementation of a Logger
 class MockedLogger : public IIssueLogger {
@@ -36,25 +39,25 @@ class MockedLogger : public IIssueLogger {
 // SerialReader
 TEST(SerialReader, ConnectWithUnexistentDevice) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(INVALID_PORT, "19200|N|8|1|N", logger, 2000);
+  SbpSerialDataSource reader(INVALID_PORT, VALID_CONNSTR, logger, 2000);
   ASSERT_FALSE(reader.isValid());
 }
 
 TEST(SerialReader, ConnectWithExistentDeviceButInvalidConnStr) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|T|8|1|W", logger, 2000);
+  SbpSerialDataSource reader(VALID_PORT, INVALID_CONNSTR, logger, 2000);
   ASSERT_FALSE(reader.isValid());
 }
 
 TEST(SerialReader, ConnectWithExistentDevice) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|N|8|1|N", logger, 2000);
+  SbpSerialDataSource reader(VALID_PORT, VALID_CONNSTR, logger, 2000);
   ASSERT_TRUE(reader.isValid());
 }
 
 TEST(SerialReader, ReadPackageWithInvalidReader) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(INVALID_PORT, "19200|N|8|1|N", logger, 2000);
+  SbpSerialDataSource reader(INVALID_PORT, VALID_CONNSTR, logger, 2000);
   ASSERT_FALSE(reader.isValid());
   u8 buffer[100];
   ASSERT_EQ(-1, reader.read(buffer, 100));
@@ -62,14 +65,14 @@ TEST(SerialReader, ReadPackageWithInvalidReader) {
 
 TEST(SerialReader, ReadPackageWithNullBuffer) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|N|8|1|N", logger, 2000);
+  SbpSerialDataSource reader(VALID_PORT, VALID_CONNSTR, logger, 2000);
   ASSERT_TRUE(reader.isValid());
   ASSERT_EQ(-1, reader.read(nullptr, 100));
 }
 
 TEST(SerialReader, ReadPackageOK) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|N|8|1|N", logger, 2000);
+  SbpSerialDataSource reader(VALID_PORT, VALID_CONNSTR, logger, 2000);
   ASSERT_TRUE(reader.isValid());
   u8 buffer[100];
   const int32_t result = reader.read(buffer, 100);
