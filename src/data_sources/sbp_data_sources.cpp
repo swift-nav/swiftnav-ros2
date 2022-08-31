@@ -7,9 +7,11 @@ std::shared_ptr<SbpFileDataSource> dataSourceFactory(
 
 std::shared_ptr<SbpSerialDataSource> dataSourceFactory(
     const std::string& device_name, const std::string& connection_str,
-    const uint32_t timeout, const LoggerPtr& logger) {
-  return std::make_shared<SbpSerialDataSource>(device_name, connection_str,
-                                               logger, timeout);
+    const uint32_t read_timeout, const uint32_t write_timeout,
+    const LoggerPtr& logger) {
+  auto serial_port = std::make_unique<SerialPort>(
+      device_name, connection_str, read_timeout, write_timeout, logger);
+  return std::make_shared<SbpSerialDataSource>(logger, serial_port);
 }
 
 std::shared_ptr<SbpTCPDataSource> dataSourceFactory(const std::string& host_ip,

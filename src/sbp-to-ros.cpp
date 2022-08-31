@@ -88,8 +88,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
         get_parameter<std::string>("device_name", device);
         get_parameter<std::string>("connection_str", connection_str);
         get_parameter<int32_t>("timeout", timeout);
-        data_source_ =
-            dataSourceFactory(device, connection_str, timeout, logger_);
+        data_source_ = dataSourceFactory(device, connection_str, timeout,
+                                         timeout, logger_);
       } break;
 
       case TCP_DATA_SOURCE: {

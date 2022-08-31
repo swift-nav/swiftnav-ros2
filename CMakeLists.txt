@@ -22,6 +22,7 @@ add_executable(sbp-to-ros
   src/data_sources/sbp_serial_datasource.cpp
   src/data_sources/sbp_tcp_datasource.cpp
   src/data_sources/sbp_data_sources.cpp
+  src/data_sources/serial.cpp
   src/logging/ros_logger.cpp
   src/logging/sbp_to_ros2_logger.cpp
   src/logging/sbp_file_logger.cpp
@@ -60,6 +61,7 @@ if(BUILD_TESTING)
   include_directories("/usr/local/include/")
 
   find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_gmock REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
@@ -68,7 +70,8 @@ if(BUILD_TESTING)
   # a copyright and license is added to all source files
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
-  ament_add_gtest(${PROJECT_NAME}_test
+#  ament_add_gtest(${PROJECT_NAME}_test
+  ament_add_gmock(${PROJECT_NAME}_test
     test/test_network.cpp
     test/test_serial.cpp
     test/test_subscribers.cpp
@@ -79,6 +82,7 @@ if(BUILD_TESTING)
     test/publishers/test_time_reference_publisher.cpp
     src/data_sources/sbp_tcp_datasource.cpp
     src/data_sources/sbp_serial_datasource.cpp
+    src/data_sources/serial.cpp
     src/subscribers/IMUSubscriber.cpp
     src/subscribers/OdometrySubscriber.cpp
   )

@@ -38,7 +38,8 @@ std::shared_ptr<SbpFileDataSource> dataSourceFactory(
  */
 std::shared_ptr<SbpSerialDataSource> dataSourceFactory(
     const std::string& device_name, const std::string& connection_str,
-    const uint32_t timeout, const LoggerPtr& logger);
+    const uint32_t read_timeout, const uint32_t write_timeout,
+    const LoggerPtr& logger);
 
 /**
  * @brief Function that creates an SBP TCP data source

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <data_sources/sbp_data_source.h>
-#include <libserialport.h>
+#include <data_sources/serial.h>
 #include <logging/issue_logger.h>
+#include <memory>
 #include <string>
 
 /**
@@ -27,26 +28,11 @@ class SbpSerialDataSource : public SbpDataSource {
    * start. If 0 (default) the read operation blocks until the requested
    * number of bytes is read or an error occurs
    */
-  SbpSerialDataSource(const std::string& port_name,
-                      const std::string& connection_string,
-                      const LoggerPtr& logger,
-                      const uint32_t read_timeout = 0U) noexcept;
-
-  /**
-   * @brief Move Construct a new SbpSerialDataSource object
-   *
-   * @param rhs SbpSerialDataSource to construct from
-   */
-  SbpSerialDataSource(SbpSerialDataSource&& rhs) noexcept;
-
-  /**
-   * @brief Destroy the SbpSerialDataSource object
-   */
-  virtual ~SbpSerialDataSource();
+  SbpSerialDataSource(const LoggerPtr& logger,
+                      std::unique_ptr<SerialPort>& serial) noexcept;
 
   // Deleted methods
   SbpSerialDataSource() = delete;
-  SbpSerialDataSource(const SbpSerialDataSource& rhs) = delete;
 
   /**
    * @brief Method to read data from the serial connection
@@ -76,23 +62,6 @@ class SbpSerialDataSource : public SbpDataSource {
   bool isValid() const noexcept;
 
  private:
-  /**
-   * @brief Method to close the port and release the resources
-   */
-  void closePort() noexcept;
-
-  /**
-   * @brief Method to configure the port
-   *
-   * @param params Object containing the parameters to set
-   * @return String containing the error. Empty if OK
-   */
-  std::string setPortSettings(
-      const class SerialParameterSplitter& params) noexcept;
-
-  sp_port* port_;             /** @brief Pointer to a libserialport structure
-                                 representing a port */
-  LoggerPtr logger_;          /** @brief Logging facility */
-  uint32_t read_timeout_{0U}; /** @brief read timeout in ms */
-  uint32_t write_timeout_{0U}; /** @brief write timeout in ms */
+  std::unique_ptr<SerialPort> port_; /** @brief Serial port object */
+  LoggerPtr logger_;                 /** @brief Logging facility */
 };
