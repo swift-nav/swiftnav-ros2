@@ -20,9 +20,6 @@ void NavSatFixPublisher::handle_sbp_msg(
     uint16_t sender_id, const sbp_msg_obs_t& msg) {
   (void)sender_id;
 
-  std::cout << "msg.header.t.tow: " << msg.header.t.tow  << std::endl;
-  std::cout << "sbp_msg_obs_.header.t.tow: " << sbp_msg_obs_.header.t.tow  << std::endl;
-
   if (msg.header.t.tow != sbp_msg_obs_.header.t.tow){
     msg_ = sensor_msgs::msg::NavSatFix();
   }
@@ -145,11 +142,16 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   
   // OBS msg has not arrived yet.
   if (sbp_msg_obs_.header.t.tow == 0) {
+    // TODO log
     return;
   }
 
   // Last received OBS msg tow is too old
-  if ( (sbp_msg_obs_.header.t.tow - msg.tow) > MAX_TIME_DIFF ) {
+  u32 time_diff = (sbp_msg_obs_.header.t.tow > msg.tow) ? 
+                      sbp_msg_obs_.header.t.tow - msg.tow : 
+                        msg.tow - sbp_msg_obs_.header.t.tow;
+  if ( time_diff > MAX_TIME_DIFF ) {
+  // TODO log
     return;
   }
 
