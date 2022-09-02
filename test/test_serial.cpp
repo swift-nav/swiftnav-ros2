@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include<test/mocked_logger.h>
+
 using ::testing::Return;
 
 // TODO: Make the devices name right
@@ -16,27 +18,6 @@ constexpr char INVALID_PORT[] = "/dev/ttyTAM32";
 
 constexpr char VALID_CONNSTR[] = "115200|N|8|1|N";
 constexpr char INVALID_CONNSTR[] = "19200|T|8|1|W";
-
-// *************************************************************************
-// Dummy console implementation of a Logger
-class MockedLogger : public IIssueLogger {
- public:
-  void logDebug(const std::stringstream& ss) override {
-    std::cout << "DEBUG->" << ss.str() << std::endl;
-  }
-  void logInfo(const std::stringstream& ss) override {
-    std::cout << "INFO->" << ss.str() << std::endl;
-  }
-  void logWarning(const std::stringstream& ss) override {
-    std::cout << "WARN->" << ss.str() << std::endl;
-  }
-  void logError(const std::stringstream& ss) override {
-    std::cout << "ERROR->" << ss.str() << std::endl;
-  }
-  void logFatal(const std::stringstream& ss) override {
-    std::cout << "FATAL->" << ss.str() << std::endl;
-  }
-};
 
 class MockedSerialPort : public SerialPort {
  public:

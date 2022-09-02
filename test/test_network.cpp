@@ -2,6 +2,8 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include<test/mocked_logger.h>
+
 // This test must be run with the PC connected to a running device through
 // Ethernet
 
@@ -10,26 +12,6 @@ constexpr uint16_t DEFAULT_INVALID_PORT = 8082;
 const std::string DEFAULT_VALID_IP = "127.0.0.1";
 const std::string DEFAULT_INVALID_IP = "0.0.0.11";
 
-// *************************************************************************
-// Dummy console implementation of a Logger
-class MockedLogger : public IIssueLogger {
- public:
-  void logDebug(const std::stringstream& ss) override {
-    std::cout << "DEBUG->" << ss.str() << std::endl;
-  }
-  void logInfo(const std::stringstream& ss) override {
-    std::cout << "INFO->" << ss.str() << std::endl;
-  }
-  void logWarning(const std::stringstream& ss) override {
-    std::cout << "WARN->" << ss.str() << std::endl;
-  }
-  void logError(const std::stringstream& ss) override {
-    std::cout << "ERROR->" << ss.str() << std::endl;
-  }
-  void logFatal(const std::stringstream& ss) override {
-    std::cout << "FATAL->" << ss.str() << std::endl;
-  }
-};
 
 // *************************************************************************
 // TCPReader

@@ -15,33 +15,14 @@
 #include <subscribers/IMUSubscriber.h>
 #include <subscribers/OdometrySubscriber.h>
 
+#include<test/mocked_logger.h>
+
 const std::string IMU_TOPIC = "/imudata";
 const std::string IMU_NODE = "IMUTester";
 const std::string ODOMETRY_TOPIC = "/odomdata";
 const std::string ODOMETRY_NODE = "ODOMTESTER";
 
 constexpr uint64_t SECONDS = 1000000000ULL;
-
-// *************************************************************************
-// Dummy console implementation of a Logger
-class MockedLogger : public IIssueLogger {
- public:
-  void logDebug(const std::stringstream& ss) override {
-    std::cout << "DEBUG->" << ss.str() << std::endl;
-  }
-  void logInfo(const std::stringstream& ss) override {
-    std::cout << "INFO->" << ss.str() << std::endl;
-  }
-  void logWarning(const std::stringstream& ss) override {
-    std::cout << "WARN->" << ss.str() << std::endl;
-  }
-  void logError(const std::stringstream& ss) override {
-    std::cout << "ERROR->" << ss.str() << std::endl;
-  }
-  void logFatal(const std::stringstream& ss) override {
-    std::cout << "FATAL->" << ss.str() << std::endl;
-  }
-};
 
 /**
  * @brief Class to Mock a data source

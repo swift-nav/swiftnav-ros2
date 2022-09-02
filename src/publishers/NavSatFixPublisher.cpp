@@ -8,11 +8,13 @@ constexpr uint32_t MAX_TIME_DIFF = 2000;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        const std::string& topic_name,
-                                       rclcpp::Node* node, const bool enabled, 
+                                       rclcpp::Node* node, 
+                                       const LoggerPtr& logger,
+                                       const bool enabled, 
                                        const std::string& frame)
     : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
                         sbp_msg_obs_t, sbp_msg_pos_llh_cov_t>(
-          state, topic_name, node, enabled, frame) {
+          state, topic_name, node, logger, enabled, frame) {
             sbp_msg_obs_.header.t.tow = 0;
           }
 
@@ -142,7 +144,7 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   
   // OBS msg has not arrived yet.
   if (sbp_msg_obs_.header.t.tow == 0) {
-    // TODO log
+    LOG_WARN(logger_, "Obs message has not arrived yet. Not publishing");
     return;
   }
 
@@ -151,7 +153,7 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
                       sbp_msg_obs_.header.t.tow - msg.tow : 
                         msg.tow - sbp_msg_obs_.header.t.tow;
   if ( time_diff > MAX_TIME_DIFF ) {
-  // TODO log
+    LOG_WARN(logger_, "Time difference between OBS message and POS_LLH_COV message is larger than Max");
     return;
   }
 
