@@ -3,7 +3,10 @@
 IMUSubscriber::IMUSubscriber(rclcpp::Node* node, sbp::State* state,
                              const std::string& topic_name, const bool enabled,
                              const LoggerPtr& logger)
-    : ROS22SBPSubscriber(node, state, topic_name, enabled, logger) {}
+    : ROS22SBPSubscriber(node, state, enabled, logger), 
+      subscriber_(node_->create_subscription<sensor_msgs::msg::Imu>(
+            topic_name, 10 ,std::bind(&IMUSubscriber::topic_callback, this, _1)))
+      {}
 
 void IMUSubscriber::topic_callback(const sensor_msgs::msg::Imu & msg)
 {

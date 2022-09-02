@@ -4,7 +4,10 @@ OdometrySubscriber::OdometrySubscriber(rclcpp::Node* node, sbp::State* state,
                                        const std::string& topic_name,
                                        const bool enabled,
                                        const LoggerPtr& logger)
-    : ROS22SBPSubscriber(node, state, topic_name, enabled, logger) {}
+    : ROS22SBPSubscriber(node, state, enabled, logger),
+      subscriber_(node_->create_subscription<nav_msgs::msg::Odometry>(
+            topic_name, 10, std::bind(&OdometrySubscriber::topic_callback, this, _1)))
+      {}
 
 void OdometrySubscriber::topic_callback(const nav_msgs::msg::Odometry & msg)
 {

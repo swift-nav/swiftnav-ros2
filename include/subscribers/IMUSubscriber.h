@@ -5,7 +5,7 @@
 
 #include<subscribers/ROS22SBPSubscriber.h>
 
-class IMUSubscriber : public ROS22SBPSubscriber<sensor_msgs::msg::Imu>{
+class IMUSubscriber : public ROS22SBPSubscriber{
     public:
      IMUSubscriber() = delete;
 
@@ -15,4 +15,6 @@ class IMUSubscriber : public ROS22SBPSubscriber<sensor_msgs::msg::Imu>{
 
     protected:
      virtual void topic_callback(const sensor_msgs::msg::Imu & msg);
+    
+     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr subscriber_;   /** @brief ROS 2 publisher */
 };

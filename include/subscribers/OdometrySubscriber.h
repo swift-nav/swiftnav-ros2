@@ -5,7 +5,7 @@
 
 #include<subscribers/ROS22SBPSubscriber.h>
 
-class OdometrySubscriber : public ROS22SBPSubscriber<nav_msgs::msg::Odometry>{
+class OdometrySubscriber : public ROS22SBPSubscriber{
     public:
      OdometrySubscriber() = delete;
 
@@ -15,4 +15,7 @@ class OdometrySubscriber : public ROS22SBPSubscriber<nav_msgs::msg::Odometry>{
 
     protected:
      virtual void topic_callback(const nav_msgs::msg::Odometry & msg);
+    
+    private:
+     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscriber_;   /** @brief ROS 2 publisher */
 };

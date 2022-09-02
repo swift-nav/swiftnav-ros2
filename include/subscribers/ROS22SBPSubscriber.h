@@ -9,8 +9,8 @@
 
 using namespace std::placeholders;
 
-template<typename ROS2MsgType>
-class ROS22SBPSubscriber {
+
+class ROS22SBPSubscriber{
   public:
    ROS22SBPSubscriber() = delete;
 
@@ -23,13 +23,9 @@ class ROS22SBPSubscriber {
     * (false)
     */
    ROS22SBPSubscriber(rclcpp::Node* node, sbp::State* state,
-                      const std::string& topic_name, const bool enabled,
-                      const LoggerPtr& logger)
+                     const bool enabled, const LoggerPtr& logger)
        : state_(state),
          node_(node),
-         subscriber_(node_->create_subscription<ROS2MsgType>(
-             topic_name, 10,
-             std::bind(&ROS22SBPSubscriber::topic_callback, this, _1))),
          enabled_(enabled),
          logger_(logger) {}
 
@@ -44,7 +40,6 @@ class ROS22SBPSubscriber {
    /**
     * @brief Method to send message to connected Swift device
     */
-   virtual void topic_callback(const ROS2MsgType & msg) = 0;
    virtual s8 send_message(const sbp_msg_type_t msg_type, const sbp_msg_t& msg)
    {
     return state_->send_message(SBP_SENDER_ID, msg_type, msg);
@@ -52,8 +47,6 @@ class ROS22SBPSubscriber {
 
    sbp::State* state_;
    rclcpp::Node* node_; /** @brief ROS 2 node object */
-   std::shared_ptr<rclcpp::Subscription<ROS2MsgType>> subscriber_;
-   //rclcpp::Subscription<ROS2MsgType>::SharedPtr subscriber_;      /** @brief ROS 2 publisher */
    bool enabled_; /** @brief Flag that enables or disables the publishing */
    LoggerPtr logger_; /** @brief Logging facility */
 };
