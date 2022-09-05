@@ -138,11 +138,11 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
     get_parameter<bool>("navsatfix", enabled);
     navsatfix_publisher_ = std::make_unique<NavSatFixPublisher>(
-        &state_, "navsatfix", this, enabled, frame_);
+        &state_, "navsatfix", this, logger_, enabled, frame_);
 
     get_parameter<bool>("timereference", enabled);
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
-        &state_, "timereference", this, enabled, frame_);
+        &state_, "timereference", this, logger_, enabled, frame_);
   }
 
   sbp::State state_;           /** @brief SBP state object */

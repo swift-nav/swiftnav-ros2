@@ -29,7 +29,8 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    * (false)
    */
   NavSatFixPublisher(sbp::State* state, const std::string& topic_name,
-                     rclcpp::Node* node, const bool enabled, const std::string& frame);
+                     rclcpp::Node* node, const LoggerPtr& logger,
+                     const bool enabled, const std::string& frame);
 
   /**
    * @brief Handles a sbp_msg_measurement_state_t message. It gets the constellation for

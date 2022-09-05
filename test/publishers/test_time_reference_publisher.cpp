@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include<test/test_utils.h>
+#include<test/mocked_logger.h>
 
 #include <rclcpp/exceptions.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -21,6 +22,7 @@ public:
   {
     rclcpp::shutdown();
   }
+
  const std::string topic_name_ = "test_time_reference";
  const std::string frame_name_ = "test_frame";
  sbp::State state_;
@@ -29,7 +31,8 @@ public:
 
 TEST_F(TestTimeReferencePublisher, sendMessage) {
  auto node = std::make_shared<rclcpp::Node>("TestTimeReferenceNode");
- TimeReferencePublisher time_reference_publisher(&state_, topic_name_, node.get(), true, frame_name_);
+ auto ml = std::make_shared<MockedLogger>();
+ TimeReferencePublisher time_reference_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
 
  sbp_msg_t sbp_msg;
  sbp_msg.gps_time.tow = 1000;

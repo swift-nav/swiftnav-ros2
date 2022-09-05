@@ -6,10 +6,11 @@ static constexpr uint32_t MS_TO_NS = 1000000;
 TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
                                                const std::string& topic_name,
                                                rclcpp::Node* node,
+                                               const LoggerPtr& logger,
                                                const bool enabled, 
                                                const std::string& frame)
     : SBP2ROS2Publisher<sensor_msgs::msg::TimeReference, sbp_msg_gps_time_t>(
-          state, topic_name, node, enabled, frame) {}
+          state, topic_name, node, logger, enabled, frame) {}
 
 void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg) {
  (void)sender_id;

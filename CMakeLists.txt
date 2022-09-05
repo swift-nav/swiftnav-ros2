@@ -73,9 +73,9 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 #  ament_add_gtest(${PROJECT_NAME}_test
   ament_add_gmock(${PROJECT_NAME}_test
-    test/test_network.cpp
-    test/test_serial.cpp
-    test/test_subscribers.cpp
+    # test/test_network.cpp
+    # test/test_serial.cpp
+    # test/test_subscribers.cpp
     test/test_main.cpp
     src/data_sources/sbp_serial_datasource.cpp
     src/data_sources/sbp_tcp_datasource.cpp
@@ -87,6 +87,7 @@ if(BUILD_TESTING)
     src/publishers/TimeReferencePublisher.cpp
     src/subscribers/IMUSubscriber.cpp
     src/subscribers/OdometrySubscriber.cpp
+    test/mocked_logger.cpp
   )
   target_include_directories(${PROJECT_NAME}_test PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

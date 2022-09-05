@@ -8,20 +8,19 @@ constexpr uint32_t MAX_TIME_DIFF = 2000;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        const std::string& topic_name,
-                                       rclcpp::Node* node, const bool enabled, 
+                                       rclcpp::Node* node, 
+                                       const LoggerPtr& logger,
+                                       const bool enabled, 
                                        const std::string& frame)
     : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
                         sbp_msg_obs_t, sbp_msg_pos_llh_cov_t>(
-          state, topic_name, node, enabled, frame) {
+          state, topic_name, node, logger, enabled, frame) {
             sbp_msg_obs_.header.t.tow = 0;
           }
 
 void NavSatFixPublisher::handle_sbp_msg(
     uint16_t sender_id, const sbp_msg_obs_t& msg) {
   (void)sender_id;
-
-  std::cout << "msg.header.t.tow: " << msg.header.t.tow  << std::endl;
-  std::cout << "sbp_msg_obs_.header.t.tow: " << sbp_msg_obs_.header.t.tow  << std::endl;
 
   if (msg.header.t.tow != sbp_msg_obs_.header.t.tow){
     msg_ = sensor_msgs::msg::NavSatFix();
@@ -145,11 +144,16 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   
   // OBS msg has not arrived yet.
   if (sbp_msg_obs_.header.t.tow == 0) {
+    LOG_WARN(logger_, "Obs message has not arrived yet. Not publishing");
     return;
   }
 
   // Last received OBS msg tow is too old
-  if ( (sbp_msg_obs_.header.t.tow - msg.tow) > MAX_TIME_DIFF ) {
+  u32 time_diff = (sbp_msg_obs_.header.t.tow > msg.tow) ? 
+                      sbp_msg_obs_.header.t.tow - msg.tow : 
+                        msg.tow - sbp_msg_obs_.header.t.tow;
+  if ( time_diff > MAX_TIME_DIFF ) {
+    LOG_WARN(logger_, "Time difference between OBS message and POS_LLH_COV message is larger than Max");
     return;
   }
 
