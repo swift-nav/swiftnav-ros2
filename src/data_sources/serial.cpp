@@ -143,6 +143,8 @@ SerialPort::SerialPort(const std::string& device_name,
       read_timeout_(read_timeout),
       write_timeout_(write_timeout) {}
 
+SerialPort::~SerialPort() { closePort(); }
+
 bool SerialPort::open() noexcept {
   if (device_name_.empty()) {
     LOG_FATAL(logger_, "The port name should be specified");
@@ -207,12 +209,12 @@ int32_t SerialPort::read(uint8_t* buffer, const uint32_t buffer_length) {
 
 int32_t SerialPort::write(const uint8_t* buffer, const uint32_t buffer_length) {
   if (!port_) {
-    LOG_FATAL(logger_, "Called write in an uninitialized SbpSerialDataSource");
+    LOG_ERROR(logger_, "Called write in an uninitialized SbpSerialDataSource");
     return -1;
   }
 
   if (!buffer) {
-    LOG_FATAL(logger_, "Called SerialPort::write with a NULL buffer");
+    LOG_ERROR(logger_, "Called SerialPort::write with a NULL buffer");
     return -1;
   }
 

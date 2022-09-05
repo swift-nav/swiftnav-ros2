@@ -32,7 +32,8 @@ std::shared_ptr<SbpFileDataSource> dataSourceFactory(
  *
  * @param device_name Serial port name (depending on the OS format)
  * @param connection_str String used to configure the port
- * @param timeout Max time (in ms) to wait for data to come.
+ * @param read_timeout Max time (in ms) to wait for data to be read.
+ * @param write_timeout Max time (in ms) to wait for data to be written.
  * @param logger Logging facility to use
  * @return A shared pointer to an SbpSerialDataSource object
  */
@@ -46,11 +47,12 @@ std::shared_ptr<SbpSerialDataSource> dataSourceFactory(
  *
  * @param host_ip IP of the host to connect to
  * @param host_port Port of the host to connect
- * @param timeout Max time (in ms) to wait for data to come.
+ * @param read_timeout Max time (in ms) to wait for data to be read.
+ * @param write_timeout Max time (in ms) to wait for data to be written.
  * @param logger Logging facility to use
  * @return A shared pointer to an SbpTCPDataSource object
  */
-std::shared_ptr<SbpTCPDataSource> dataSourceFactory(const std::string& host_ip,
-                                                    const uint16_t host_port,
-                                                    const uint32_t timeout,
-                                                    const LoggerPtr& logger);
+std::shared_ptr<SbpTCPDataSource> dataSourceFactory(
+    const std::string& host_ip, const uint16_t host_port,
+    const uint32_t read_timeout, const uint32_t write_timeout,
+    const LoggerPtr& logger);

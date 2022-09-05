@@ -84,21 +84,24 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
       case SERIAL_DATA_SOURCE: {
         std::string device, connection_str;
-        int32_t timeout;
+        int32_t read_timeout, write_timeout;
         get_parameter<std::string>("device_name", device);
         get_parameter<std::string>("connection_str", connection_str);
-        get_parameter<int32_t>("timeout", timeout);
-        data_source_ = dataSourceFactory(device, connection_str, timeout,
-                                         timeout, logger_);
+        get_parameter<int32_t>("read_timeout", read_timeout);
+        get_parameter<int32_t>("write_timeout", write_timeout);
+        data_source_ = dataSourceFactory(device, connection_str, read_timeout,
+                                         write_timeout, logger_);
       } break;
 
       case TCP_DATA_SOURCE: {
         std::string ip;
-        int32_t port, timeout;
+        int32_t port, read_timeout, write_timeout;
         get_parameter<std::string>("host_ip", ip);
         get_parameter<int32_t>("host_port", port);
-        get_parameter<int32_t>("timeout", timeout);
-        data_source_ = dataSourceFactory(ip, port, timeout, logger_);
+        get_parameter<int32_t>("read_timeout", read_timeout);
+        get_parameter<int32_t>("write_timeout", write_timeout);
+        data_source_ =
+            dataSourceFactory(ip, port, read_timeout, write_timeout, logger_);
       } break;
 
       default:
@@ -118,7 +121,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<std::string>("connection_str", "");
     declare_parameter<std::string>("host_ip", "");
     declare_parameter<int32_t>("host_port", 0);
-    declare_parameter<int32_t>("timeout", 0);
+    declare_parameter<int32_t>("read_timeout", 0);
+    declare_parameter<int32_t>("write_timeout", 0);
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
     declare_parameter<bool>("log_sbp_messages", false);

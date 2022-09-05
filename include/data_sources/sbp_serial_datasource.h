@@ -15,24 +15,15 @@ class SbpSerialDataSource : public SbpDataSource {
   /**
    * @brief Construct a new SbpSerialDataSource object
    *
-   * @param port_name String containing the name of the serial port to use
-   * @param connection_string String containing the data needed to open the
-   * serial port. The format of the string is: SPEED|DATA BITS|PARITY|STOP
-   * BITS|FLOW CONTROL, where: \nSPEED: 9600, or 19200, or 115200, etc.\nDATA
-   * BITS: Number of data bits (8 for example)\nPARITY: Parity control (N: none,
-   * O: Odd, E: even, M: mark, S: space)\nSTOP BITS: Number of stop bits used
-   * (1, 2)\nFLOW CONTROL: (N: none, X: Xon/Xoff, R: RTS/CTS, D: DTR/DSR)
-   * Example: 19200|N|8|1|N
    * @param logger Logger facility to use
-   * @param read_timeout Timeout in milliseconds for the read operation to
-   * start. If 0 (default) the read operation blocks until the requested
-   * number of bytes is read or an error occurs
+   * @param serial A serial communications object
    */
   SbpSerialDataSource(const LoggerPtr& logger,
-                      std::unique_ptr<SerialPort>& serial) noexcept;
+                      std::unique_ptr<SerialPort> serial) noexcept;
 
   // Deleted methods
   SbpSerialDataSource() = delete;
+  SbpSerialDataSource(const SbpSerialDataSource& rhs) = delete;
 
   /**
    * @brief Method to read data from the serial connection

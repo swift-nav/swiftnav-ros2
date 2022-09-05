@@ -11,13 +11,14 @@ std::shared_ptr<SbpSerialDataSource> dataSourceFactory(
     const LoggerPtr& logger) {
   auto serial_port = std::make_unique<SerialPort>(
       device_name, connection_str, read_timeout, write_timeout, logger);
-  return std::make_shared<SbpSerialDataSource>(logger, serial_port);
+  return std::make_shared<SbpSerialDataSource>(logger, std::move(serial_port));
 }
 
-std::shared_ptr<SbpTCPDataSource> dataSourceFactory(const std::string& host_ip,
-                                                    const uint16_t host_port,
-                                                    const uint32_t timeout,
-                                                    const LoggerPtr& logger) {
-  return std::make_shared<SbpTCPDataSource>(host_ip, host_port, logger,
-                                            timeout);
+std::shared_ptr<SbpTCPDataSource> dataSourceFactory(
+    const std::string& host_ip, const uint16_t host_port,
+    const uint32_t read_timeout, const uint32_t write_timeout,
+    const LoggerPtr& logger) {
+  auto tcp = std::make_unique<TCP>(host_ip, host_port, logger, read_timeout,
+                                   write_timeout);
+  return std::make_shared<SbpTCPDataSource>(logger, std::move(tcp));
 }
