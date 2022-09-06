@@ -28,18 +28,18 @@ public:
 };
 
 TEST_F(TestNavSatFixPublisher, sendMessage) {
- 
+
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
  NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
- obs_sbp_msg.obs.n_obs = 1; 
+ obs_sbp_msg.obs.n_obs = 1;
  sbp_packed_obs_content_t obs_content;
  obs_content.sid.code = 0;
  obs_sbp_msg.obs.obs[0] = obs_content;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 2;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 3;
@@ -95,18 +95,18 @@ TEST_F(TestNavSatFixPublisher, sendMessage) {
 }
 
 TEST_F(TestNavSatFixPublisher, timeDiff) {
- 
+
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
  NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
- obs_sbp_msg.obs.n_obs = 1; 
+ obs_sbp_msg.obs.n_obs = 1;
  sbp_packed_obs_content_t obs_content;
  obs_content.sid.code = 0;
  obs_sbp_msg.obs.obs[0] = obs_content;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 2002;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 3;
@@ -127,15 +127,14 @@ TEST_F(TestNavSatFixPublisher, timeDiff) {
 
  bool is_received = false;
  auto callback =
-  [&is_received](
-    const sensor_msgs::msg::NavSatFix & msg) -> void {
-      is_received = true;
-  };
+     [&is_received](const sensor_msgs::msg::NavSatFix& /*msg*/) -> void {
+   is_received = true;
+ };
  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(topic_name_, 1, callback);
  nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
  nav_sat_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
  ASSERT_EQ("Time difference between OBS message and POS_LLH_COV message is larger than Max", ml->getLastLoggedWarning());
- 
+
  ASSERT_FALSE(is_received);
 
 

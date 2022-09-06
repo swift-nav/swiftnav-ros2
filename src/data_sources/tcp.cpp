@@ -127,12 +127,11 @@ void TCP::deinitSockets() noexcept {
 }
 
 void TCP::closeSocket() noexcept {
-  if (isValid())
 #if defined(__linux__)
-    close(socket_id_);
+  if (socket_id_ != -1) close(socket_id_);
   socket_id_ = -1;
 #else
-    closesocket(socket_id_);
+  if (socket_id_ != INVALID_SOCKET) closesocket(socket_id_);
   socket_id_ = INVALID_SOCKET;
 #endif  // __linux__
 }

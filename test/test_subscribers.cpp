@@ -131,6 +131,7 @@ TEST_F(TestROS2toSBP, EnabledIMUSubscriber) {
   // Create the equivalent SBP message
   sbp_msg_t sbp_msg;
 
+  memset(&sbp_msg, 0, sizeof(sbp_msg));
   sbp_msg.imu_raw.gyr_x = 34;
   sbp_msg.imu_raw.gyr_y = 23;
   sbp_msg.imu_raw.gyr_z = 12;

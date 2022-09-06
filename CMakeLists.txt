@@ -73,9 +73,9 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 #  ament_add_gtest(${PROJECT_NAME}_test
   ament_add_gmock(${PROJECT_NAME}_test
-    # test/test_network.cpp
-    # test/test_serial.cpp
-    # test/test_subscribers.cpp
+    test/test_network.cpp
+    #test/test_serial.cpp
+    #test/test_subscribers.cpp
     test/test_main.cpp
     src/data_sources/sbp_serial_datasource.cpp
     src/data_sources/sbp_tcp_datasource.cpp

@@ -27,7 +27,7 @@ class MockedSerialPort : public SerialPort {
                    const LoggerPtr& logger)
       : SerialPort(device_name, connection_string, read_timeout, write_timeout,
                    logger) {}
-  MOCK_METHOD(bool, open, (), (noexcept));
+  MOCK_METHOD(bool, open, (), (noexcept, override));
   MOCK_METHOD(int32_t, read, (uint8_t * buffer, const uint32_t buffer_length),
               (override));
   MOCK_METHOD(int32_t, write,
@@ -43,6 +43,7 @@ TEST(SerialDataSource, ConnectWithUnexistentDevice) {
   auto mocked_sp = std::make_unique<MockedSerialPort>(
       INVALID_PORT, VALID_CONNSTR, 2000, 2000, logger);
   EXPECT_CALL(*mocked_sp, open).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(*mocked_sp, isValid).WillOnce(Return(false));
   SbpSerialDataSource reader(logger, std::move(mocked_sp));
   ASSERT_FALSE(reader.isValid());
 }
@@ -52,6 +53,7 @@ TEST(SerialDataSource, ConnectWithExistentDeviceButInvalidConnStr) {
   auto mocked_sp = std::make_unique<MockedSerialPort>(
       VALID_PORT, INVALID_CONNSTR, 2000, 2000, logger);
   EXPECT_CALL(*mocked_sp, open).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(*mocked_sp, isValid).WillOnce(Return(false));
   SbpSerialDataSource reader(logger, std::move(mocked_sp));
   ASSERT_FALSE(reader.isValid());
 }
@@ -61,7 +63,7 @@ TEST(SerialDataSource, ConnectWithExistentDevice) {
   auto mocked_sp = std::make_unique<MockedSerialPort>(VALID_PORT, VALID_CONNSTR,
                                                       2000, 2000, logger);
   EXPECT_CALL(*mocked_sp, open).Times(1).WillOnce(Return(true));
-  ON_CALL(*mocked_sp, isValid).WillByDefault(Return(true));
+  EXPECT_CALL(*mocked_sp, isValid).WillOnce(Return(true));
   SbpSerialDataSource reader(logger, std::move(mocked_sp));
   ASSERT_TRUE(reader.isValid());
 }
