@@ -20,7 +20,8 @@ class SbpTCPDataSource : public SbpDataSource {
    * then the read operation blocks until the requested number of bytes have
    * read or an error ocurred
    */
-  SbpTCPDataSource(const LoggerPtr& logger, std::unique_ptr<TCP> tcp) noexcept;
+  SbpTCPDataSource(const LoggerPtr& logger,
+                   const std::shared_ptr<TCP>& tcp) noexcept;
 
   // Deleted methods
   SbpTCPDataSource() = delete;
@@ -53,6 +54,6 @@ class SbpTCPDataSource : public SbpDataSource {
   bool isValid() const noexcept;
 
  private:
-  std::unique_ptr<TCP> tcp_; /** @brief TCP/IP data object */
+  std::shared_ptr<TCP> tcp_; /** @brief TCP/IP data object */
   LoggerPtr logger_;         /** @brief Logging facility */
 };

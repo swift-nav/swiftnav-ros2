@@ -36,7 +36,7 @@ class MockedTCP : public TCP {
   MockedTCP(const std::string& ip, const uint16_t port, const LoggerPtr& logger,
             const uint32_t read_timeout, const uint32_t write_timeout)
       : TCP(ip, port, logger, read_timeout, write_timeout) {}
-  MOCK_METHOD(bool, open, (), (noexcept));
+  MOCK_METHOD(bool, open, (), (noexcept, override));
   MOCK_METHOD(int32_t, read, (uint8_t * buffer, const uint32_t buffer_length),
               (override));
   MOCK_METHOD(int32_t, write,
@@ -49,28 +49,29 @@ class MockedTCP : public TCP {
 // TCPDataSource
 TEST(TCPDataSource, TestInvalidConnection) {
   auto logger = std::make_shared<MockedLogger>();
-  auto mocked_tcp = std::make_unique<MockedTCP>(
+  auto mocked_tcp = std::make_shared<MockedTCP>(
       DEFAULT_INVALID_IP, DEFAULT_INVALID_PORT, logger, 2000, 2000);
   EXPECT_CALL(*mocked_tcp, open).Times(1).WillOnce(Return(false));
-  SbpTCPDataSource reader(logger, std::move(mocked_tcp));
+  EXPECT_CALL(*mocked_tcp, isValid).WillOnce(Return(false));
+  SbpTCPDataSource reader(logger, mocked_tcp);
   ASSERT_FALSE(reader.isValid());
 }
 
 TEST(TCPDataSource, TestValidConnection) {
   auto logger = std::make_shared<MockedLogger>();
-  auto mocked_tcp = std::make_unique<MockedTCP>(
+  auto mocked_tcp = std::make_shared<MockedTCP>(
       DEFAULT_VALID_IP, DEFAULT_VALID_PORT, logger, 2000, 2000);
   EXPECT_CALL(*mocked_tcp, open).Times(1).WillOnce(Return(true));
-  ON_CALL(*mocked_tcp, isValid).WillByDefault(Return(true));
-  SbpTCPDataSource reader(logger, std::move(mocked_tcp));
+  EXPECT_CALL(*mocked_tcp, isValid).WillOnce(Return(true));
+  SbpTCPDataSource reader(logger, mocked_tcp);
   ASSERT_TRUE(reader.isValid());
 }
 
 // Reading tests
 TEST(TCPDataSource, TestReadingWithInvalidObject) {
   auto logger = std::make_shared<MockedLogger>();
-  std::unique_ptr<TCP> tcp;
-  SbpTCPDataSource reader(logger, std::move(tcp));
+  std::shared_ptr<TCP> tcp;
+  SbpTCPDataSource reader(logger, tcp);
   ASSERT_FALSE(reader.isValid());
   uint8_t buffer[100];
   ASSERT_EQ(-1, reader.read(buffer, 100));
@@ -78,24 +79,24 @@ TEST(TCPDataSource, TestReadingWithInvalidObject) {
 
 TEST(TCPDataSource, TestReadingWithNullBuffer) {
   auto logger = std::make_shared<MockedLogger>();
-  auto mocked_tcp = std::make_unique<MockedTCP>(
+  auto mocked_tcp = std::make_shared<MockedTCP>(
       DEFAULT_VALID_IP, DEFAULT_VALID_PORT, logger, 2000, 2000);
   EXPECT_CALL(*mocked_tcp, open).Times(1).WillOnce(Return(true));
   EXPECT_CALL(*mocked_tcp, read).Times(0);
   ON_CALL(*mocked_tcp, isValid).WillByDefault(Return(true));
-  SbpTCPDataSource reader(logger, std::move(mocked_tcp));
+  SbpTCPDataSource reader(logger, mocked_tcp);
   ASSERT_TRUE(reader.isValid());
   ASSERT_EQ(-1, reader.read(nullptr, 100));
 }
 
 TEST(TCPDataSource, TestReadPackageOK) {
   auto logger = std::make_shared<MockedLogger>();
-  auto mocked_tcp = std::make_unique<MockedTCP>(
+  auto mocked_tcp = std::make_shared<MockedTCP>(
       DEFAULT_VALID_IP, DEFAULT_VALID_PORT, logger, 2000, 2000);
   EXPECT_CALL(*mocked_tcp, open).Times(1).WillOnce(Return(true));
   EXPECT_CALL(*mocked_tcp, read).Times(1).WillOnce(Return(100));
   ON_CALL(*mocked_tcp, isValid).WillByDefault(Return(true));
-  SbpTCPDataSource reader(logger, std::move(mocked_tcp));
+  SbpTCPDataSource reader(logger, mocked_tcp);
   ASSERT_TRUE(reader.isValid());
   uint8_t buffer[100];
   const int32_t result = reader.read(buffer, 100);
@@ -105,7 +106,7 @@ TEST(TCPDataSource, TestReadPackageOK) {
 // Writing tests
 TEST(TCPDataSource, TestWritingWithInvalidObject) {
   auto logger = std::make_shared<MockedLogger>();
-  std::unique_ptr<TCP> tcp;
+  std::shared_ptr<TCP> tcp;
   SbpTCPDataSource writer(logger, std::move(tcp));
   ASSERT_FALSE(writer.isValid());
   uint8_t buffer[100];
@@ -114,24 +115,24 @@ TEST(TCPDataSource, TestWritingWithInvalidObject) {
 
 TEST(TCPDataSource, TestWritingWithNullBuffer) {
   auto logger = std::make_shared<MockedLogger>();
-  auto mocked_tcp = std::make_unique<MockedTCP>(
+  auto mocked_tcp = std::make_shared<MockedTCP>(
       DEFAULT_VALID_IP, DEFAULT_VALID_PORT, logger, 2000, 2000);
   EXPECT_CALL(*mocked_tcp, open).Times(1).WillOnce(Return(true));
   EXPECT_CALL(*mocked_tcp, write).Times(0);
   ON_CALL(*mocked_tcp, isValid).WillByDefault(Return(true));
-  SbpTCPDataSource writer(logger, std::move(mocked_tcp));
+  SbpTCPDataSource writer(logger, mocked_tcp);
   ASSERT_TRUE(writer.isValid());
   ASSERT_EQ(-1, writer.write(nullptr, 100));
 }
 
 TEST(TCPDataSource, TestWritePackageOK) {
   auto logger = std::make_shared<MockedLogger>();
-  auto mocked_tcp = std::make_unique<MockedTCP>(
+  auto mocked_tcp = std::make_shared<MockedTCP>(
       DEFAULT_VALID_IP, DEFAULT_VALID_PORT, logger, 2000, 2000);
   EXPECT_CALL(*mocked_tcp, open).Times(1).WillOnce(Return(true));
   EXPECT_CALL(*mocked_tcp, write).Times(1).WillOnce(Return(100));
   ON_CALL(*mocked_tcp, isValid).WillByDefault(Return(true));
-  SbpTCPDataSource writer(logger, std::move(mocked_tcp));
+  SbpTCPDataSource writer(logger, mocked_tcp);
   ASSERT_TRUE(writer.isValid());
   uint8_t buffer[100];
   const int32_t result = writer.write(buffer, 100);

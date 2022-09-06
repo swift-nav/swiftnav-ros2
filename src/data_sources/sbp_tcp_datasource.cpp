@@ -1,13 +1,16 @@
 #include <data_sources/sbp_tcp_datasource.h>
-
 #include <cstring>
+#include <iostream>
 
 SbpTCPDataSource::SbpTCPDataSource(const LoggerPtr& logger,
-                                   std::unique_ptr<TCP> tcp) noexcept
-    : logger_(logger) {
-  tcp_ = std::move(tcp);
-  if (!tcp_ || !tcp_->open())
-    LOG_FATAL(logger_, "Could not establish a TCP connection");
+                                   const std::shared_ptr<TCP>& tcp) noexcept
+    : tcp_(tcp), logger_(logger) {
+  if (!tcp) {
+    LOG_FATAL(logger_, "No TCP object attached");
+    return;
+  }
+
+  if (!tcp_->open()) LOG_FATAL(logger_, "Could not establish a TCP connection");
 }
 
 s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
@@ -41,5 +44,8 @@ s32 SbpTCPDataSource::write(const u8* buffer, u32 buffer_length) {
 }
 
 bool SbpTCPDataSource::isValid() const noexcept {
-  return (tcp_ && tcp_->isValid());
+  if (tcp_)
+    return tcp_->isValid();
+  else
+    return false;
 }
