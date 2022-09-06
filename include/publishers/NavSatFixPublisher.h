@@ -128,5 +128,5 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    */
   void loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg);
 
-  sbp_msg_obs_t sbp_msg_obs_;
+  u32 last_received_obs_tow_{0};
 };
