@@ -5,8 +5,8 @@
 SbpTCPDataSource::SbpTCPDataSource(const LoggerPtr& logger,
                                    const std::shared_ptr<TCP>& tcp) noexcept
     : tcp_(tcp), logger_(logger) {
-  if (!tcp) {
-    LOG_FATAL(logger_, "No TCP object attached");
+  if (!tcp_) {
+    // LOG_FATAL(logger_, "No TCP object attached");
     return;
   }
 

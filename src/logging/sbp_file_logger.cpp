@@ -36,9 +36,9 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
   file_ = fopen(file_name.c_str(), "wb");
 #endif  // _WIN32
   if (!file_)
-    LOG_ERROR(logger_, "Unable to open the file: " << file_name);
+    LOG_ERROR(logger_, "Unable to open the file: %s", file_name.c_str());
   else
-    LOG_INFO(logger_, "Now logging SBP messages to " << file_name);
+    LOG_INFO(logger_, "Now logging SBP messages to %s", file_name.c_str());
 }
 
 SbpFileLogger::~SbpFileLogger() {

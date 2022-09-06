@@ -38,7 +38,7 @@ TCP::~TCP() {
 bool TCP::open() noexcept {
   const std::string error = initSockets();
   if (!error.empty()) {
-    LOG_FATAL(logger_, error);
+    LOG_FATAL(logger_, error.c_str());
     return false;
   } else {
     return openSocket();
@@ -56,8 +56,8 @@ int32_t TCP::read(uint8_t* buffer, const uint32_t buffer_size) {
 
   int result = select(socket_id_ + 1, &read_set, nullptr, nullptr, &timeout);
   if (result == -1) {
-    LOG_ERROR(logger_,
-              "Error: " << GET_SOCKET_ERROR() << " waiting for incoming data");
+    LOG_ERROR(logger_, "Error: %u waiting for incoming data",
+              GET_SOCKET_ERROR());
     return -1;
   } else if (result == 0) {
     LOG_WARN(logger_, "Timeout waiting for incoming data from socket");
@@ -71,7 +71,7 @@ int32_t TCP::read(uint8_t* buffer, const uint32_t buffer_size) {
     LOG_WARN(logger_, "Connection closed by peer");
     return -1;
   } else {
-    LOG_ERROR(logger_, "Error (" << GET_SOCKET_ERROR() << ") while reading");
+    LOG_ERROR(logger_, "Error (%u) while reading", GET_SOCKET_ERROR());
     return result;
   }
 }
@@ -88,8 +88,8 @@ int32_t TCP::write(const uint8_t* buffer, const uint32_t buffer_size) {
   int result = select(socket_id_ + 1, nullptr, &write_set, nullptr, &timeout);
   if (result == -1) {
     LOG_ERROR(logger_,
-              "Error: " << GET_SOCKET_ERROR()
-                        << " waiting for the socket to be ready to write data");
+              "Error: %u waiting for the socket to be ready to write data",
+              GET_SOCKET_ERROR());
     return -1;
   } else if (result == 0) {
     LOG_WARN(logger_,
@@ -101,7 +101,7 @@ int32_t TCP::write(const uint8_t* buffer, const uint32_t buffer_size) {
   if (result > 0) {
     return result;
   } else {
-    LOG_ERROR(logger_, "Error (" << GET_SOCKET_ERROR() << ") while writing");
+    LOG_ERROR(logger_, "Error (%u) while writing", GET_SOCKET_ERROR());
     return result;
   }
 }
@@ -147,7 +147,7 @@ bool TCP::isValid() const noexcept {
 bool TCP::openSocket() noexcept {
   socket_id_ = socket(AF_INET, SOCK_STREAM, 0);
   if (!isValid()) {
-    LOG_FATAL(logger_, "socket() failed. (" << GET_SOCKET_ERROR() << ")");
+    LOG_FATAL(logger_, "socket() failed. (%u)", GET_SOCKET_ERROR());
     return false;
   }
 

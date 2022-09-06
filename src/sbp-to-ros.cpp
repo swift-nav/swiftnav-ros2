@@ -105,8 +105,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
       } break;
 
       default:
-        LOG_FATAL(logger_,
-                  "Could not create a data source of type: " << interface);
+        LOG_FATAL(logger_, "Could not create a data source of type: %d",
+                  interface);
         break;
     }
   }

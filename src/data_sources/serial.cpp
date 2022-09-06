@@ -153,36 +153,37 @@ bool SerialPort::open() noexcept {
 
   sp_return result = sp_get_port_by_name(device_name_.c_str(), &port_);
   if (result != SP_OK) {
-    LOG_FATAL(logger_, "No serial port named " << device_name_);
+    LOG_FATAL(logger_, "No serial port named %s", device_name_.c_str());
     return false;
   }
 
   result = sp_open(port_, SP_MODE_READ_WRITE);
   if (result != SP_OK) {
-    LOG_FATAL(logger_, "Cannot open port : " << sp_get_port_name(port_)
-                                             << " error: " << result);
+    LOG_FATAL(logger_, "Cannot open port : %s. Error: %d",
+              sp_get_port_name(port_), result);
     return false;
   }
 
   SerialParameterSplitter params(connection_string_, logger_);
   if (!params.isValid()) {
-    LOG_FATAL(logger_,
-              "Invalid data in connection string: " << connection_string_);
+    LOG_FATAL(logger_, "Invalid data in connection string: %s",
+              connection_string_.c_str());
     return false;
   }
 
   const std::string error = setPortSettings(params);
   if (!error.empty()) {
-    LOG_FATAL(logger_, error);
+    LOG_FATAL(logger_, error.c_str());
     return false;
   }
 
   sp_flush(port_, SP_BUF_BOTH);
-  LOG_INFO(logger_, "Port " << device_name_ << " opened with:\nBaud rate: "
-                            << params.speed << "\nParity: " << params.parity
-                            << "\nData bits: " << params.data_bits
-                            << "\nStop bits: " << params.stop_bits
-                            << "\nFlow control: " << params.flow_control);
+  LOG_INFO(
+      logger_,
+      "Port %s opened with:\nBaud rate: %u\nParity: %c\nData bits: %u\nStop "
+      "bits: %u\nFlow control: %c",
+      device_name_.c_str(), params.speed, params.parity, params.data_bits,
+      params.stop_bits, params.flow_control);
   return true;
 }
 
@@ -199,8 +200,7 @@ int32_t SerialPort::read(uint8_t* buffer, const uint32_t buffer_length) {
 
   const auto result = sp_nonblocking_read(port_, buffer, buffer_length);
   if (result < 0) {
-    LOG_ERROR(logger_,
-              "Error (" << result << ") while reading the serial port");
+    LOG_ERROR(logger_, "Error (%d) while reading the serial port", result);
     return -1;
   }
 
@@ -221,8 +221,7 @@ int32_t SerialPort::write(const uint8_t* buffer, const uint32_t buffer_length) {
   const auto result =
       sp_blocking_write(port_, buffer, buffer_length, write_timeout_);
   if (result < 0) {
-    LOG_ERROR(logger_,
-              "Error (" << result << ") while writing to the serial port");
+    LOG_ERROR(logger_, "Error (%d) while writing to the serial port", result);
     return -1;
   }
 
@@ -312,9 +311,9 @@ void SerialPort::closePort() noexcept {
   if (port_) {
     std::string port_name(sp_get_port_name(port_));
     if (sp_close(port_) != SP_OK) {
-      LOG_ERROR(logger_, "Could not close " << port_name);
+      LOG_ERROR(logger_, "Could not close %s", port_name.c_str());
     } else {
-      LOG_INFO(logger_, port_name << " closed");
+      LOG_INFO(logger_, "%s closed", port_name.c_str());
     }
 
     sp_free_port(port_);

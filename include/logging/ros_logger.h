@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <string>
 #include <string_view>
 #include "issue_logger.h"
 
@@ -9,11 +10,11 @@ class ROSLogger : public IIssueLogger {
  public:
   ROSLogger() = delete;
   explicit ROSLogger(const int64_t log_delay);
-  void logDebug(const std::stringstream& ss) override;
-  void logInfo(const std::stringstream& ss) override;
-  void logWarning(const std::stringstream& ss) override;
-  void logError(const std::stringstream& ss) override;
-  void logFatal(const std::stringstream& ss) override;
+  void logDebug(const std::string_view ss) override;
+  void logInfo(const std::string_view ss) override;
+  void logWarning(const std::string_view ss) override;
+  void logError(const std::string_view ss) override;
+  void logFatal(const std::string_view ss) override;
 
  private:
   /**

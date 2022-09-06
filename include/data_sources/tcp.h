@@ -75,6 +75,6 @@ class TCP {
   LoggerPtr logger_;           /** @brief Logging facility */
   std::string ip_;             /** @brief IP to connect to */
   uint16_t port_;              /** @brief TCP port to connect to */
-  uint32_t read_timeout_{0U};  /** @brief Read timeout in ms */
-  uint32_t write_timeout_{0U}; /** @brief Write timeout in ms */
+  uint32_t read_timeout_;      /** @brief Read timeout in ms */
+  uint32_t write_timeout_;     /** @brief Write timeout in ms */
 };

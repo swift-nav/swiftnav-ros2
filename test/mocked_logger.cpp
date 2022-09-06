@@ -2,29 +2,29 @@
 
 #include<iostream>
 
-void MockedLogger::logDebug(const std::stringstream& ss) {
-  std::cout << "DEBUG->" << ss.str() << std::endl;
-  last_logged_debug_ = ss.str();
+void MockedLogger::logDebug(const std::string_view ss) {
+  std::cout << "DEBUG->" << ss << std::endl;
+  last_logged_debug_ = ss;
 }
 
-void MockedLogger::logInfo(const std::stringstream& ss) {
-  std::cout << "INFO->" << ss.str() << std::endl;
-  last_logged_info_ = ss.str();
+void MockedLogger::logInfo(const std::string_view ss) {
+  std::cout << "INFO->" << ss << std::endl;
+  last_logged_info_ = ss;
 }
 
-void MockedLogger::logWarning(const std::stringstream& ss) {
-  std::cout << "WARN->" << ss.str() << std::endl;
-  last_logged_warning_ = ss.str();
+void MockedLogger::logWarning(const std::string_view ss) {
+  std::cout << "WARN->" << ss << std::endl;
+  last_logged_warning_ = ss;
 }
 
-void MockedLogger::logError(const std::stringstream& ss) {
-  std::cout << "ERROR->" << ss.str() << std::endl;
-  last_logged_error_ = ss.str();
+void MockedLogger::logError(const std::string_view ss) {
+  std::cout << "ERROR->" << ss << std::endl;
+  last_logged_error_ = ss;
 }
-  
-void MockedLogger::logFatal(const std::stringstream& ss) {
-  std::cout << "FATAL->" << ss.str() << std::endl;
-  last_logged_fatal_ = ss.str();
+
+void MockedLogger::logFatal(const std::string_view ss) {
+  std::cout << "FATAL->" << ss << std::endl;
+  last_logged_fatal_ = ss;
 }
 
   std::string MockedLogger::getLastLoggedDebug() {

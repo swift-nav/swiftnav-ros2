@@ -17,23 +17,23 @@ void SBPToROS2Logger::handle_sbp_message(uint16_t sender_id,
   if (msg_type == SBP_MSG_LOG) {
     switch (msg.log.level) {
       case SBP_LOG_LOGGING_LEVEL_WARN:
-        LOG_WARN(ros_logger_, "SBP(WARN): " << msg.log.text.data);
+        LOG_WARN(ros_logger_, "SBP(WARN): %s", msg.log.text.data);
         break;
 
       case SBP_LOG_LOGGING_LEVEL_EMERG:
-        LOG_FATAL(ros_logger_, "SBP(EMERG): " << msg.log.text.data);
+        LOG_FATAL(ros_logger_, "SBP(EMERG): %s", msg.log.text.data);
         break;
 
       case SBP_LOG_LOGGING_LEVEL_ALERT:
-        LOG_FATAL(ros_logger_, "SBP(ALERT): " << msg.log.text.data);
+        LOG_FATAL(ros_logger_, "SBP(ALERT): %s", msg.log.text.data);
         break;
 
       case SBP_LOG_LOGGING_LEVEL_CRIT:
-        LOG_ERROR(ros_logger_, "SBP(CRIT): " << msg.log.text.data);
+        LOG_ERROR(ros_logger_, "SBP(CRIT): %s", msg.log.text.data);
         break;
 
       case SBP_LOG_LOGGING_LEVEL_ERROR:
-        LOG_ERROR(ros_logger_, "SBP(ERROR): " << msg.log.text.data);
+        LOG_ERROR(ros_logger_, "SBP(ERROR): %s", msg.log.text.data);
         break;
     }
   }

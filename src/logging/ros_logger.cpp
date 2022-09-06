@@ -1,43 +1,38 @@
 #include <logging/ros_logger.h>
 #include <rclcpp/rclcpp.hpp>
 
-void ROSLogger::logDebug(const std::stringstream& ss) {
-  const std::string output(ss.str());
-  if (canLog(output)) {
-    RCLCPP_DEBUG(rclcpp::get_logger("rclcpp"), output.c_str());
-    updateLogStatus(output);
+void ROSLogger::logDebug(const std::string_view ss) {
+  if (canLog(ss)) {
+    RCLCPP_DEBUG(rclcpp::get_logger("rclcpp"), ss.data());
+    updateLogStatus(ss);
   }
 }
 
-void ROSLogger::logInfo(const std::stringstream& ss) {
-  const std::string output(ss.str());
-  if (canLog(output)) {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), output.c_str());
-    updateLogStatus(output);
+void ROSLogger::logInfo(const std::string_view ss) {
+  if (canLog(ss)) {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), ss.data());
+    updateLogStatus(ss);
   }
 }
 
-void ROSLogger::logWarning(const std::stringstream& ss) {
-  const std::string output(ss.str());
-  if (canLog(output)) {
-    RCLCPP_WARN(rclcpp::get_logger("rclcpp"), output.c_str());
-    updateLogStatus(output);
+void ROSLogger::logWarning(const std::string_view ss) {
+  if (canLog(ss)) {
+    RCLCPP_WARN(rclcpp::get_logger("rclcpp"), ss.data());
+    updateLogStatus(ss);
   }
 }
 
-void ROSLogger::logError(const std::stringstream& ss) {
-  const std::string output(ss.str());
-  if (canLog(output)) {
-    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), output.c_str());
-    updateLogStatus(output);
+void ROSLogger::logError(const std::string_view ss) {
+  if (canLog(ss)) {
+    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), ss.data());
+    updateLogStatus(ss);
   }
 }
 
-void ROSLogger::logFatal(const std::stringstream& ss) {
-  const std::string output(ss.str());
-  if (canLog(output)) {
-    RCLCPP_FATAL(rclcpp::get_logger("rclcpp"), output.c_str());
-    updateLogStatus(output);
+void ROSLogger::logFatal(const std::string_view ss) {
+  if (canLog(ss)) {
+    RCLCPP_FATAL(rclcpp::get_logger("rclcpp"), ss.data());
+    updateLogStatus(ss);
   }
 }
 

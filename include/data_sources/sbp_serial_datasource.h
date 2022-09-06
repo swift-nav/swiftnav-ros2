@@ -19,7 +19,7 @@ class SbpSerialDataSource : public SbpDataSource {
    * @param serial A serial communications object
    */
   SbpSerialDataSource(const LoggerPtr& logger,
-                      std::unique_ptr<SerialPort> serial) noexcept;
+                      const std::shared_ptr<SerialPort>& serial) noexcept;
 
   // Deleted methods
   SbpSerialDataSource() = delete;
@@ -53,6 +53,6 @@ class SbpSerialDataSource : public SbpDataSource {
   bool isValid() const noexcept;
 
  private:
-  std::unique_ptr<SerialPort> port_; /** @brief Serial port object */
+  std::shared_ptr<SerialPort> port_; /** @brief Serial port object */
   LoggerPtr logger_;                 /** @brief Logging facility */
 };

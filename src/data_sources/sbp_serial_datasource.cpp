@@ -1,11 +1,9 @@
 #include <data_sources/sbp_serial_datasource.h>
 
 SbpSerialDataSource::SbpSerialDataSource(
-    const LoggerPtr& logger, std::unique_ptr<SerialPort> serial) noexcept
-    : logger_(logger) {
-  if (serial) {
-    port_ = std::move(serial);
-  } else {
+    const LoggerPtr& logger, const std::shared_ptr<SerialPort>& serial) noexcept
+    : port_(serial), logger_(logger) {
+  if (!port_) {
     LOG_FATAL(logger_, "No serial port attached");
     return;
   }

@@ -1,7 +1,7 @@
 #include <data_sources/sbp_tcp_datasource.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <iostream>
+#include <test/mocked_logger.h>
 
 using ::testing::Return;
 
@@ -9,27 +9,6 @@ constexpr uint16_t DEFAULT_VALID_PORT = 55555;
 constexpr uint16_t DEFAULT_INVALID_PORT = 8082;
 const std::string DEFAULT_VALID_IP = "127.0.0.1";
 const std::string DEFAULT_INVALID_IP = "0.0.0.11";
-
-// *************************************************************************
-// Dummy console implementation of a Logger
-class MockedLogger : public IIssueLogger {
- public:
-  void logDebug(const std::stringstream& ss) override {
-    std::cout << "DEBUG->" << ss.str() << std::endl;
-  }
-  void logInfo(const std::stringstream& ss) override {
-    std::cout << "INFO->" << ss.str() << std::endl;
-  }
-  void logWarning(const std::stringstream& ss) override {
-    std::cout << "WARN->" << ss.str() << std::endl;
-  }
-  void logError(const std::stringstream& ss) override {
-    std::cout << "ERROR->" << ss.str() << std::endl;
-  }
-  void logFatal(const std::stringstream& ss) override {
-    std::cout << "FATAL->" << ss.str() << std::endl;
-  }
-};
 
 class MockedTCP : public TCP {
  public:
@@ -71,8 +50,11 @@ TEST(TCPDataSource, TestValidConnection) {
 TEST(TCPDataSource, TestReadingWithInvalidObject) {
   auto logger = std::make_shared<MockedLogger>();
   std::shared_ptr<TCP> tcp;
+  std::cout << "1\n";
   SbpTCPDataSource reader(logger, tcp);
+  std::cout << "2\n";
   ASSERT_FALSE(reader.isValid());
+  std::cout << "3\n";
   uint8_t buffer[100];
   ASSERT_EQ(-1, reader.read(buffer, 100));
 }
