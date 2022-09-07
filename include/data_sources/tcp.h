@@ -10,21 +10,62 @@
 #include <ws2tcpip.h>
 #endif  // _WIN32
 
+/**
+ * @brief Class that isolates the OS TCP implementation from the driver
+ */
 class TCP {
  public:
   TCP() = delete;
 
+  /**
+   * @brief Construct a new TCP object
+   *
+   * @param ip Ip address to connect to
+   * @param port IP port to connect to
+   * @param logger Logging facility
+   * @param read_timeout Timeout in ms for the read operation to succeed
+   * @param write_timeout Timeout in ms for the write operation to succeed
+   */
   TCP(const std::string& ip, const uint16_t port, const LoggerPtr& logger,
       const uint32_t read_timeout, const uint32_t write_timeout);
 
+  /**
+   * @brief Destroy the TCP object
+   */
   virtual ~TCP();
 
+  /**
+   * @brief Opens the TCP connection
+   *
+   * @return true The TCP connection could be opened
+   * @return false The TCP connection couldn't be opened
+   */
   virtual bool open() noexcept;
 
+  /**
+   * @brief Read bytes from the TCP connection
+   *
+   * @param buffer Buffer where to put the read bytes
+   * @param buffer_size Number of bytes to read (up to buffer size)
+   * @return Number of bytes actually read
+   */
   virtual int32_t read(uint8_t* buffer, const uint32_t buffer_size);
 
+  /**
+   * @brief Write bytes to the TCP connection
+   *
+   * @param buffer Buffer from where to write the bytes
+   * @param buffer_size Number of bytes to write (up to buffer size)
+   * @return Number of bytes actually written
+   */
   virtual int32_t write(const uint8_t* buffer, const uint32_t buffer_size);
 
+  /**
+   * @brief Determines if the object is valid (valid TCP connection) or not
+   *
+   * @return true The object is valid
+   * @return false The object isn't valid
+   */
   virtual bool isValid() const noexcept;
 
  protected:
