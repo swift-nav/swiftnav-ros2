@@ -15,7 +15,8 @@ class OdometrySubscriber : public ROS22SBPSubscriber{
 
     protected:
      virtual void topic_callback(const nav_msgs::msg::Odometry & msg);
-    
+
     private:
-     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscriber_;   /** @brief ROS 2 publisher */
+     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr
+         subscriber_; /** @brief ROS 2 subscriber */
 };

@@ -9,9 +9,9 @@
 #include <publishers/SBP2ROS2Publisher.h>
 
 /**
- * @brief Class that listens for sbp_msg_obs_t and sbp_msg_pos_llh_cov_t, 
+ * @brief Class that listens for sbp_msg_obs_t and sbp_msg_pos_llh_cov_t,
  * publishing a gps_comon::msg::GPSFix ros2 message.
- *   
+ *
 */
 class GPSFixPublisher : public SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
                                                     sbp_msg_pos_llh_acc_t,
@@ -27,7 +27,7 @@ class GPSFixPublisher : public SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
 
   /**
    * @brief Construct a new Gps Fix Publisher object
-   * 
+   *
    * @param state SBP State object
    * @param topic_name Name of the topic to publish a gps_msgs::msg::GPSFix message
    * @param node ROS 2 node object
@@ -59,12 +59,12 @@ class GPSFixPublisher : public SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
   void handle_sbp_msg(uint16_t sender_id,
                       const sbp_msg_gps_time_t& msg);
 
-  
+
  protected:
   /**
-   * @brief Checks that the Ros2 gps_msgs::msg::GPSFix is complete, if so, 
+   * @brief Checks that the Ros2 gps_msgs::msg::GPSFix is complete, if so,
    * it publishes it
-   * 
+   *
    */
   void publish() override;
 
@@ -73,7 +73,7 @@ class GPSFixPublisher : public SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
   /**
    * @brief Loads the covariance matrix values in the ROS2 message from values in the
    * sbp message. To do so it converts the covariance matrix from NED to ENU.
-   * 
+   *
    * @param msg sbp_msg_pos_llh_cov_t
    */
   void loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg);

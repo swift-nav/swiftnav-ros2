@@ -8,9 +8,9 @@ constexpr uint32_t MAX_TIME_DIFF = 2000;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        const std::string& topic_name,
-                                       rclcpp::Node* node, 
+                                       rclcpp::Node* node,
                                        const LoggerPtr& logger,
-                                       const bool enabled, 
+                                       const bool enabled,
                                        const std::string& frame)
     : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
                         sbp_msg_obs_t, sbp_msg_pos_llh_cov_t>(
@@ -26,7 +26,7 @@ void NavSatFixPublisher::handle_sbp_msg(
 
   /**
    * As per sbp lib documentation:
-   * 
+   *
    * 0  GPS L1CA
    * 1  GPS L2CM
    * 5  GPS L1P
@@ -39,17 +39,17 @@ void NavSatFixPublisher::handle_sbp_msg(
    * 56 GPS L1CI
    * 57 GPS L1CQ
    * 58 GPS L1CX
-   * 
+   *
    * 2  SBAS L1CA
    * 41 SBAS L5I
    * 42 SBAS L5Q
    * 43 SBAS L5X
-   * 
+   *
    * 3  GLO L1OF
    * 4  GLO L20F
    * 29 GLO L1P
    * 30 GLO L2P
-   * 
+   *
    * 12 BDS2 B1
    * 13 BDS2 B2
    * 44 BDS3 B1CI
@@ -64,7 +64,7 @@ void NavSatFixPublisher::handle_sbp_msg(
    * 53 BDS3 B3I
    * 54 BDS3 B3Q
    * 55 BDS3 B3X
-   * 
+   *
    * 14 GAL E1B
    * 15 GAL E1C
    * 16 GAL E1X
@@ -87,19 +87,19 @@ void NavSatFixPublisher::handle_sbp_msg(
    * 34 QZS L1CX
    * 35 QZS L2CM
    * 36 QZS L2CL
-   * 
+   *
    * NavStatus message definition:
    * SERVICE_GPS=1
    * SERVICE_GLONASS=2
    * SERVICE_COMPASS=4
    * SERVICE_GALILEO=8
-   * 
+   *
    */
   sbp_packed_obs_content_t obs_content;
   for(int i = 0; i < msg.n_obs; i++) {
     obs_content = msg.obs[i];
 
-    if (obs_content.sid.code == 0  ||  
+    if (obs_content.sid.code == 0  ||
         obs_content.sid.code == 1  ||
         obs_content.sid.code == 5  ||
         obs_content.sid.code == 7  ||
@@ -111,9 +111,9 @@ void NavSatFixPublisher::handle_sbp_msg(
         obs_content.sid.code == 57 ||
         obs_content.sid.code == 58 ) {
         msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-      } else if (obs_content.sid.code == 2  || 
-                obs_content.sid.code == 41 ||  
-                obs_content.sid.code == 42 ||  
+      } else if (obs_content.sid.code == 2  ||
+                obs_content.sid.code == 41 ||
+                obs_content.sid.code == 42 ||
                 obs_content.sid.code == 43 ) {
                   msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
       } else if (obs_content.sid.code >= 31  &&  obs_content.sid.code <= 40 ) {
@@ -127,19 +127,19 @@ void NavSatFixPublisher::handle_sbp_msg(
                 obs_content.sid.code <= 28 ) {
         msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO;
       } else if (obs_content.sid.code == 12 ||
-                obs_content.sid.code == 13 || 
+                obs_content.sid.code == 13 ||
                 ( obs_content.sid.code >= 44 && obs_content.sid.code <= 55 )) {
         msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS;
       }
   }
 
-  last_received_obs_tow_ = msg.header.t.tow;  
+  last_received_obs_tow_ = msg.header.t.tow;
 }
 
 void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_pos_llh_cov_t& msg) {
   (void)sender_id;
-  
+
   // OBS msg has not arrived yet.
   if (last_received_obs_tow_ == 0) {
     LOG_WARN(logger_, "Obs message has not arrived yet. Not publishing");
@@ -147,8 +147,8 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   }
 
   // Last received OBS msg tow is too old
-  u32 time_diff = (last_received_obs_tow_ > msg.tow) ? 
-                      last_received_obs_tow_ - msg.tow : 
+  u32 time_diff = (last_received_obs_tow_ > msg.tow) ?
+                      last_received_obs_tow_ - msg.tow :
                         msg.tow - last_received_obs_tow_;
   if ( time_diff > MAX_TIME_DIFF ) {
     LOG_WARN(logger_, "Time difference between OBS message and POS_LLH_COV message is larger than Max");
@@ -202,7 +202,7 @@ void NavSatFixPublisher::publish() {
   if (enabled_) {
 
     msg_.header.stamp = node_->now();
-    msg_.header.frame_id = frame_; 
+    msg_.header.frame_id = frame_;
 
     publisher_->publish(msg_);
   }

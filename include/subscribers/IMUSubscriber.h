@@ -15,6 +15,7 @@ class IMUSubscriber : public ROS22SBPSubscriber{
 
     protected:
      virtual void topic_callback(const sensor_msgs::msg::Imu & msg);
-    
-     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr subscriber_;   /** @brief ROS 2 publisher */
+
+     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr
+         subscriber_; /** @brief ROS 2 subscriber */
 };

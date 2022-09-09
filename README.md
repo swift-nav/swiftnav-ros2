@@ -339,3 +339,134 @@ SBPRos2Driver:
 
 
 # Adding a new ROS2 topic to SBP message transaltion
+In order to add a new ROS2 to SBP translation unit, you should (let's assume that you want to translate sensor_msgs/Imu to MSG_IMU_RAW):
+
+## Step 1 (Add a new class to subscribers)
+```
+// Header file (imu_subscriber.h)
+class IMUSubscriber : public ROS22SBPSubscriber{
+    public:
+     IMUSubscriber() = delete;
+
+     IMUSubscriber(rclcpp::Node* node, sbp::State* state,
+                   const std::string& topic_name, const bool enabled,
+                   const LoggerPtr& logger);
+
+    protected:
+     virtual void topic_callback(const sensor_msgs::msg::Imu & msg);
+
+     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr subscriber_;   /** @brief ROS 2 publisher */
+};
+
+// CPP file (imu_subscriber.cpp)
+IMUSubscriber::IMUSubscriber(rclcpp::Node* node, sbp::State* state,
+                             const std::string& topic_name, const bool enabled,
+                             const LoggerPtr& logger)
+    : ROS22SBPSubscriber(node, state, enabled, logger),
+      subscriber_(node_->create_subscription<sensor_msgs::msg::Imu>(
+            topic_name, 10 ,std::bind(&IMUSubscriber::topic_callback, this, _1)))
+      {}
+
+void IMUSubscriber::topic_callback(const sensor_msgs::msg::Imu & msg)
+{
+  // sbp_msg_imu_aux_t sbp_imu_aux_msg; // TODO how to fill this?
+  sbp_msg_t sbp_msg;
+
+  sbp_msg.imu_raw.tow =
+      msg.header.stamp.sec * 1000;  //+ msg.header.stamp.nsec / 10;
+  sbp_msg.imu_raw.tow_f =
+      msg.header.stamp.sec * 1000;  //+ msg.header.stamp.nsec / 10;
+  sbp_msg.imu_raw.acc_x = msg.linear_acceleration.x;
+  sbp_msg.imu_raw.acc_y = msg.linear_acceleration.y;
+  sbp_msg.imu_raw.acc_z = msg.linear_acceleration.z;
+  sbp_msg.imu_raw.gyr_x = msg.angular_velocity.x;
+  sbp_msg.imu_raw.gyr_y = msg.angular_velocity.y;
+  sbp_msg.imu_raw.gyr_z = msg.angular_velocity.z;
+
+  if (enabled_) send_message(SbpMsgImuRaw, sbp_msg);
+}
+```
+
+## Step 2 (Add the new publisher, to the driver)
+```
+#include <subscribers/imu_subscriber.h>
+
+...
+  // Whe should modify createSubscribers()
+  void createSubscribers() {
+    bool enabled;
+    std::string topic_name;
+
+    get_parameter<bool>("imu", enabled);
+    get_parameter<std::string>("imu_topic_name", topic_name);
+    imu_subscriber_ = std::make_unique<IMUSubscriber>(this, &state_, topic_name,
+                                                      enabled, logger_);
+  }
+
+...
+
+  // We should modify declareParameters(), to add the subcribing flags for the new subscriber
+  void declareParameters() {
+    declare_parameter<int32_t>("interface", 0);
+    declare_parameter<std::string>("sbp_file", "");
+    declare_parameter<std::string>("device_name", "");
+    declare_parameter<std::string>("connection_str", "");
+    declare_parameter<std::string>("host_ip", "");
+    declare_parameter<int32_t>("host_port", 0);
+    declare_parameter<bool>("navsatfix", true);
+    declare_parameter<bool>("timereference", true);
+    declare_parameter<bool>("my_pose2d", true);
+    declare_parameter<bool>("log_sbp_messages", false);
+    declare_parameter<std::string>("log_sbp_filepath", "");
+
+    // New flags for the new subscriber
+    declare_parameter<bool>("imu", true);
+    declare_parameter<std::string>("imu_topic_name", "");
+  }
+
+...
+
+  // And finally we add the member variable for the subscriber
+  std::unique_ptr<IMUSubscriber> imu_subscriber_;
+
+```
+
+### Step 3 (Add the new cpp file to CMakeLists.txt)
+```
+add_executable(sbp-to-ros
+  src/sbp-to-ros.cpp
+  src/publishers/NavSatFixPublisher.cpp
+  src/publishers/TimeReferencePublisher.cpp
+
+  src/subscribers/imu_subscriber.cpp # new file
+
+  src/data_sources/sbp_file_datasource.cpp
+  src/data_sources/sbp_serial_datasource.cpp
+  src/data_sources/sbp_tcp_datasource.cpp
+  src/data_sources/sbp_data_sources.cpp
+  src/logging/ros_logger.cpp
+  src/logging/sbp_to_ros2_logger.cpp
+  src/logging/sbp_file_logger.cpp
+  )
+```
+
+### Step 4 (Add the new parameters to params.yaml)
+```
+SBPRos2Driver:
+  ros__parameters:
+    interface: 3
+    sbp_file: "/workspaces/Swift/24-185316.sbp"
+    device_name: "/dev/ttyS0"
+    connection_str: "115200|N|8|1|N"
+    host_ip: "127.0.0.1"
+    host_port: 8082
+    timeout: 2000
+    navsatfix: True
+    timereference: True
+
+    imu: True                         #New parameter
+    imu_topic_name: "/my_imu_topic"   #New parameter
+
+    log_sbp_messages: True
+    log_sbp_filepath: "/workspaces/Swift"
+```

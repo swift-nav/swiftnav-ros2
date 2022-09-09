@@ -7,7 +7,7 @@ TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
                                                const std::string& topic_name,
                                                rclcpp::Node* node,
                                                const LoggerPtr& logger,
-                                               const bool enabled, 
+                                               const bool enabled,
                                                const std::string& frame)
     : SBP2ROS2Publisher<sensor_msgs::msg::TimeReference, sbp_msg_gps_time_t>(
           state, topic_name, node, logger, enabled, frame) {}
