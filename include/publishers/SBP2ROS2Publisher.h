@@ -29,10 +29,10 @@ class SBP2ROS2Publisher : private sbp::MessageHandler<SBPMsgTypes...> {
     * @param topic_name Name of the topic to publish in ROS
     * @param node ROS 2 node object
     * @param enabled Flag telling if the topic should be published (true) or not (false)
-    * @param frame frame is the frame of reference reported by the satellite receiver, usually 
-    *              the location of the antenna. This is a Euclidean frame relative to the vehicle, 
+    * @param frame frame is the frame of reference reported by the satellite receiver, usually
+    *              the location of the antenna. This is a Euclidean frame relative to the vehicle,
     *              not a reference ellipsoid.
-    * 
+    *
     */
    SBP2ROS2Publisher(sbp::State* state, const std::string& topic_name,
                      rclcpp::Node* node, const LoggerPtr& logger, const bool enabled, const std::string& frame)
