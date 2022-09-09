@@ -87,8 +87,8 @@ if(BUILD_TESTING)
   test/test_network.cpp
   test/test_serial.cpp
   test/test_subscribers.cpp
-  # test/publishers/test_nav_sat_fix_publisher.cpp
-  # test/publishers/test_time_reference_publisher.cpp
+  test/publishers/test_nav_sat_fix_publisher.cpp
+  test/publishers/test_time_reference_publisher.cpp
   test/test_main.cpp
   )
   target_include_directories(${PROJECT_NAME}_test PUBLIC
