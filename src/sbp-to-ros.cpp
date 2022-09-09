@@ -14,6 +14,8 @@
 #include <publishers/NavSatFixPublisher.h>
 #include <publishers/TimeReferencePublisher.h>
 
+//#include <subscribers/IMUSubscriber.h>
+
 #include <data_sources/sbp_data_sources.h>
 #include <utils.h>
 
@@ -32,11 +34,12 @@ class SBPROS2DriverNode : public rclcpp::Node {
     get_parameter<std::string>("frame_name", frame_);
     logger_ = std::make_shared<ROSLogger>(LOG_REPUBLISH_DELAY);
 
-    createReader();
+    createDataSources();
     if (!data_source_) exit(EXIT_FAILURE);
     state_.set_reader(data_source_.get());
     state_.set_writer(data_source_.get());
     createPublishers();
+    createSubscribers();
 
     bool log_sbp_messages;
     std::string log_path;
@@ -69,9 +72,9 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
  private:
   /**
-   * @brief Method for creating the readers (data sources)
+   * @brief Method for creating the data sources
    */
-  void createReader() {
+  void createDataSources() {
     int32_t interface;
 
     get_parameter<int32_t>("interface", interface);
@@ -144,6 +147,11 @@ class SBPROS2DriverNode : public rclcpp::Node {
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
         &state_, "timereference", this, logger_, enabled, frame_);
   }
+
+  /**
+   * @brief Method for creating ROS 2 subscribers
+   */
+  void createSubscribers() {}
 
   sbp::State state_;           /** @brief SBP state object */
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */
