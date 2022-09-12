@@ -143,7 +143,13 @@ bool GPSFixPublisher::ok_to_publish(const u32 &tow){
 }
 
 void GPSFixPublisher::publish(){
+  if (enabled_) {
 
+    msg_.header.stamp = node_->now();
+    msg_.header.frame_id = frame_;
+
+    publisher_->publish(msg_);
+  }
 }
 
 void GPSFixPublisher::loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg) {
