@@ -48,11 +48,11 @@ class SerialParameterSplitter {
       case 230400:
       case 460800:
       case 921600:
-      break;
+        break;
 
-    default:
-      return false;
-      break;
+      default:
+        return false;
+        break;
     }
 
     // Test data bits

@@ -11,12 +11,13 @@ TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
     : SBP2ROS2Publisher<sensor_msgs::msg::TimeReference, sbp_msg_gps_time_t>(
           state, topic_name, node, enabled, frame) {}
 
-void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg) {
- (void)sender_id;
+void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
+                                            const sbp_msg_gps_time_t& msg) {
+  (void)sender_id;
 
- msg_.time_ref.sec = msg.tow / TOW_MS;
- msg_.time_ref.nanosec = ((msg.tow % TOW_MS) * MS_TO_NS) + msg.ns_residual;
- publish();
+  msg_.time_ref.sec = msg.tow / TOW_MS;
+  msg_.time_ref.nanosec = ((msg.tow % TOW_MS) * MS_TO_NS) + msg.ns_residual;
+  publish();
 }
 
 void TimeReferencePublisher::publish() {
