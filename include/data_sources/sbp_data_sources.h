@@ -56,3 +56,4 @@ std::shared_ptr<SbpTCPDataSource> dataSourceFactory(
     const std::string& host_ip, const uint16_t host_port,
     const uint32_t read_timeout, const uint32_t write_timeout,
     const LoggerPtr& logger);
+
