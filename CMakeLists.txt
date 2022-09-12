@@ -91,10 +91,15 @@ if(BUILD_TESTING)
   test/publishers/test_time_reference_publisher.cpp
   test/test_main.cpp
   )
+
   target_include_directories(${PROJECT_NAME}_test PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
-  target_compile_features(${PROJECT_NAME}_test PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+
+  target_compile_features(${PROJECT_NAME}_test PRIVATE c_std_99 cxx_std_17)  # Require C99 and C++17
+  # target_compile_options(${PROJECT_NAME}_test PRIVATE -fprofile-arcs -ftest-coverage)
+  # target_link_options(${PROJECT_NAME}_test PRIVATE --coverage)
+  # target_link_libraries(${PROJECT_NAME}_test sbp serialport gcov)
   target_link_libraries(${PROJECT_NAME}_test sbp serialport)
   ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs)
 endif()
