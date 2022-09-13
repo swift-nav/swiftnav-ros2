@@ -13,6 +13,7 @@
 
 #include <publishers/NavSatFixPublisher.h>
 #include <publishers/TimeReferencePublisher.h>
+#include <publishers/GPSFixPublisher.h>
 
 //#include <subscribers/IMUSubscriber.h>
 
@@ -128,6 +129,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<int32_t>("write_timeout", 0);
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
+    declare_parameter<bool>("gpsfix", true);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
     declare_parameter<std::string>("frame_name", "gps");
@@ -146,6 +148,10 @@ class SBPROS2DriverNode : public rclcpp::Node {
     get_parameter<bool>("timereference", enabled);
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
         &state_, "timereference", this, logger_, enabled, frame_);
+    
+    get_parameter<bool>("gpsfix", enabled);
+    gpsfix_publisher_ = std::make_unique<GPSFixPublisher>(
+        &state_, "gpsfix", this, logger_, enabled, frame_);
   }
 
   /**
@@ -162,6 +168,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
       navsatfix_publisher_; /** @brief NavSatFix ROS 2 publisher */
   std::unique_ptr<TimeReferencePublisher>
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
+  std::unique_ptr<GPSFixPublisher>
+      gpsfix_publisher_; /** @brief TimeReference ROS 2 publisher */
   std::shared_ptr<SBPToROS2Logger>
       sbptoros2_; /** @brief SBP to ROS2 logging object */
   std::string frame_;
