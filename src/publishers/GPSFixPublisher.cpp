@@ -49,6 +49,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_vel_cog_t
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_vel_ned_cov_t& msg){
     last_received_vel_ned_cov_tow_ = msg.tow;
+
 }
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_orient_euler_t& msg){
@@ -77,9 +78,6 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_
 }
 
 bool GPSFixPublisher::ok_to_publish(const u32 &tow){
-  u32 obs_time_diff = (last_received_obs_tow_ > tow)
-                          ? last_received_obs_tow_ - tow
-                          : tow - last_received_obs_tow_;
 
   u32 pos_llh_cov_time_diff = (last_received_pos_llh_cov_tow_ > tow)
                                   ? last_received_pos_llh_cov_tow_ - tow
@@ -105,41 +103,20 @@ bool GPSFixPublisher::ok_to_publish(const u32 &tow){
                                ? last_received_gps_time_tow_ - tow
                                : tow - last_received_gps_time_tow_;
 
-  if (obs_time_diff <= MAX_OBS_TIME_DIFF) {
+  if(pos_llh_cov_time_diff > MAX_POS_LLH_COV_TIME_DIFF){
     return false;
-    }
-
-    if(pos_llh_cov_time_diff <= MAX_POS_LLH_COV_TIME_DIFF){
-
-        return false;
-    }
-
-    if(vel_cog_time_diff <= MAX_VEL_COG_TIME_DIFF){
-
-        return false;
-    }
-
-    if(vel_ned_cov_time_diff <= MAX_VEL_NED_COV_TIME_DIFF){
-
-        return false;
-    }
-
-    if(orient_euler_time_diff <= MAX_ORIENT_EULER_TIME_DIFF){
-
-        return false;
-    }
-
-    if(dops_time_diff <= MAX_DOPS_TIME_DIFF){
-
-        return false;
-    }
-
-    if(gps_time_time_diff <= MAX_GPS_TIME_TIME_DIFF){
-
-        return false;
-    }
-
-    return true;
+  } else if(vel_cog_time_diff > MAX_VEL_COG_TIME_DIFF){
+    return false;
+  } else if(vel_ned_cov_time_diff > MAX_VEL_NED_COV_TIME_DIFF){
+    return false;
+  } else if(orient_euler_time_diff > MAX_ORIENT_EULER_TIME_DIFF){
+    return false;
+  } else if(dops_time_diff > MAX_DOPS_TIME_DIFF){
+    return false;
+  } else if(gps_time_time_diff > MAX_GPS_TIME_TIME_DIFF){
+    return false;
+  }
+  return true;
 }
 
 void GPSFixPublisher::publish(){
