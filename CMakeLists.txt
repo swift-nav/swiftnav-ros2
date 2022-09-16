@@ -35,6 +35,9 @@ add_executable(sbp-to-ros
   src/publishers/TimeReferencePublisher.cpp
   src/publishers/GPSFixPublisher.cpp
   src/publishers/baseline_heading_publisher.cpp
+  src/publishers/angular_rate_publisher.cpp
+  src/publishers/orient_euler_publisher.cpp
+  src/publishers/orient_quat_publisher.cpp
   src/subscribers/IMUSubscriber.cpp
   src/subscribers/OdometrySubscriber.cpp
   )

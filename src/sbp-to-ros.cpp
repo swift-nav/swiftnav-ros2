@@ -11,9 +11,13 @@
 #include <libsbp/cpp/state.h>
 #include <libsbp/cpp/message_handler.h>
 
+#include <publishers/GPSFixPublisher.h>
 #include <publishers/NavSatFixPublisher.h>
 #include <publishers/TimeReferencePublisher.h>
-#include <publishers/GPSFixPublisher.h>
+#include <publishers/angular_rate_publisher.h>
+#include <publishers/baseline_heading_publisher.h>
+#include <publishers/orient_euler_publisher.h>
+#include <publishers/orient_quat_publisher.h>
 
 //#include <subscribers/IMUSubscriber.h>
 
@@ -130,6 +134,10 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
     declare_parameter<bool>("gpsfix", true);
+    declare_parameter<bool>("baseline_heading", true);
+    declare_parameter<bool>("angular_rate", true);
+    declare_parameter<bool>("orient_euler", true);
+    declare_parameter<bool>("orient_quat", true);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
     declare_parameter<std::string>("frame_name", "gps");
@@ -148,10 +156,27 @@ class SBPROS2DriverNode : public rclcpp::Node {
     get_parameter<bool>("timereference", enabled);
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
         &state_, "timereference", this, logger_, enabled, frame_);
-    
+
     get_parameter<bool>("gpsfix", enabled);
     gpsfix_publisher_ = std::make_unique<GPSFixPublisher>(
         &state_, "gpsfix", this, logger_, enabled, frame_);
+
+    // SBP to ROS custom messages
+    get_parameter<bool>("baseline_heading", enabled);
+    baseline_heading_publisher_ = std::make_unique<BaselineHeadingPublisher>(
+        &state_, "baseline_heading", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("angular_rate", enabled);
+    angular_rate_publisher_ = std::make_unique<AngularRatePublisher>(
+        &state_, "angular_rate", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("orient_euler", enabled);
+    orient_euler_publisher_ = std::make_unique<OrientEulerPublisher>(
+        &state_, "orient_euler", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("orient_quat", enabled);
+    orient_quat_publisher_ = std::make_unique<OrientQuatPublisher>(
+        &state_, "orient_quat", this, logger_, enabled, frame_);
   }
 
   /**
@@ -170,6 +195,14 @@ class SBPROS2DriverNode : public rclcpp::Node {
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
   std::unique_ptr<GPSFixPublisher>
       gpsfix_publisher_; /** @brief TimeReference ROS 2 publisher */
+  std::unique_ptr<BaselineHeadingPublisher>
+      baseline_heading_publisher_; /** @brief MSG_BASELINE_HEADING publisher */
+  std::unique_ptr<AngularRatePublisher>
+      angular_rate_publisher_; /** @brief MSG_ANGULAR_RATE publisher */
+  std::unique_ptr<OrientEulerPublisher>
+      orient_euler_publisher_; /** @brief MSG_ORIENT_EULER publisher */
+  std::unique_ptr<OrientQuatPublisher>
+      orient_quat_publisher_; /** @brief MSG_ORIENT_QUAT publisher */
   std::shared_ptr<SBPToROS2Logger>
       sbptoros2_; /** @brief SBP to ROS2 logging object */
   std::string frame_;
