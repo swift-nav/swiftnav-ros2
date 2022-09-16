@@ -20,14 +20,6 @@ find_package(rosidl_default_generators REQUIRED)
 link_directories("/usr/local/lib/")
 include_directories("/usr/local/include/")
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/BaselineHeading.msg"
-  "msg/AngularRate.msg"
-  "msg/OrientQuat.msg"
-  "msg/OrientEuler.msg"
-  DEPENDENCIES # Add packages that above messages depend on
-)
-
 add_executable(sbp-to-ros
   src/sbp-to-ros.cpp
   src/data_sources/sbp_file_datasource.cpp
@@ -42,15 +34,29 @@ add_executable(sbp-to-ros
   src/publishers/NavSatFixPublisher.cpp
   src/publishers/TimeReferencePublisher.cpp
   src/publishers/GPSFixPublisher.cpp
+  src/publishers/baseline_heading_publisher.cpp
   src/subscribers/IMUSubscriber.cpp
   src/subscribers/OdometrySubscriber.cpp
   )
-target_link_libraries(sbp-to-ros sbp serialport)
+
+
+  rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/BaselineHeading.msg"
+  "msg/AngularRate.msg"
+  "msg/OrientQuat.msg"
+  "msg/OrientEuler.msg"
+  DEPENDENCIES # Add packages that above messages depend on
+  )
+
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(sbp-to-ros sbp serialport "${cpp_typesupport_target}")
 target_include_directories(sbp-to-ros PUBLIC
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+  # $<INSTALL_INTERFACE:include>
+  # $<INSTALL_INTERFACE:include/swiftnav_ros2_driver>)
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs nav_msgs gps_msgs)
+ament_export_dependencies(rosidl_default_runtime)
 
 install(TARGETS
   sbp-to-ros
