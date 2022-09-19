@@ -10,12 +10,13 @@ GPSFixPublisher::GPSFixPublisher(sbp::State* state, const std::string& topic_nam
                                                     sbp_msg_vel_ned_cov_t,
                                                     sbp_msg_orient_euler_t,
                                                     sbp_msg_dops_t,
-                                                    sbp_msg_gps_time_t>(
+                                                    sbp_msg_gps_time_t,
+                                                    sbp_msg_obs_t>(
                                 state, topic_name, node, logger, enabled, frame) {}
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_pos_llh_acc_t& msg){
     msg_.status.satellites_used = msg.n_sats;
-
+    //msg_.satellite_used_prn = ?
     msg_.err_horz = msg.h_accuracy;
     msg_.err_vert = msg.v_accuracy;
     msg_.err_track = msg.at_accuracy;
@@ -77,6 +78,17 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_
   last_received_gps_time_tow_ = msg.tow;
 }
 
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_obs_t& msg){
+  last_received_obs_tow_ = msg.header.t.tow;
+
+  msg_.status.satellites_visible = msg.n_obs;
+  sbp_packed_obs_content_t obs_content;
+  for(int i = 0; i < msg.n_obs; i++) {
+    obs_content = msg.obs[i];
+    msg_.status.satellite_visible_prn.push_back(obs_content.sid.code);
+  }
+}
+
 bool GPSFixPublisher::ok_to_publish(const u32 &tow){
 
   u32 pos_llh_cov_time_diff = (last_received_pos_llh_cov_tow_ > tow)
@@ -103,6 +115,10 @@ bool GPSFixPublisher::ok_to_publish(const u32 &tow){
                                ? last_received_gps_time_tow_ - tow
                                : tow - last_received_gps_time_tow_;
 
+  u32 obs_time_diff = (last_received_obs_tow_ > tow)
+                               ? last_received_obs_tow_ - tow
+                               : tow - last_received_obs_tow_;
+
   if(pos_llh_cov_time_diff > MAX_POS_LLH_COV_TIME_DIFF){
     return false;
   } else if(vel_cog_time_diff > MAX_VEL_COG_TIME_DIFF){
@@ -115,7 +131,9 @@ bool GPSFixPublisher::ok_to_publish(const u32 &tow){
     return false;
   } else if(gps_time_time_diff > MAX_GPS_TIME_TIME_DIFF){
     return false;
-  }
+  } else if(obs_time_diff > MAX_OBS_TIME_DIFF_MS){
+    return false;
+  }  
   return true;
 }
 
@@ -140,5 +158,5 @@ void GPSFixPublisher::loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg) {
   msg_.position_covariance[7] = -msg.cov_n_d;
   msg_.position_covariance[8] = msg.cov_d_d;
 
-  msg_.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
+  msg_.position_covariance_type = gps_msgs::msg::GPSFix::COVARIANCE_TYPE_KNOWN;
 }

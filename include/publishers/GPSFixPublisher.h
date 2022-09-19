@@ -20,7 +20,8 @@ class GPSFixPublisher : public SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
                                                     sbp_msg_vel_ned_cov_t,
                                                     sbp_msg_orient_euler_t,
                                                     sbp_msg_dops_t,
-                                                    sbp_msg_gps_time_t
+                                                    sbp_msg_gps_time_t,
+                                                    sbp_msg_obs_t
                                                     > {
  public:
   GPSFixPublisher() = delete;
@@ -59,6 +60,9 @@ class GPSFixPublisher : public SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
   void handle_sbp_msg(uint16_t sender_id,
                       const sbp_msg_gps_time_t& msg);
 
+  void handle_sbp_msg(uint16_t sender_id,
+                      const sbp_msg_obs_t& msg);                      
+
 
  protected:
   /**
@@ -80,20 +84,20 @@ class GPSFixPublisher : public SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
 
   bool ok_to_publish(const u32 &tow);
 
- u32 last_received_obs_tow_{0};
  u32 last_received_pos_llh_cov_tow_{0};
  u32 last_received_vel_cog_tow_{0};
  u32 last_received_vel_ned_cov_tow_{0};
  u32 last_received_orient_euler_tow_{0};
  u32 last_received_dops_tow_{0};
  u32 last_received_gps_time_tow_{0};
+ u32 last_received_obs_tow_{0};
 
- static constexpr uint32_t MAX_OBS_TIME_DIFF = 2000;
  static constexpr uint32_t MAX_POS_LLH_COV_TIME_DIFF = 2000;
  static constexpr uint32_t MAX_VEL_COG_TIME_DIFF = 2000;
  static constexpr uint32_t MAX_VEL_NED_COV_TIME_DIFF = 2000;
  static constexpr uint32_t MAX_ORIENT_EULER_TIME_DIFF = 2000;
  static constexpr uint32_t MAX_DOPS_TIME_DIFF = 2000;
  static constexpr uint32_t MAX_GPS_TIME_TIME_DIFF = 2000;
+ static constexpr uint32_t MAX_OBS_TIME_DIFF_MS = 2000;
 
 };
