@@ -12,6 +12,7 @@
 export GITHUB_TOKEN=$1
 export SONAR_TOKEN=$2
 
+source $HOME/dev_ws/install/setup.bash
 mkdir -p build
 cd build
 cmake -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage ..

@@ -6,6 +6,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV CC=gcc-11
 ENV CXX=g++-11
+ENV HOME /home/dockerdev
 
 ARG UID=1000
 
@@ -25,12 +26,16 @@ RUN \
      useradd -u ${UID} -ms /bin/bash -G sudo dockerdev \
   && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers 
 
-WORKDIR /home/dockerdev
-RUN chown -R dockerdev:dockerdev /home/dockerdev
+RUN chown -R dockerdev:dockerdev $HOME/
 USER dockerdev
 
+RUN mkdir -p $HOME/dev_ws/src && cd $HOME/dev_ws/src && git clone https://github.com/swri-robotics/gps_umd && cd gps_umd && git checkout ros2-devel
+WORKDIR $HOME/dev_ws/
+RUN . /opt/ros/humble/setup.sh && colcon build --packages-select gps_msgs
+
+WORKDIR $HOME/
 RUN git clone https://github.com/swift-nav/libsbp.git && cd libsbp && git checkout v4.4.0
-WORKDIR /home/dockerdev/libsbp/c
+WORKDIR $HOME/libsbp/c
 RUN git submodule update --init
 RUN mkdir build &&  \
     cd build && \
