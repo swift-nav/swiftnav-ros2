@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install --yes \
     doxygen \
     check \
     clang-format-13 \
-    libserialport-dev
+    libserialport-dev \
+    ros-humble-gps-msgs
 
 # Add a "dockerdev" user with sudo capabilities
 # 1000 is the first user ID issued on Ubuntu; might
@@ -28,10 +29,6 @@ RUN \
 
 RUN chown -R dockerdev:dockerdev $HOME/
 USER dockerdev
-
-RUN mkdir -p $HOME/dev_ws/src && cd $HOME/dev_ws/src && git clone https://github.com/swri-robotics/gps_umd && cd gps_umd && git checkout ros2-devel
-WORKDIR $HOME/dev_ws/
-RUN . /opt/ros/humble/setup.sh && colcon build --packages-select gps_msgs
 
 WORKDIR $HOME/
 RUN git clone https://github.com/swift-nav/libsbp.git && cd libsbp && git checkout v4.4.0
