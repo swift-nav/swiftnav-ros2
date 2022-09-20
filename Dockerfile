@@ -6,6 +6,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV CC=gcc-11
 ENV CXX=g++-11
+ENV HOME /home/dockerdev
 
 ARG UID=1000
 
@@ -16,7 +17,8 @@ RUN apt-get update && apt-get install --yes \
     doxygen \
     check \
     clang-format-13 \
-    libserialport-dev
+    libserialport-dev \
+    ros-humble-gps-msgs
 
 # Add a "dockerdev" user with sudo capabilities
 # 1000 is the first user ID issued on Ubuntu; might
@@ -25,12 +27,12 @@ RUN \
      useradd -u ${UID} -ms /bin/bash -G sudo dockerdev \
   && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers 
 
-WORKDIR /home/dockerdev
-RUN chown -R dockerdev:dockerdev /home/dockerdev
+RUN chown -R dockerdev:dockerdev $HOME/
 USER dockerdev
 
+WORKDIR $HOME/
 RUN git clone https://github.com/swift-nav/libsbp.git && cd libsbp && git checkout v4.4.0
-WORKDIR /home/dockerdev/libsbp/c
+WORKDIR $HOME/libsbp/c
 RUN git submodule update --init
 RUN mkdir build &&  \
     cd build && \
