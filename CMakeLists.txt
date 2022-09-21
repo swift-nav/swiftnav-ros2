@@ -44,10 +44,15 @@ add_executable(sbp-to-ros
 
 
   rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/BaselineHeading.msg"
   "msg/AngularRate.msg"
-  "msg/OrientQuat.msg"
+  "msg/BaselineHeading.msg"
+  "msg/GnssTimeOffset.msg"
+  "msg/ImuAux.msg"
+  "msg/ImuRaw.msg"
+  "msg/Odometry.msg"
   "msg/OrientEuler.msg"
+  "msg/OrientQuat.msg"
+  "msg/Wheeltick.msg"
   DEPENDENCIES # Add packages that above messages depend on
   )
 

@@ -13,7 +13,17 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
     - [Step 3 (Add the new cpp file to CMakeLists.txt)](#step-3-add-the-new-cpp-file-to-cmakeliststxt)
     - [Step 4 (Add the new parameter to params.yaml)](#step-4-add-the-new-parameter-to-paramsyaml)
 - [Adding a new ROS2 topic to SBP message transaltion](#adding-a-new-ros2-topic-to-sbp-message-transaltion)
-
+    - [Step 1 (Add a new class to subscribers)](#step-1-add-a-new-class-to-subscribers)
+    - [Step 2 (Add the new subscriber, to the driver)](#step-2-add-the-new-subscriber-to-the-driver)
+    - [Step 3 (Add the new cpp file to CMakeLists.txt)](#step-3-add-the-new-cpp-file-to-cmakeliststxt-1)
+    - [Step 4 (Add the new parameters to params.yaml)](#step-4-add-the-new-parameters-to-paramsyaml)
+- [Adding custom ROS2 messages (transcribe to ROS2 an existing SBP message)](#adding-custom-ros2-messages-transcribe-to-ros2-an-existing-sbp-message)
+    - [Step 1 (Add a new custom msg)](#step-1-add-a-new-custom-msg)
+    - [Step 2 (Add the new msg file to CMakeLists.txt)](#step-2-add-the-new-msg-file-to-cmakeliststxt)
+    - [Step 3 (Add a new class to publishers)](#step-3-add-a-new-class-to-publishers)
+    - [Step 4 (Add the new cpp file to CMakeLists.txt)](#step-4-add-the-new-cpp-file-to-cmakeliststxt)
+    - [Step 5 (Add the new publisher, to the driver)](#step-5-add-the-new-publisher-to-the-driver)
+    - [Step 6 (Add the new parameter to params.yaml)](#step-6-add-the-new-parameter-to-paramsyaml)
 
 
 # **Setting the environment for Visual Studio Code**
@@ -387,7 +397,7 @@ void IMUSubscriber::topic_callback(const sensor_msgs::msg::Imu & msg)
 }
 ```
 
-## Step 2 (Add the new publisher, to the driver)
+## Step 2 (Add the new subscriber, to the driver)
 ```
 #include <subscribers/imu_subscriber.h>
 
@@ -466,6 +476,188 @@ SBPRos2Driver:
 
     imu: True                         #New parameter
     imu_topic_name: "/my_imu_topic"   #New parameter
+
+    log_sbp_messages: True
+    log_sbp_filepath: "/workspaces/Swift"
+```
+
+# Adding custom ROS2 messages (transcribe to ROS2 an existing SBP message)
+In order to add a new ROS2 custom msg (one that directly transcribes an existing SBP message), you should (let's assume that you want to transcribe MSG_ORIENT_EULER into /orient_euler):
+
+## Step 1 (Add a new custom msg)
+In the msg folder create a new file for the message, lets name it OrientEuler.msg
+```
+uint32 tow
+int32 roll
+int32 pitch
+int32 yaw
+float32 roll_accuracy
+float32 pitch_accuracy
+float32 yaw_accuracy
+uint8 flags
+```
+
+## Step 2 (Add the new msg file to CMakeLists.txt)
+```
+  rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/AngularRate.msg"
+  "msg/BaselineHeading.msg"
+  "msg/GnssTimeOffset.msg"
+  "msg/ImuAux.msg"
+  "msg/ImuRaw.msg"
+  "msg/Odometry.msg"
+
+  "msg/OrientEuler.msg"  # New custom msg file
+
+  "msg/OrientQuat.msg"
+  "msg/Wheeltick.msg"
+  DEPENDENCIES # Add packages that above messages depend on
+  )
+```
+
+## Step 3 (Add a new class to publishers)
+```
+// Header file (orient_euler_publisher.h)
+#include <rclcpp/rclcpp.hpp>
+#include <swiftnav_ros2_driver/msg/orient_euler.hpp>  // Note that we're including the custom msg auto-generated header
+
+#include <libsbp/cpp/message_handler.h>
+#include <libsbp/cpp/state.h>
+
+#include <publishers/SBP2ROS2Publisher.h>
+
+class OrientEulerPublisher
+    : public SBP2ROS2Publisher<swiftnav_ros2_driver::msg::OrientEuler,
+                               sbp_msg_orient_euler_t> {
+ public:
+  OrientEulerPublisher() = delete;
+  OrientEulerPublisher(sbp::State* state, const std::string& topic_name,
+                       rclcpp::Node* node, const LoggerPtr& logger,
+                       const bool enabled, const std::string& frame);
+
+  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_orient_euler_t& msg);
+
+ protected:
+  void publish() override;
+};
+
+// CPP file (orient_euler_publisher.cpp)
+OrientEulerPublisher::OrientEulerPublisher(
+    sbp::State* state, const std::string& topic_name, rclcpp::Node* node,
+    const LoggerPtr& logger, const bool enabled, const std::string& frame)
+    : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::OrientEuler,
+                        sbp_msg_orient_euler_t>(state, topic_name, node, logger,
+                                                enabled, frame) {}
+
+void OrientEulerPublisher::handle_sbp_msg(uint16_t sender_id,
+                                          const sbp_msg_orient_euler_t& msg) {
+  (void)sender_id;
+
+  // We just map the contents of the SBP msg into the custom ROS2 msg
+  msg_.tow = msg.tow;
+  msg_.pitch = msg.pitch;
+  msg_.pitch_accuracy = msg.pitch_accuracy;
+  msg_.roll = msg.roll;
+  msg_.roll_accuracy = msg.roll_accuracy;
+  msg_.yaw = msg.yaw;
+  msg_.yaw_accuracy = msg.yaw_accuracy;
+  msg_.flags = msg.flags;
+  publish();
+}
+
+void OrientEulerPublisher::publish() {
+  if (enabled_) {
+    publisher_->publish(msg_);
+    msg_ = swiftnav_ros2_driver::msg::OrientEuler();
+  }
+}
+```
+
+### Step 4 (Add the new cpp file to CMakeLists.txt)
+```
+add_executable(sbp-to-ros
+  src/sbp-to-ros.cpp
+  src/publishers/NavSatFixPublisher.cpp
+  src/publishers/TimeReferencePublisher.cpp
+
+  src/publishers/orient_euler_publisher.cpp   # New cpp file
+
+  src/data_sources/sbp_file_datasource.cpp
+  src/data_sources/sbp_serial_datasource.cpp
+  src/data_sources/sbp_tcp_datasource.cpp
+  src/data_sources/sbp_data_sources.cpp
+  src/logging/ros_logger.cpp
+  src/logging/sbp_to_ros2_logger.cpp
+  src/logging/sbp_file_logger.cpp
+  )
+```
+
+## Step 5 (Add the new publisher, to the driver)
+```
+#include <publishers/orient_euler_publisher.h>
+
+...
+  // Whe should modify createPublishers()
+  void createPublishers() {
+    bool enabled;
+
+    get_parameter<bool>("navsatfix", enabled);
+    navsatfix_publisher_ = std::make_unique<NavSatFixPublisher>(
+        &state_, "navsatfix", this, enabled);
+
+    get_parameter<bool>("timereference", enabled);
+    timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
+        &state_, "timereference", this, enabled);
+
+    // The new publisher
+    get_parameter<bool>("orient_euler", enabled);
+    orient_euler_publisher_ = std::make_unique<OrientEulerPublisher>(
+        &state_, "orient_euler", this, logger_, enabled, frame_);
+  }
+
+...
+
+  // We should modify declareParameters(), to add the publishing flag for the new publisher
+  void declareParameters() {
+    declare_parameter<int32_t>("interface", 0);
+    declare_parameter<std::string>("sbp_file", "");
+    declare_parameter<std::string>("device_name", "");
+    declare_parameter<std::string>("connection_str", "");
+    declare_parameter<std::string>("host_ip", "");
+    declare_parameter<int32_t>("host_port", 0);
+    declare_parameter<bool>("navsatfix", true);
+    declare_parameter<bool>("timereference", true);
+
+    // New flag for the new publisher
+    declare_parameter<bool>("orient_euler", true);
+
+    declare_parameter<bool>("log_sbp_messages", false);
+    declare_parameter<std::string>("log_sbp_filepath", "");
+  }
+
+...
+
+  // And finally we add the member variable for the publisher
+  std::unique_ptr<OrientEulerPublisher>
+      orient_euler_publisher_; /** @brief MSG_ORIENT_EULER publisher */
+
+```
+
+### Step 6 (Add the new parameter to params.yaml)
+```
+SBPRos2Driver:
+  ros__parameters:
+    interface: 3
+    sbp_file: "/workspaces/Swift/24-185316.sbp"
+    device_name: "/dev/ttyS0"
+    connection_str: "115200|N|8|1|N"
+    host_ip: "127.0.0.1"
+    host_port: 8082
+    timeout: 2000
+    navsatfix: True
+    timereference: True
+
+    orient_euler: True   #New parameter
 
     log_sbp_messages: True
     log_sbp_filepath: "/workspaces/Swift"
