@@ -16,8 +16,13 @@
 #include <publishers/TimeReferencePublisher.h>
 #include <publishers/angular_rate_publisher.h>
 #include <publishers/baseline_heading_publisher.h>
+#include <publishers/gnss_time_offset_publisher.h>
+#include <publishers/imu_aux_publisher.h>
+#include <publishers/imu_raw_publisher.h>
+#include <publishers/odometry_publisher.h>
 #include <publishers/orient_euler_publisher.h>
 #include <publishers/orient_quat_publisher.h>
+#include <publishers/wheeltick_publisher.h>
 
 //#include <subscribers/IMUSubscriber.h>
 
@@ -131,13 +136,18 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<int32_t>("host_port", 0);
     declare_parameter<int32_t>("read_timeout", 0);
     declare_parameter<int32_t>("write_timeout", 0);
-    declare_parameter<bool>("navsatfix", true);
-    declare_parameter<bool>("timereference", true);
-    declare_parameter<bool>("gpsfix", true);
-    declare_parameter<bool>("baseline_heading", true);
     declare_parameter<bool>("angular_rate", true);
+    declare_parameter<bool>("baseline_heading", true);
+    declare_parameter<bool>("gnss_time_offset", true);
+    declare_parameter<bool>("gpsfix", true);
+    declare_parameter<bool>("imu_aux", true);
+    declare_parameter<bool>("imu_raw", true);
+    declare_parameter<bool>("navsatfix", true);
+    declare_parameter<bool>("odometry", true);
     declare_parameter<bool>("orient_euler", true);
     declare_parameter<bool>("orient_quat", true);
+    declare_parameter<bool>("timereference", true);
+    declare_parameter<bool>("wheeltick", true);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
     declare_parameter<std::string>("frame_name", "gps");
@@ -177,6 +187,26 @@ class SBPROS2DriverNode : public rclcpp::Node {
     get_parameter<bool>("orient_quat", enabled);
     orient_quat_publisher_ = std::make_unique<OrientQuatPublisher>(
         &state_, "orient_quat", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("gnss_time_offset", enabled);
+    gnss_time_offset_publisher_ = std::make_unique<GnssTimeOffsetPublisher>(
+        &state_, "gnss_time_offset", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("imu_aux", enabled);
+    imu_aux_publisher_ = std::make_unique<ImuAuxPublisher>(
+        &state_, "imu_aux", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("imu_raw", enabled);
+    imu_raw_publisher_ = std::make_unique<ImuRawPublisher>(
+        &state_, "imu_raw", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("odometry", enabled);
+    odometry_publisher_ = std::make_unique<OdometryPublisher>(
+        &state_, "odometry", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("wheeltick", enabled);
+    wheeltick_publisher_ = std::make_unique<WheeltickPublisher>(
+        &state_, "wheeltick", this, logger_, enabled, frame_);
   }
 
   /**
@@ -203,6 +233,16 @@ class SBPROS2DriverNode : public rclcpp::Node {
       orient_euler_publisher_; /** @brief MSG_ORIENT_EULER publisher */
   std::unique_ptr<OrientQuatPublisher>
       orient_quat_publisher_; /** @brief MSG_ORIENT_QUAT publisher */
+  std::unique_ptr<GnssTimeOffsetPublisher>
+      gnss_time_offset_publisher_; /** @brief MSG_GNSS_TIME_OFFSET publisher */
+  std::unique_ptr<ImuAuxPublisher>
+      imu_aux_publisher_; /** @brief MSG_IMU_AUX publisher */
+  std::unique_ptr<ImuRawPublisher>
+      imu_raw_publisher_; /** @brief MSG_IMU_RAW publisher */
+  std::unique_ptr<OdometryPublisher>
+      odometry_publisher_; /** @brief MSG_ODOMETRY publisher */
+  std::unique_ptr<WheeltickPublisher>
+      wheeltick_publisher_; /** @brief MSG_WHEELTICK publisher */
   std::shared_ptr<SBPToROS2Logger>
       sbptoros2_; /** @brief SBP to ROS2 logging object */
   std::string frame_;
