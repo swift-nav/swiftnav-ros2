@@ -7,15 +7,17 @@
 #include <libsbp/cpp/state.h>
 
 #include <publishers/SBP2ROS2Publisher.h>
+#include <publishers/dummy_publisher.h>
 
 class GnssTimeOffsetPublisher
-    : public SBP2ROS2Publisher<swiftnav_ros2_driver::msg::GnssTimeOffset,
+    : public DummyPublisher,
+      public SBP2ROS2Publisher<swiftnav_ros2_driver::msg::GnssTimeOffset,
                                sbp_msg_gnss_time_offset_t> {
  public:
   GnssTimeOffsetPublisher() = delete;
   GnssTimeOffsetPublisher(sbp::State* state, const std::string& topic_name,
                           rclcpp::Node* node, const LoggerPtr& logger,
-                          const bool enabled, const std::string& frame);
+                          const std::string& frame);
 
   void handle_sbp_msg(uint16_t sender_id,
                       const sbp_msg_gnss_time_offset_t& msg);
