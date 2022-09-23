@@ -8,13 +8,18 @@ SBPRos2Driver:
     host_port: 55555
     read_timeout: 2000
     write_timeout: 2000
-    navsatfix: True
-    timereference: True
-    gpsfix: True
-    baseline_heading: True
     angular_rate: True
+    baseline_heading: True
+    gnss_time_offset: True
+    gpsfix: True
+    imu_aux: True
+    imu_raw: True
+    navsatfix: True
+    odometry: True
     orient_euler: True
     orient_quat: True
+    timereference: True
+    wheeltick: True
     log_sbp_messages: True
     log_sbp_filepath: "/workspaces/Swift"
     frame_name: "gps"
