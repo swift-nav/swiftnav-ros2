@@ -44,6 +44,7 @@ add_executable(sbp-to-ros
   src/publishers/imu_aux_publisher.cpp
   src/publishers/imu_raw_publisher.cpp
   src/publishers/odometry_publisher.cpp
+  src/publishers/publisher_factory.cpp
   src/publishers/wheeltick_publisher.cpp
   src/subscribers/IMUSubscriber.cpp
   src/subscribers/OdometrySubscriber.cpp

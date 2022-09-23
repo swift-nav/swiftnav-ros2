@@ -11,19 +11,7 @@
 #include <libsbp/cpp/state.h>
 #include <libsbp/cpp/message_handler.h>
 
-#include <publishers/GPSFixPublisher.h>
-#include <publishers/PoseStampedPublisher.h>
-#include <publishers/NavSatFixPublisher.h>
-#include <publishers/TimeReferencePublisher.h>
-#include <publishers/angular_rate_publisher.h>
-#include <publishers/baseline_heading_publisher.h>
-#include <publishers/gnss_time_offset_publisher.h>
-#include <publishers/imu_aux_publisher.h>
-#include <publishers/imu_raw_publisher.h>
-#include <publishers/odometry_publisher.h>
-#include <publishers/orient_euler_publisher.h>
-#include <publishers/orient_quat_publisher.h>
-#include <publishers/wheeltick_publisher.h>
+#include <publishers/publisher_factory.h>
 
 //#include <subscribers/IMUSubscriber.h>
 
