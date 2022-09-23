@@ -5,7 +5,7 @@ SbpFileDataSource::SbpFileDataSource(const std::string &file_path,
     : logger_(logger) {
   file_stream_ = std::ifstream(file_path, std::ios::binary | std::ios_base::in);
   if (!file_stream_.is_open())
-    LOG_FATAL(logger_, "File: " << file_path << " couldn't be open");
+    LOG_FATAL(logger_, "File: %s  couldn't be open", file_path.c_str());
 }
 
 SbpFileDataSource::~SbpFileDataSource() { file_stream_.close(); }

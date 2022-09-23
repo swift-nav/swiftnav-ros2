@@ -31,6 +31,9 @@
 *.out
 *.app
 
+# Code coverage
+*.gcov
+
 # Folders
 build/
 install/

@@ -1,6 +1,11 @@
 #include <data_sources/sbp_serial_datasource.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <iostream>
+
+#include<test/mocked_logger.h>
+
+using ::testing::Return;
 
 // TODO: Make the devices name right
 #if defined(_WIN32)
@@ -11,67 +16,126 @@ constexpr char VALID_PORT[] = "/dev/ttyS0";
 constexpr char INVALID_PORT[] = "/dev/ttyTAM32";
 #endif  // _WIN32
 
-// *************************************************************************
-// Dummy console implementation of a Logger
-class MockedLogger : public IIssueLogger {
+constexpr char VALID_CONNSTR[] = "115200|N|8|1|N";
+constexpr char INVALID_CONNSTR[] = "19200|T|8|1|W";
+
+class MockedSerialPort : public SerialPort {
  public:
-  void logDebug(const std::stringstream& ss) override {
-    std::cout << "DEBUG->" << ss.str() << std::endl;
-  }
-  void logInfo(const std::stringstream& ss) override {
-    std::cout << "INFO->" << ss.str() << std::endl;
-  }
-  void logWarning(const std::stringstream& ss) override {
-    std::cout << "WARN->" << ss.str() << std::endl;
-  }
-  void logError(const std::stringstream& ss) override {
-    std::cout << "ERROR->" << ss.str() << std::endl;
-  }
-  void logFatal(const std::stringstream& ss) override {
-    std::cout << "FATAL->" << ss.str() << std::endl;
-  }
+  MockedSerialPort(const std::string& device_name,
+                   const std::string& connection_string,
+                   const uint32_t read_timeout, const uint32_t write_timeout,
+                   const LoggerPtr& logger)
+      : SerialPort(device_name, connection_string, read_timeout, write_timeout,
+                   logger) {}
+  MOCK_METHOD(bool, open, (), (noexcept, override));
+  MOCK_METHOD(int32_t, read, (uint8_t * buffer, const uint32_t buffer_length),
+              (override));
+  MOCK_METHOD(int32_t, write,
+              (const uint8_t* buffer, const uint32_t buffer_length),
+              (override));
+  MOCK_METHOD(bool, isValid, (), (const, noexcept, override));
 };
 
 // *************************************************************************
-// SerialReader
-TEST(SerialReader, ConnectWithUnexistentDevice) {
+// SerialDataSource
+TEST(SerialDataSource, ConnectWithUnexistentDevice) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(INVALID_PORT, "19200|N|8|1|N", logger, 2000);
+  auto mocked_sp = std::make_shared<MockedSerialPort>(
+      INVALID_PORT, VALID_CONNSTR, 2000, 2000, logger);
+  EXPECT_CALL(*mocked_sp, open).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(*mocked_sp, isValid).WillOnce(Return(false));
+  SbpSerialDataSource reader(logger, mocked_sp);
   ASSERT_FALSE(reader.isValid());
 }
 
-TEST(SerialReader, ConnectWithExistentDeviceButInvalidConnStr) {
+TEST(SerialDataSource, ConnectWithExistentDeviceButInvalidConnStr) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|T|8|1|W", logger, 2000);
+  auto mocked_sp = std::make_shared<MockedSerialPort>(
+      VALID_PORT, INVALID_CONNSTR, 2000, 2000, logger);
+  EXPECT_CALL(*mocked_sp, open).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(*mocked_sp, isValid).WillOnce(Return(false));
+  SbpSerialDataSource reader(logger, mocked_sp);
   ASSERT_FALSE(reader.isValid());
 }
 
-TEST(SerialReader, ConnectWithExistentDevice) {
+TEST(SerialDataSource, ConnectWithExistentDevice) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|N|8|1|N", logger, 2000);
+  auto mocked_sp = std::make_shared<MockedSerialPort>(VALID_PORT, VALID_CONNSTR,
+                                                      2000, 2000, logger);
+  EXPECT_CALL(*mocked_sp, open).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(*mocked_sp, isValid).WillOnce(Return(true));
+  SbpSerialDataSource reader(logger, mocked_sp);
   ASSERT_TRUE(reader.isValid());
 }
 
-TEST(SerialReader, ReadPackageWithInvalidReader) {
+// Reading tests
+TEST(SerialDataSource, ReadPackageWithInvalidSource) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(INVALID_PORT, "19200|N|8|1|N", logger, 2000);
+  std::shared_ptr<SerialPort> serial_port;
+  SbpSerialDataSource reader(logger, serial_port);
   ASSERT_FALSE(reader.isValid());
   u8 buffer[100];
   ASSERT_EQ(-1, reader.read(buffer, 100));
 }
 
-TEST(SerialReader, ReadPackageWithNullBuffer) {
+TEST(SerialDataSource, ReadPackageWithNullBuffer) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|N|8|1|N", logger, 2000);
+  auto mocked_sp = std::make_shared<MockedSerialPort>(VALID_PORT, VALID_CONNSTR,
+                                                      2000, 2000, logger);
+  ON_CALL(*mocked_sp, open).WillByDefault(Return(true));
+  EXPECT_CALL(*mocked_sp, read).Times(1).WillOnce(Return(-1));
+  ON_CALL(*mocked_sp, isValid).WillByDefault(Return(true));
+  SbpSerialDataSource reader(logger, mocked_sp);
   ASSERT_TRUE(reader.isValid());
   ASSERT_EQ(-1, reader.read(nullptr, 100));
 }
 
-TEST(SerialReader, ReadPackageOK) {
+TEST(SerialDataSource, ReadPackageOK) {
   auto logger = std::make_shared<MockedLogger>();
-  SbpSerialDataSource reader(VALID_PORT, "19200|N|8|1|N", logger, 2000);
+  auto mocked_sp = std::make_shared<MockedSerialPort>(VALID_PORT, VALID_CONNSTR,
+                                                      2000, 2000, logger);
+  ON_CALL(*mocked_sp, open).WillByDefault(Return(true));
+  EXPECT_CALL(*mocked_sp, read).Times(1).WillOnce(Return(100));
+  ON_CALL(*mocked_sp, isValid).WillByDefault(Return(true));
+  SbpSerialDataSource reader(logger, mocked_sp);
   ASSERT_TRUE(reader.isValid());
   u8 buffer[100];
   const int32_t result = reader.read(buffer, 100);
+  ASSERT_TRUE((result > 0) && (result <= 100));
+}
+
+// Writing tests
+TEST(SerialDataSource, WritePackageWithInvalidSource) {
+  auto logger = std::make_shared<MockedLogger>();
+  std::shared_ptr<SerialPort> serial_port;
+  SbpSerialDataSource writer(logger, serial_port);
+  ASSERT_FALSE(writer.isValid());
+  u8 buffer[100];
+  ASSERT_EQ(-1, writer.write(buffer, 100));
+}
+
+TEST(SerialDataSource, WritePackageWithNullBuffer) {
+  auto logger = std::make_shared<MockedLogger>();
+  auto mocked_sp = std::make_shared<MockedSerialPort>(VALID_PORT, VALID_CONNSTR,
+                                                      2000, 2000, logger);
+  ON_CALL(*mocked_sp, open).WillByDefault(Return(true));
+  EXPECT_CALL(*mocked_sp, write).Times(1).WillOnce(Return(-1));
+  ON_CALL(*mocked_sp, isValid).WillByDefault(Return(true));
+  SbpSerialDataSource writer(logger, mocked_sp);
+  ASSERT_TRUE(writer.isValid());
+  ASSERT_EQ(-1, writer.write(nullptr, 100));
+}
+
+TEST(SerialDataSource, WritePackageOK) {
+  auto logger = std::make_shared<MockedLogger>();
+  auto mocked_sp = std::make_shared<MockedSerialPort>(VALID_PORT, VALID_CONNSTR,
+                                                      2000, 2000, logger);
+  ON_CALL(*mocked_sp, open).WillByDefault(Return(true));
+  EXPECT_CALL(*mocked_sp, write).Times(1).WillOnce(Return(100));
+  ON_CALL(*mocked_sp, isValid).WillByDefault(Return(true));
+  SbpSerialDataSource writer(logger, mocked_sp);
+  ASSERT_TRUE(writer.isValid());
+  u8 buffer[100];
+  const int32_t result = writer.write(buffer, 100);
   ASSERT_TRUE((result > 0) && (result <= 100));
 }

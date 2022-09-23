@@ -11,12 +11,26 @@
 #include <libsbp/cpp/state.h>
 #include <libsbp/cpp/message_handler.h>
 
+#include <publishers/GPSFixPublisher.h>
+#include <publishers/PoseStampedPublisher.h>
 #include <publishers/NavSatFixPublisher.h>
 #include <publishers/TimeReferencePublisher.h>
+#include <publishers/angular_rate_publisher.h>
+#include <publishers/baseline_heading_publisher.h>
+#include <publishers/gnss_time_offset_publisher.h>
+#include <publishers/imu_aux_publisher.h>
+#include <publishers/imu_raw_publisher.h>
+#include <publishers/odometry_publisher.h>
+#include <publishers/orient_euler_publisher.h>
+#include <publishers/orient_quat_publisher.h>
+#include <publishers/wheeltick_publisher.h>
+
+//#include <subscribers/IMUSubscriber.h>
 
 #include <data_sources/sbp_data_sources.h>
+#include <utils.h>
 
-// TODO: Do we need to catch exceptions or not?
+static const int64_t LOG_REPUBLISH_DELAY = 2_ns;
 
 /**
  * @brief Class that represents the ROS 2 driver node
@@ -28,11 +42,15 @@ class SBPROS2DriverNode : public rclcpp::Node {
    */
   SBPROS2DriverNode() : Node("SBPRos2Driver") {
     declareParameters();
-    logger_ = std::make_shared<ROSLogger>();
-    createReader();
-    if (!reader_) exit(EXIT_FAILURE);
-    state_.set_reader(reader_.get());
+    get_parameter<std::string>("frame_name", frame_);
+    logger_ = std::make_shared<ROSLogger>(LOG_REPUBLISH_DELAY);
+
+    createDataSources();
+    if (!data_source_) exit(EXIT_FAILURE);
+    state_.set_reader(data_source_.get());
+    state_.set_writer(data_source_.get());
     createPublishers();
+    createSubscribers();
 
     bool log_sbp_messages;
     std::string log_path;
@@ -65,9 +83,9 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
  private:
   /**
-   * @brief Method for creating the readers (data sources)
+   * @brief Method for creating the data sources
    */
-  void createReader() {
+  void createDataSources() {
     int32_t interface;
 
     get_parameter<int32_t>("interface", interface);
@@ -75,30 +93,34 @@ class SBPROS2DriverNode : public rclcpp::Node {
       case FILE_DATA_SOURCE: {
         std::string file;
         get_parameter<std::string>("sbp_file", file);
-        reader_ = dataSourceFactory(file, logger_);
+        data_source_ = dataSourceFactory(file, logger_);
       } break;
 
       case SERIAL_DATA_SOURCE: {
         std::string device, connection_str;
-        int32_t timeout;
+        int32_t read_timeout, write_timeout;
         get_parameter<std::string>("device_name", device);
         get_parameter<std::string>("connection_str", connection_str);
-        get_parameter<int32_t>("timeout", timeout);
-        reader_ = dataSourceFactory(device, connection_str, timeout, logger_);
+        get_parameter<int32_t>("read_timeout", read_timeout);
+        get_parameter<int32_t>("write_timeout", write_timeout);
+        data_source_ = dataSourceFactory(device, connection_str, read_timeout,
+                                         write_timeout, logger_);
       } break;
 
       case TCP_DATA_SOURCE: {
         std::string ip;
-        int32_t port, timeout;
+        int32_t port, read_timeout, write_timeout;
         get_parameter<std::string>("host_ip", ip);
         get_parameter<int32_t>("host_port", port);
-        get_parameter<int32_t>("timeout", timeout);
-        reader_ = dataSourceFactory(ip, port, timeout, logger_);
+        get_parameter<int32_t>("read_timeout", read_timeout);
+        get_parameter<int32_t>("write_timeout", write_timeout);
+        data_source_ =
+            dataSourceFactory(ip, port, read_timeout, write_timeout, logger_);
       } break;
 
       default:
-        LOG_FATAL(logger_,
-                  "Could not create a data source of type: " << interface);
+        LOG_FATAL(logger_, "Could not create a data source of type: %d",
+                  interface);
         break;
     }
   }
@@ -113,10 +135,24 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<std::string>("connection_str", "");
     declare_parameter<std::string>("host_ip", "");
     declare_parameter<int32_t>("host_port", 0);
+    declare_parameter<int32_t>("read_timeout", 0);
+    declare_parameter<int32_t>("write_timeout", 0);
+    declare_parameter<bool>("angular_rate", true);
+    declare_parameter<bool>("baseline_heading", true);
+    declare_parameter<bool>("gnss_time_offset", true);
+    declare_parameter<bool>("gpsfix", true);
+    declare_parameter<bool>("imu_aux", true);
+    declare_parameter<bool>("imu_raw", true);
     declare_parameter<bool>("navsatfix", true);
+    declare_parameter<bool>("odometry", true);
+    declare_parameter<bool>("orient_euler", true);
+    declare_parameter<bool>("orient_quat", true);
+    declare_parameter<bool>("posestamped", true);
     declare_parameter<bool>("timereference", true);
+    declare_parameter<bool>("wheeltick", true);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
+    declare_parameter<std::string>("frame_name", "gps");
   }
 
   /**
@@ -127,24 +163,97 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
     get_parameter<bool>("navsatfix", enabled);
     navsatfix_publisher_ = std::make_unique<NavSatFixPublisher>(
-        &state_, "navsatfix", this, enabled);
+        &state_, "navsatfix", this, logger_, enabled, frame_);
 
     get_parameter<bool>("timereference", enabled);
     timereference_publisher_ = std::make_unique<TimeReferencePublisher>(
-        &state_, "timereference", this, enabled);
+        &state_, "timereference", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("gpsfix", enabled);
+    gpsfix_publisher_ = std::make_unique<GPSFixPublisher>(
+        &state_, "gpsfix", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("posestamped", enabled);
+    posestamped_publisher_ = std::make_unique<PoseStampedPublisher>(
+        &state_, "posestamped", this, logger_, enabled, frame_);
+
+    // SBP to ROS custom messages
+    get_parameter<bool>("baseline_heading", enabled);
+    baseline_heading_publisher_ = std::make_unique<BaselineHeadingPublisher>(
+        &state_, "baseline_heading", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("angular_rate", enabled);
+    angular_rate_publisher_ = std::make_unique<AngularRatePublisher>(
+        &state_, "angular_rate", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("orient_euler", enabled);
+    orient_euler_publisher_ = std::make_unique<OrientEulerPublisher>(
+        &state_, "orient_euler", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("orient_quat", enabled);
+    orient_quat_publisher_ = std::make_unique<OrientQuatPublisher>(
+        &state_, "orient_quat", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("gnss_time_offset", enabled);
+    gnss_time_offset_publisher_ = std::make_unique<GnssTimeOffsetPublisher>(
+        &state_, "gnss_time_offset", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("imu_aux", enabled);
+    imu_aux_publisher_ = std::make_unique<ImuAuxPublisher>(
+        &state_, "imu_aux", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("imu_raw", enabled);
+    imu_raw_publisher_ = std::make_unique<ImuRawPublisher>(
+        &state_, "imu_raw", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("odometry", enabled);
+    odometry_publisher_ = std::make_unique<OdometryPublisher>(
+        &state_, "odometry", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("wheeltick", enabled);
+    wheeltick_publisher_ = std::make_unique<WheeltickPublisher>(
+        &state_, "wheeltick", this, logger_, enabled, frame_);
   }
+
+  /**
+   * @brief Method for creating ROS 2 subscribers
+   */
+  void createSubscribers() {}
 
   sbp::State state_;           /** @brief SBP state object */
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */
   bool exit_requested_{false}; /** @brief Thread stopping flag */
-  std::shared_ptr<sbp::IReader> reader_; /** @brief data source object */
+  std::shared_ptr<SbpDataSource> data_source_; /** @brief data source object */
   std::shared_ptr<ROSLogger> logger_;    /** @brief ROS 2 logging object */
   std::unique_ptr<NavSatFixPublisher>
       navsatfix_publisher_; /** @brief NavSatFix ROS 2 publisher */
   std::unique_ptr<TimeReferencePublisher>
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
+  std::unique_ptr<GPSFixPublisher>
+      gpsfix_publisher_; /** @brief GPSFix ROS 2 publisher */
+  std::unique_ptr<PoseStampedPublisher>
+      posestamped_publisher_; /** @brief PoseStamped ROS 2 publisher */
+  std::unique_ptr<BaselineHeadingPublisher>
+      baseline_heading_publisher_; /** @brief MSG_BASELINE_HEADING publisher */
+  std::unique_ptr<AngularRatePublisher>
+      angular_rate_publisher_; /** @brief MSG_ANGULAR_RATE publisher */
+  std::unique_ptr<OrientEulerPublisher>
+      orient_euler_publisher_; /** @brief MSG_ORIENT_EULER publisher */
+  std::unique_ptr<OrientQuatPublisher>
+      orient_quat_publisher_; /** @brief MSG_ORIENT_QUAT publisher */
+  std::unique_ptr<GnssTimeOffsetPublisher>
+      gnss_time_offset_publisher_; /** @brief MSG_GNSS_TIME_OFFSET publisher */
+  std::unique_ptr<ImuAuxPublisher>
+      imu_aux_publisher_; /** @brief MSG_IMU_AUX publisher */
+  std::unique_ptr<ImuRawPublisher>
+      imu_raw_publisher_; /** @brief MSG_IMU_RAW publisher */
+  std::unique_ptr<OdometryPublisher>
+      odometry_publisher_; /** @brief MSG_ODOMETRY publisher */
+  std::unique_ptr<WheeltickPublisher>
+      wheeltick_publisher_; /** @brief MSG_WHEELTICK publisher */
   std::shared_ptr<SBPToROS2Logger>
       sbptoros2_; /** @brief SBP to ROS2 logging object */
+  std::string frame_;
 };
 
 int main(int argc, char** argv) {

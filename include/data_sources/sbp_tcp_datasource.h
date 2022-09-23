@@ -1,20 +1,14 @@
 #pragma once
 
-#include <libsbp/cpp/state.h>
-#include <logging/issue_logger.h>
-#include <cstdint>
-#include <string>
-
-#if defined(_WIN32)
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif  // _WIN32
+#include <data_sources/sbp_data_source.h>
+#include <data_sources/tcp.h>
+#include <memory>
 
 /**
  * @brief Class that implements a TCP reader based on the SBP reader interface
  * (IReader)
  */
-class SbpTCPDataSource : public sbp::IReader {
+class SbpTCPDataSource : public SbpDataSource {
  public:
   /**
    * @brief Construct a new SbpTCPDataSource object
@@ -26,25 +20,11 @@ class SbpTCPDataSource : public sbp::IReader {
    * then the read operation blocks until the requested number of bytes have
    * read or an error ocurred
    */
-  SbpTCPDataSource(const std::string& ip, const uint16_t port,
-                   const LoggerPtr& logger,
-                   const uint32_t read_timeout = 0) noexcept;
-
-  /**
-   * @brief Move Construct a new SbpTCPDataSource object
-   *
-   * @param rhs SbpTCPDataSource to construct from
-   */
-  SbpTCPDataSource(SbpTCPDataSource&& rhs) noexcept;
-
-  /**
-   * @brief Destroy the SbpTCPDataSource object
-   */
-  virtual ~SbpTCPDataSource();
+  SbpTCPDataSource(const LoggerPtr& logger,
+                   const std::shared_ptr<TCP>& tcp) noexcept;
 
   // Deleted methods
   SbpTCPDataSource() = delete;
-  SbpTCPDataSource(const SbpTCPDataSource& rhs) = delete;
 
   /**
    * @brief Method to read data from the TCP connection
@@ -57,6 +37,15 @@ class SbpTCPDataSource : public sbp::IReader {
   s32 read(u8* buffer, u32 buffer_length) override;
 
   /**
+   * @brief Method to write data to the TCP connection
+   *
+   * @param buffer Buffer containing the data to write
+   * @param buffer_length Number of bytes to write
+   * @return Number of bytes actually written
+   */
+  s32 write(const u8* buffer, u32 buffer_length) override;
+
+  /**
    * @brief Method to determine if the internal socket is valid or not
    *
    * @return true Socket is valid
@@ -65,56 +54,6 @@ class SbpTCPDataSource : public sbp::IReader {
   bool isValid() const noexcept;
 
  private:
-  /**
-   * @brief Method to init the socket system.
-   *
-   * @return true Sockets ready for use
-   * @return false Sockets not reaady for use
-   */
-  bool initSockets() noexcept;
-
-  /**
-   * @brief Method to clean and free socket system resources
-   */
-  void deinitSockets() noexcept;
-
-  /**
-   * @brief Closes the open socket in use
-   */
-  void closeSocket() noexcept;
-
-  /**
-   * @brief Method that opens and connects the socket
-   *
-   * @param ip IP to connect to
-   * @param port Port to connect to
-   */
-  void openSocket(const std::string& ip, const uint16_t port) noexcept;
-
-  /**
-   * @brief Sets the socket to be non-blocking
-   *
-   * @return true The socket could be configured
-   * @return false The configuration failed
-   */
-  bool setNonBlocking() noexcept;
-
-  /**
-   * @brief Method to connect the socket client to the server
-   *
-   * @param ip Ip address of the server to connect to
-   * @param port TCP port tof the server to connect to
-   * @return true The socket is connected
-   * @return false The socket failed to connect
-   */
-  bool connectSocket(const std::string& ip, const uint16_t port) noexcept;
-
-#if defined(_WIN32)
-  SOCKET socket_id_{INVALID_SOCKET}; /** @brief Windows Socket */
-#else
-  int socket_id_{-1}; /** @brief Linux socket */
-#endif  // _WIN32
-
-  LoggerPtr logger_;      /** @brief Logging facility */
-  uint32_t read_timeout_; /** @brief Read timeout in ms */
+  std::shared_ptr<TCP> tcp_; /** @brief TCP/IP data object */
+  LoggerPtr logger_;         /** @brief Logging facility */
 };

@@ -1,13 +1,25 @@
 SBPRos2Driver:
   ros__parameters:
-    interface: 3
+    interface: 2
     sbp_file: "/workspaces/Swift/24-185316.sbp"
-    device_name: "/dev/ttyS0"
+    device_name: "/dev/ttySAM3"
     connection_str: "115200|N|8|1|N"
     host_ip: "127.0.0.1"
-    host_port: 8082
-    timeout: 2000
+    host_port: 55555
+    read_timeout: 2000
+    write_timeout: 2000
+    angular_rate: True
+    baseline_heading: True
+    gnss_time_offset: True
+    gpsfix: True
+    imu_aux: True
+    imu_raw: True
     navsatfix: True
+    odometry: True
+    orient_euler: True
+    orient_quat: True
     timereference: True
+    wheeltick: True
     log_sbp_messages: True
     log_sbp_filepath: "/workspaces/Swift"
+    frame_name: "gps"
