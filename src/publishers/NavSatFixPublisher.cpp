@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-constexpr uint32_t STATUS_MASK = 0x00000111;
+constexpr uint32_t STATUS_MASK = 0b00000111;
 constexpr uint32_t MAX_TIME_DIFF = 2000;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
