@@ -16,6 +16,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(gps_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(tf2 REQUIRED)
 
 link_directories("/usr/local/lib/")
 include_directories("/usr/local/include/")
@@ -34,6 +35,7 @@ add_executable(sbp-to-ros
   src/publishers/NavSatFixPublisher.cpp
   src/publishers/TimeReferencePublisher.cpp
   src/publishers/GPSFixPublisher.cpp
+  src/publishers/PoseStampedPublisher.cpp
   src/publishers/baseline_heading_publisher.cpp
   src/publishers/angular_rate_publisher.cpp
   src/publishers/orient_euler_publisher.cpp
@@ -63,7 +65,7 @@ target_include_directories(sbp-to-ros PUBLIC
   # $<INSTALL_INTERFACE:include>
   # $<INSTALL_INTERFACE:include/swiftnav_ros2_driver>)
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs nav_msgs gps_msgs)
+ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs nav_msgs gps_msgs tf2)
 ament_export_dependencies(rosidl_default_runtime)
 
 install(TARGETS

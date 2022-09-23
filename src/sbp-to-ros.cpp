@@ -12,6 +12,7 @@
 #include <libsbp/cpp/message_handler.h>
 
 #include <publishers/GPSFixPublisher.h>
+#include <publishers/PoseStampedPublisher.h>
 #include <publishers/NavSatFixPublisher.h>
 #include <publishers/TimeReferencePublisher.h>
 #include <publishers/angular_rate_publisher.h>
@@ -134,6 +135,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
     declare_parameter<bool>("navsatfix", true);
     declare_parameter<bool>("timereference", true);
     declare_parameter<bool>("gpsfix", true);
+    declare_parameter<bool>("posestamped", true);
     declare_parameter<bool>("baseline_heading", true);
     declare_parameter<bool>("angular_rate", true);
     declare_parameter<bool>("orient_euler", true);
@@ -160,6 +162,10 @@ class SBPROS2DriverNode : public rclcpp::Node {
     get_parameter<bool>("gpsfix", enabled);
     gpsfix_publisher_ = std::make_unique<GPSFixPublisher>(
         &state_, "gpsfix", this, logger_, enabled, frame_);
+
+    get_parameter<bool>("posestamped", enabled);
+    posestamped_publisher_ = std::make_unique<PoseStampedPublisher>(
+        &state_, "posestamped", this, logger_, enabled, frame_);
 
     // SBP to ROS custom messages
     get_parameter<bool>("baseline_heading", enabled);
@@ -194,7 +200,9 @@ class SBPROS2DriverNode : public rclcpp::Node {
   std::unique_ptr<TimeReferencePublisher>
       timereference_publisher_; /** @brief TimeReference ROS 2 publisher */
   std::unique_ptr<GPSFixPublisher>
-      gpsfix_publisher_; /** @brief TimeReference ROS 2 publisher */
+      gpsfix_publisher_; /** @brief GPSFix ROS 2 publisher */
+  std::unique_ptr<PoseStampedPublisher>
+      posestamped_publisher_; /** @brief PoseStamped ROS 2 publisher */
   std::unique_ptr<BaselineHeadingPublisher>
       baseline_heading_publisher_; /** @brief MSG_BASELINE_HEADING publisher */
   std::unique_ptr<AngularRatePublisher>
