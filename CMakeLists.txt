@@ -32,10 +32,10 @@ add_executable(sbp-to-ros
   src/logging/ros_logger.cpp
   src/logging/sbp_to_ros2_logger.cpp
   src/logging/sbp_file_logger.cpp
-  src/publishers/NavSatFixPublisher.cpp
-  src/publishers/TimeReferencePublisher.cpp
-  src/publishers/GPSFixPublisher.cpp
-  src/publishers/PoseStampedPublisher.cpp
+  src/publishers/navsatfix_publisher.cpp
+  src/publishers/timereference_publisher.cpp
+  src/publishers/gpsfix_publisher.cpp
+  src/publishers/posestamped_publisher.cpp
   src/publishers/baseline_heading_publisher.cpp
   src/publishers/angular_rate_publisher.cpp
   src/publishers/orient_euler_publisher.cpp
@@ -112,8 +112,8 @@ if(BUILD_TESTING)
   src/data_sources/sbp_tcp_datasource.cpp
   src/data_sources/serial.cpp
   src/data_sources/tcp.cpp
-  src/publishers/NavSatFixPublisher.cpp
-  src/publishers/TimeReferencePublisher.cpp
+  src/publishers/navsatfix_publisher.cpp
+  src/publishers/timereference_publisher.cpp
   src/subscribers/IMUSubscriber.cpp
   src/subscribers/OdometrySubscriber.cpp
   test/mocked_logger.cpp

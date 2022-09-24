@@ -1,11 +1,13 @@
 #include <publishers/angular_rate_publisher.h>
 
-AngularRatePublisher::AngularRatePublisher(
-    sbp::State* state, const std::string& topic_name, rclcpp::Node* node,
-    const LoggerPtr& logger, const bool enabled, const std::string& frame)
+AngularRatePublisher::AngularRatePublisher(sbp::State* state,
+                                           const std::string& topic_name,
+                                           rclcpp::Node* node,
+                                           const LoggerPtr& logger,
+                                           const std::string& frame)
     : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::AngularRate,
                         sbp_msg_angular_rate_t>(state, topic_name, node, logger,
-                                                enabled, frame) {}
+                                                frame) {}
 
 void AngularRatePublisher::handle_sbp_msg(uint16_t sender_id,
                                           const sbp_msg_angular_rate_t& msg) {
@@ -20,8 +22,6 @@ void AngularRatePublisher::handle_sbp_msg(uint16_t sender_id,
 }
 
 void AngularRatePublisher::publish() {
-  if (enabled_) {
-    publisher_->publish(msg_);
-    msg_ = swiftnav_ros2_driver::msg::AngularRate();
-  }
+  publisher_->publish(msg_);
+  msg_ = swiftnav_ros2_driver::msg::AngularRate();
 }

@@ -1,35 +1,33 @@
-#include<publishers/GPSFixPublisher.h>
+#include <publishers/gpsfix_publisher.h>
 
-GPSFixPublisher::GPSFixPublisher(sbp::State* state, const std::string& topic_name,
-                     rclcpp::Node* node, const LoggerPtr& logger,
-                     const bool enabled, const std::string& frame): SBP2ROS2Publisher<
-                                                    gps_msgs::msg::GPSFix,
-                                                    sbp_msg_pos_llh_acc_t,
-                                                    sbp_msg_pos_llh_cov_t,
-                                                    sbp_msg_vel_cog_t,
-                                                    sbp_msg_vel_ned_cov_t,
-                                                    sbp_msg_orient_euler_t,
-                                                    sbp_msg_dops_t,
-                                                    sbp_msg_gps_time_t,
-                                                    sbp_msg_obs_t>(
-                                state, topic_name, node, logger, enabled, frame) {}
+GPSFixPublisher::GPSFixPublisher(sbp::State* state,
+                                 const std::string& topic_name,
+                                 rclcpp::Node* node, const LoggerPtr& logger,
+                                 const std::string& frame)
+    : SBP2ROS2Publisher<gps_msgs::msg::GPSFix, sbp_msg_pos_llh_acc_t,
+                        sbp_msg_pos_llh_cov_t, sbp_msg_vel_cog_t,
+                        sbp_msg_vel_ned_cov_t, sbp_msg_orient_euler_t,
+                        sbp_msg_dops_t, sbp_msg_gps_time_t, sbp_msg_obs_t>(
+          state, topic_name, node, logger, frame) {}
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_pos_llh_acc_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_pos_llh_acc_t& msg) {
   (void)sender_id;
   msg_.status.satellites_used = msg.n_sats;
-  //msg_.satellite_used_prn = ?
+  // msg_.satellite_used_prn = ?
   msg_.err_horz = msg.h_accuracy;
   msg_.err_vert = msg.v_accuracy;
   msg_.err_track = msg.at_accuracy;
 
-  if( ok_to_publish(msg.tow) ) {
-      publish();
+  if (ok_to_publish(msg.tow)) {
+    publish();
   }
 
   return;
 }
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_pos_llh_cov_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_pos_llh_cov_t& msg) {
   (void)sender_id;
   msg_.latitude = msg.lat;
   msg_.longitude = msg.lon;
@@ -40,7 +38,8 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_pos_llh_c
   last_received_pos_llh_cov_tow_ = msg.tow;
 }
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_vel_cog_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_vel_cog_t& msg) {
   (void)sender_id;
   msg_.track = msg.cog;
   msg_.speed = msg.sog;
@@ -51,13 +50,15 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_vel_cog_t
   last_received_vel_cog_tow_ = msg.tow;
 }
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_vel_ned_cov_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_vel_ned_cov_t& msg) {
   (void)sender_id;
   last_received_vel_ned_cov_tow_ = msg.tow;
-  //TODO are we using this for something? else remove
+  // TODO are we using this for something? else remove
 }
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_orient_euler_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_orient_euler_t& msg) {
   (void)sender_id;
   msg_.pitch = msg.pitch;
   msg_.roll = msg.roll;
@@ -69,7 +70,8 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_orient_eu
   last_received_orient_euler_tow_ = msg.tow;
 }
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_dops_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_dops_t& msg) {
   (void)sender_id;
   msg_.gdop = msg.gdop;
   msg_.pdop = msg.pdop;
@@ -80,25 +82,26 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_dops_t& m
   last_received_dops_tow_ = msg.tow;
 }
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_gps_time_t& msg) {
   (void)sender_id;
   last_received_gps_time_tow_ = msg.tow;
 }
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id, const sbp_msg_obs_t& msg){
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_obs_t& msg) {
   (void)sender_id;
   last_received_obs_tow_ = msg.header.t.tow;
 
   msg_.status.satellites_visible = msg.n_obs;
   sbp_packed_obs_content_t obs_content;
-  for(int i = 0; i < msg.n_obs; i++) {
+  for (int i = 0; i < msg.n_obs; i++) {
     obs_content = msg.obs[i];
     msg_.status.satellite_visible_prn.push_back(obs_content.sid.code);
   }
 }
 
-bool GPSFixPublisher::ok_to_publish(const u32 &tow){
-
+bool GPSFixPublisher::ok_to_publish(const u32& tow) {
   u32 pos_llh_cov_time_diff = (last_received_pos_llh_cov_tow_ > tow)
                                   ? last_received_pos_llh_cov_tow_ - tow
                                   : tow - last_received_pos_llh_cov_tow_;
@@ -124,42 +127,38 @@ bool GPSFixPublisher::ok_to_publish(const u32 &tow){
                                : tow - last_received_gps_time_tow_;
 
   u32 obs_time_diff = (last_received_obs_tow_ > tow)
-                               ? last_received_obs_tow_ - tow
-                               : tow - last_received_obs_tow_;
+                          ? last_received_obs_tow_ - tow
+                          : tow - last_received_obs_tow_;
 
-  if(pos_llh_cov_time_diff > MAX_POS_LLH_COV_TIME_DIFF){
+  if (pos_llh_cov_time_diff > MAX_POS_LLH_COV_TIME_DIFF) {
     std::cout << "MAX_POS_LLH_COV_TIME_DIFF" << std::endl;
     return false;
-  } else if(vel_cog_time_diff > MAX_VEL_COG_TIME_DIFF){
+  } else if (vel_cog_time_diff > MAX_VEL_COG_TIME_DIFF) {
     std::cout << "MAX_VEL_COG_TIME_DIFF" << std::endl;
     return false;
-  } else if(vel_ned_cov_time_diff > MAX_VEL_NED_COV_TIME_DIFF){
+  } else if (vel_ned_cov_time_diff > MAX_VEL_NED_COV_TIME_DIFF) {
     std::cout << "MAX_VEL_NED_COV_TIME_DIFF" << std::endl;
     return false;
-  } else if(orient_euler_time_diff > MAX_ORIENT_EULER_TIME_DIFF){
+  } else if (orient_euler_time_diff > MAX_ORIENT_EULER_TIME_DIFF) {
     std::cout << "MAX_ORIENT_EULER_TIME_DIFF" << std::endl;
     return false;
-  } else if(dops_time_diff > MAX_DOPS_TIME_DIFF){
+  } else if (dops_time_diff > MAX_DOPS_TIME_DIFF) {
     std::cout << "MAX_DOPS_TIME_DIFF" << std::endl;
     return false;
-  } else if(gps_time_time_diff > MAX_GPS_TIME_TIME_DIFF){
+  } else if (gps_time_time_diff > MAX_GPS_TIME_TIME_DIFF) {
     std::cout << "MAX_GPS_TIME_TIME_DIFF" << std::endl;
     return false;
-  } else if(obs_time_diff > MAX_OBS_TIME_DIFF_MS){
+  } else if (obs_time_diff > MAX_OBS_TIME_DIFF_MS) {
     std::cout << "MAX_OBS_TIME_DIFF_MS" << std::endl;
     return false;
-  }  
+  }
   return true;
 }
 
-void GPSFixPublisher::publish(){
-  if (enabled_) {
-
-    msg_.header.stamp = node_->now();
-    msg_.header.frame_id = frame_;
-
-    publisher_->publish(msg_);
-  }
+void GPSFixPublisher::publish() {
+  msg_.header.stamp = node_->now();
+  msg_.header.frame_id = frame_;
+  publisher_->publish(msg_);
 }
 
 void GPSFixPublisher::loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg) {

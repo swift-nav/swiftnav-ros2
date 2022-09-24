@@ -3,19 +3,21 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 
-#include <libsbp/cpp/state.h>
 #include <libsbp/cpp/message_handler.h>
+#include <libsbp/cpp/state.h>
 
-#include <publishers/SBP2ROS2Publisher.h>
+#include <publishers/dummy_publisher.h>
+#include <publishers/sbp2ros2_publisher.h>
 
 /**
  * @brief Class that listens for sbp_msg_obs_t and sbp_msg_pos_llh_cov_t,
  * publishing a sensor_msgs::msg::NavSatFix ros2 message.
  *
-*/
-class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
-                                                    sbp_msg_obs_t,
-                                                    sbp_msg_pos_llh_cov_t> {
+ */
+class NavSatFixPublisher
+    : public DummyPublisher,
+      public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_obs_t,
+                               sbp_msg_pos_llh_cov_t> {
  public:
   NavSatFixPublisher() = delete;
 
@@ -23,18 +25,17 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    * @brief Construct a new Nav Sat Fix Publisher object
    *
    * @param state SBP State object
-   * @param topic_name Name of the topic to publish a sensor_msgs::msg::NavSatFix message
+   * @param topic_name Name of the topic to publish a
+   * sensor_msgs::msg::NavSatFix message
    * @param node ROS 2 node object
-   * @param enabled Flag telling if the topic should be published (true) or not
-   * (false)
    */
   NavSatFixPublisher(sbp::State* state, const std::string& topic_name,
                      rclcpp::Node* node, const LoggerPtr& logger,
-                     const bool enabled, const std::string& frame);
+                     const std::string& frame);
 
   /**
-   * @brief Handles a sbp_msg_measurement_state_t message. It gets the constellation for
-   * each satellite in the measurement states.
+   * @brief Handles a sbp_msg_measurement_state_t message. It gets the
+   * constellation for each satellite in the measurement states.
    *
    * As per sbp lib documentation, the code for satellite constelation are:
    *
@@ -67,13 +68,12 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    * @param sender_id Ignored
    * @param msg Incoming sbp_msg_obs_t
    */
-  void handle_sbp_msg(uint16_t sender_id,
-                      const sbp_msg_obs_t& msg);
+  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_obs_t& msg);
 
   /**
-   * @brief Handles a sbp_msg_pos_llh_cov_t message. It gets the latitude, longitude
-   * and altitude from the sbp message and calls methods for covariance matrix and
-   * status flag.
+   * @brief Handles a sbp_msg_pos_llh_cov_t message. It gets the latitude,
+   * longitude and altitude from the sbp message and calls methods for
+   * covariance matrix and status flag.
    *
    * @param sender_id Ignored
    * @param msg Incoming sbp_msg_pos_llh_cov_t
@@ -89,18 +89,18 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
   void publish() override;
 
  private:
-
   /**
-   * @brief Loads the covariance matrix values in the ROS2 message from values in the
-   * sbp message. To do so it converts the covariance matrix from NED to ENU.
+   * @brief Loads the covariance matrix values in the ROS2 message from values
+   * in the sbp message. To do so it converts the covariance matrix from NED to
+   * ENU.
    *
    * @param msg sbp_msg_pos_llh_cov_t
    */
   void loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg);
 
   /**
-   * @brief Loads the status flag in the ROS2 message from values in the sbp_msg_pos_llh_cov_t
-   * message.
+   * @brief Loads the status flag in the ROS2 message from values in the
+   * sbp_msg_pos_llh_cov_t message.
    *
    * As per sbp library documentation:
    *
@@ -121,8 +121,8 @@ class NavSatFixPublisher : public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
    * Mapping:
    *   Invalid => STATUS_NO_FIX
    *   Single Point Position (SPP) => STATUS_FIX
-   *   Differential GNSS (DGNSS), Float RTK, Fixed RTK, Dead Reckoning => STATUS_GBAS_FIX
-   *   SBAS Position => STATUS_SBAS_FIX
+   *   Differential GNSS (DGNSS), Float RTK, Fixed RTK, Dead Reckoning =>
+   * STATUS_GBAS_FIX SBAS Position => STATUS_SBAS_FIX
    *
    * @param msg sbp_msg_pos_llh_cov_t
    */

@@ -1,11 +1,13 @@
 #include <publishers/orient_euler_publisher.h>
 
-OrientEulerPublisher::OrientEulerPublisher(
-    sbp::State* state, const std::string& topic_name, rclcpp::Node* node,
-    const LoggerPtr& logger, const bool enabled, const std::string& frame)
+OrientEulerPublisher::OrientEulerPublisher(sbp::State* state,
+                                           const std::string& topic_name,
+                                           rclcpp::Node* node,
+                                           const LoggerPtr& logger,
+                                           const std::string& frame)
     : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::OrientEuler,
                         sbp_msg_orient_euler_t>(state, topic_name, node, logger,
-                                                enabled, frame) {}
+                                                frame) {}
 
 void OrientEulerPublisher::handle_sbp_msg(uint16_t sender_id,
                                           const sbp_msg_orient_euler_t& msg) {
@@ -23,8 +25,6 @@ void OrientEulerPublisher::handle_sbp_msg(uint16_t sender_id,
 }
 
 void OrientEulerPublisher::publish() {
-  if (enabled_) {
-    publisher_->publish(msg_);
-    msg_ = swiftnav_ros2_driver::msg::OrientEuler();
-  }
+  publisher_->publish(msg_);
+  msg_ = swiftnav_ros2_driver::msg::OrientEuler();
 }
