@@ -3,9 +3,9 @@
 ImuRawPublisher::ImuRawPublisher(sbp::State* state,
                                  const std::string& topic_name,
                                  rclcpp::Node* node, const LoggerPtr& logger,
-                                 const bool enabled, const std::string& frame)
+                                 const std::string& frame)
     : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::ImuRaw, sbp_msg_imu_raw_t>(
-          state, topic_name, node, logger, enabled, frame) {}
+          state, topic_name, node, logger, frame) {}
 
 void ImuRawPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_imu_raw_t& msg) {
@@ -23,8 +23,6 @@ void ImuRawPublisher::handle_sbp_msg(uint16_t sender_id,
 }
 
 void ImuRawPublisher::publish() {
-  if (enabled_) {
-    publisher_->publish(msg_);
-    msg_ = swiftnav_ros2_driver::msg::ImuRaw();
-  }
+  publisher_->publish(msg_);
+  msg_ = swiftnav_ros2_driver::msg::ImuRaw();
 }

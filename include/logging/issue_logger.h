@@ -61,32 +61,30 @@ inline void LOG_FUNC(const LoggerPtr& logger, const int level,
 
   if (!logger) return;
 
+  char buffer[1024];
   va_start(args, format);
-  const auto size = vsnprintf(nullptr, 0, format, args);
-  if (size < 1) return;
-  const uint32_t msg_len = static_cast<uint32_t>(size) + 1U;
-  std::vector<char> msg(msg_len);
-  vsnprintf(msg.data(), msg.size(), format, args);
+  vsnprintf(buffer, sizeof(buffer) - 1, format, args);
   va_end(args);
+
   switch (level) {
     case 0:
-      logger->logDebug(msg.data());
+      logger->logDebug(buffer);
       break;
 
     case 1:
-      logger->logInfo(msg.data());
+      logger->logInfo(buffer);
       break;
 
     case 2:
-      logger->logWarning(msg.data());
+      logger->logWarning(buffer);
       break;
 
     case 3:
-      logger->logError(msg.data());
+      logger->logError(buffer);
       break;
 
     case 4:
-      logger->logFatal(msg.data());
+      logger->logFatal(buffer);
       break;
 
     default:

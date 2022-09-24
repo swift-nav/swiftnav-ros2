@@ -18,7 +18,8 @@ enum class Publishers {
   OrientEuler,      //  9
   OrientQuat,       // 10
   TimeReference,    // 11
-  Wheeltick         // 12
+  Wheeltick,        // 12
+  PoseStamped,      // 13
 };
 
 /**

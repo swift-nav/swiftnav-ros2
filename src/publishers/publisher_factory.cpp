@@ -1,16 +1,17 @@
 #include <publishers/publisher_factory.h>
 
-#include <publishers/GPSFixPublisher.h>
-#include <publishers/NavSatFixPublisher.h>
-#include <publishers/TimeReferencePublisher.h>
 #include <publishers/angular_rate_publisher.h>
 #include <publishers/baseline_heading_publisher.h>
 #include <publishers/gnss_time_offset_publisher.h>
+#include <publishers/gpsfix_publisher.h>
 #include <publishers/imu_aux_publisher.h>
 #include <publishers/imu_raw_publisher.h>
+#include <publishers/navsatfix_publisher.h>
 #include <publishers/odometry_publisher.h>
 #include <publishers/orient_euler_publisher.h>
 #include <publishers/orient_quat_publisher.h>
+#include <publishers/posestamped_publisher.h>
+#include <publishers/timereference_publisher.h>
 #include <publishers/wheeltick_publisher.h>
 
 PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
@@ -40,14 +41,55 @@ PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
                                               frame);
       break;
 
-      ImuAux,             //  5
-          ImuRaw,         //  6
-          NavSatFix,      //  7
-          Odometry,       //  8
-          OrientEuler,    //  9
-          OrientQuat,     // 10
-          TimeReference,  // 11
-          Wheeltick       // 12
+    case Publishers::ImuAux:
+      pub = std::make_shared<ImuAuxPublisher>(state, topic_name, node, logger,
+                                              frame);
+      break;
+
+    case Publishers::ImuRaw:
+      pub = std::make_shared<ImuRawPublisher>(state, topic_name, node, logger,
+                                              frame);
+      break;
+
+    case Publishers::NavSatFix:
+      pub = std::make_shared<NavSatFixPublisher>(state, topic_name, node,
+                                                 logger, frame);
+      break;
+
+    case Publishers::Odometry:
+      pub = std::make_shared<OdometryPublisher>(state, topic_name, node, logger,
+                                                frame);
+      break;
+
+    case Publishers::OrientEuler:
+      pub = std::make_shared<OrientEulerPublisher>(state, topic_name, node,
+                                                   logger, frame);
+      break;
+
+    case Publishers::OrientQuat:
+      pub = std::make_shared<OrientQuatPublisher>(state, topic_name, node,
+                                                  logger, frame);
+      break;
+
+    case Publishers::TimeReference:
+      pub = std::make_shared<TimeReferencePublisher>(state, topic_name, node,
+                                                     logger, frame);
+      break;
+
+    case Publishers::Wheeltick:
+      pub = std::make_shared<WheeltickPublisher>(state, topic_name, node,
+                                                 logger, frame);
+      break;
+
+    case Publishers::PoseStamped:
+      pub = std::make_shared<PoseStampedPublisher>(state, topic_name, node,
+                                                   logger, frame);
+      break;
+
+    default:
+      LOG_ERROR(logger, "Publisher id: %d isn't valid",
+                static_cast<int>(pub_type));
+      break;
   }
 
   return pub;

@@ -6,8 +6,8 @@
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
 
-#include <publishers/SBP2ROS2Publisher.h>
 #include <publishers/dummy_publisher.h>
+#include <publishers/sbp2ros2_publisher.h>
 
 class GnssTimeOffsetPublisher
     : public DummyPublisher,
