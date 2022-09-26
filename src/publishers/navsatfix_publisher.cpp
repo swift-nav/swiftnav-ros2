@@ -1,7 +1,7 @@
 #include <publishers/navsatfix_publisher.h>
 #include <iostream>
 
-constexpr uint32_t STATUS_MASK = 0x00000111;
+constexpr uint8_t STATUS_MASK = 0x07;
 constexpr uint32_t MAX_TIME_DIFF = 2000;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
@@ -133,9 +133,9 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   }
 
   // Last received OBS msg tow is too old
-  u32 time_diff = (last_received_obs_tow_ > msg.tow)
-                      ? last_received_obs_tow_ - msg.tow
-                      : msg.tow - last_received_obs_tow_;
+  const u32 time_diff = (last_received_obs_tow_ > msg.tow)
+                            ? last_received_obs_tow_ - msg.tow
+                            : msg.tow - last_received_obs_tow_;
   if (time_diff > MAX_TIME_DIFF) {
     LOG_WARN(logger_,
              "Time difference between OBS message and POS_LLH_COV message is "
@@ -174,7 +174,7 @@ void NavSatFixPublisher::loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg) {
   // STATUS_FIX=0
   // STATUS_SBAS_FIX=1 Satellite based augmentation
   // STATUS_GBAS_FIX=2 Ground based augmentation
-  uint8_t status = msg.flags & STATUS_MASK;
+  const uint8_t status = msg.flags & STATUS_MASK;
   if (status == 0 || status == 5) {
     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;
   } else if (status == 1) {

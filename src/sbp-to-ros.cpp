@@ -89,7 +89,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
       case SERIAL_DATA_SOURCE: {
         std::string device, connection_str;
-        int32_t read_timeout, write_timeout;
+        int32_t read_timeout;
+        int32_t write_timeout;
         get_parameter<std::string>("device_name", device);
         get_parameter<std::string>("connection_str", connection_str);
         get_parameter<int32_t>("read_timeout", read_timeout);
@@ -100,13 +101,15 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
       case TCP_DATA_SOURCE: {
         std::string ip;
-        int32_t port, read_timeout, write_timeout;
+        int32_t port;
+        int32_t read_timeout;
+        int32_t write_timeout;
         get_parameter<std::string>("host_ip", ip);
         get_parameter<int32_t>("host_port", port);
         get_parameter<int32_t>("read_timeout", read_timeout);
         get_parameter<int32_t>("write_timeout", write_timeout);
-        data_source_ =
-            dataSourceFactory(ip, port, read_timeout, write_timeout, logger_);
+        data_source_ = dataSourceFactory(ip, static_cast<uint16_t>(port),
+                                         read_timeout, write_timeout, logger_);
       } break;
 
       default:
@@ -162,7 +165,9 @@ class SBPROS2DriverNode : public rclcpp::Node {
   /**
    * @brief Method for creating ROS2 subscribers to SBP messages
    */
-  void createSubscribers() {}
+  void createSubscribers() {
+    // This method should be used to create the ROS2 to SBP subscribers
+  }
 
   sbp::State state_;           /** @brief SBP state object */
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */

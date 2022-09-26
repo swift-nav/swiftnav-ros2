@@ -101,34 +101,35 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
   }
 }
 
-bool GPSFixPublisher::ok_to_publish(const u32& tow) {
-  u32 pos_llh_cov_time_diff = (last_received_pos_llh_cov_tow_ > tow)
-                                  ? last_received_pos_llh_cov_tow_ - tow
-                                  : tow - last_received_pos_llh_cov_tow_;
+bool GPSFixPublisher::ok_to_publish(const u32& tow) const {
+  const u32 pos_llh_cov_time_diff = (last_received_pos_llh_cov_tow_ > tow)
+                                        ? last_received_pos_llh_cov_tow_ - tow
+                                        : tow - last_received_pos_llh_cov_tow_;
 
-  u32 vel_cog_time_diff = (last_received_vel_cog_tow_ > tow)
-                              ? last_received_vel_cog_tow_ - tow
-                              : tow - last_received_vel_cog_tow_;
+  const u32 vel_cog_time_diff = (last_received_vel_cog_tow_ > tow)
+                                    ? last_received_vel_cog_tow_ - tow
+                                    : tow - last_received_vel_cog_tow_;
 
-  u32 vel_ned_cov_time_diff = (last_received_vel_ned_cov_tow_ > tow)
-                                  ? last_received_vel_ned_cov_tow_ - tow
-                                  : tow - last_received_vel_ned_cov_tow_;
+  const u32 vel_ned_cov_time_diff = (last_received_vel_ned_cov_tow_ > tow)
+                                        ? last_received_vel_ned_cov_tow_ - tow
+                                        : tow - last_received_vel_ned_cov_tow_;
 
-  u32 orient_euler_time_diff = (last_received_orient_euler_tow_ > tow)
-                                   ? last_received_orient_euler_tow_ - tow
-                                   : tow - last_received_orient_euler_tow_;
+  const u32 orient_euler_time_diff =
+      (last_received_orient_euler_tow_ > tow)
+          ? last_received_orient_euler_tow_ - tow
+          : tow - last_received_orient_euler_tow_;
 
-  u32 dops_time_diff = (last_received_dops_tow_ > tow)
-                           ? last_received_dops_tow_ - tow
-                           : tow - last_received_dops_tow_;
+  const u32 dops_time_diff = (last_received_dops_tow_ > tow)
+                                 ? last_received_dops_tow_ - tow
+                                 : tow - last_received_dops_tow_;
 
-  u32 gps_time_time_diff = (last_received_gps_time_tow_ > tow)
-                               ? last_received_gps_time_tow_ - tow
-                               : tow - last_received_gps_time_tow_;
+  const u32 gps_time_time_diff = (last_received_gps_time_tow_ > tow)
+                                     ? last_received_gps_time_tow_ - tow
+                                     : tow - last_received_gps_time_tow_;
 
-  u32 obs_time_diff = (last_received_obs_tow_ > tow)
-                          ? last_received_obs_tow_ - tow
-                          : tow - last_received_obs_tow_;
+  const u32 obs_time_diff = (last_received_obs_tow_ > tow)
+                                ? last_received_obs_tow_ - tow
+                                : tow - last_received_obs_tow_;
 
   if (pos_llh_cov_time_diff > MAX_POS_LLH_COV_TIME_DIFF) {
     std::cout << "MAX_POS_LLH_COV_TIME_DIFF" << std::endl;
