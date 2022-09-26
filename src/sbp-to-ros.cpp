@@ -53,6 +53,12 @@ class SBPROS2DriverNode : public rclcpp::Node {
     sbp_thread_ = std::thread(&SBPROS2DriverNode::processSBP, this);
   }
 
+  // Deleted methods
+  SBPROS2DriverNode(const SBPROS2DriverNode&) = delete;
+  SBPROS2DriverNode(SBPROS2DriverNode&&) = delete;
+  SBPROS2DriverNode& operator=(const SBPROS2DriverNode&) = delete;
+  SBPROS2DriverNode& operator=(SBPROS2DriverNode&&) = delete;
+
   /**
    * @brief Destroy the SBPROS2DriverNode object
    */
@@ -88,7 +94,8 @@ class SBPROS2DriverNode : public rclcpp::Node {
       } break;
 
       case SERIAL_DATA_SOURCE: {
-        std::string device, connection_str;
+        std::string device;
+        std::string connection_str;
         int32_t read_timeout;
         int32_t write_timeout;
         get_parameter<std::string>("device_name", device);
@@ -168,11 +175,6 @@ class SBPROS2DriverNode : public rclcpp::Node {
   void createSubscribers() {
     // This method should be used to create the ROS2 to SBP subscribers
   }
-
-  /**
-   * @brief Method for creating ROS2 subscribers to SBP messages
-   */
-  void createSubscribers() {}
 
   sbp::State state_;           /** @brief SBP state object */
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */
