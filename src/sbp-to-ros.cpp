@@ -169,6 +169,11 @@ class SBPROS2DriverNode : public rclcpp::Node {
     // This method should be used to create the ROS2 to SBP subscribers
   }
 
+  /**
+   * @brief Method for creating ROS2 subscribers to SBP messages
+   */
+  void createSubscribers() {}
+
   sbp::State state_;           /** @brief SBP state object */
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */
   bool exit_requested_{false}; /** @brief Thread stopping flag */
