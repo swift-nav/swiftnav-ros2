@@ -167,6 +167,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
 
     LOG_INFO(logger_, "Creating %u publishers", ids.size());
     for (uint32_t i = 0; i < ids.size(); ++i) {
+      if (ids[i] == 0) continue;
       LOG_INFO(logger_, "Adding publisher id: %d with topic: %s", ids[i],
                topics[i].c_str());
       pubs_manager_.add(publisherFactory(static_cast<Publishers>(ids[i]),

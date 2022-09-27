@@ -14,9 +14,9 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
     - [Step 4 (Add the new values to enabled_publishers_ids and enabled_publishers_topics in params.yaml)](#step-4-add-the-new-values-to-enabledpublishersids-and-enabledpublisherstopics-in-paramsyaml)
 - [Adding a new ROS2 topic to SBP message transaltion](#adding-a-new-ros2-topic-to-sbp-message-transaltion)
     - [Step 1 (Add a new class to subscribers)](#step-1-add-a-new-class-to-subscribers)
-    - [Step 2 (Add the new subscriber, to the driver)](#step-2-add-the-new-subscriber-to-the-driver)
-    - [Step 3 (Add the new cpp file to CMakeLists.txt)](#step-3-add-the-new-cpp-file-to-cmakeliststxt-1)
-    - [Step 4 (Add the new parameters to params.yaml)](#step-4-add-the-new-parameters-to-paramsyaml)
+    - [Step 2 (Add the new subscriber to subscriber_factory)](#step-2-add-the-new-subscriber-to-subscriberfactory)
+    - [Step 3 (Add the new subscriber parameters to params.yaml)](#step-3-add-the-new-subscriber-parameters-to-paramsyaml)
+    - [Step 4 (Add the new cpp file to CMakeLists.txt)](#step-4-add-the-new-cpp-file-to-cmakeliststxt)
 - [Adding custom ROS2 messages (transcribe to ROS2 an existing SBP message)](#adding-custom-ros2-messages-transcribe-to-ros2-an-existing-sbp-message)
     - [Step 1 (Add a new custom msg)](#step-1-add-a-new-custom-msg)
     - [Step 2 (Add the new msg file to CMakeLists.txt)](#step-2-add-the-new-msg-file-to-cmakeliststxt)
@@ -417,12 +417,18 @@ In order to add a new ROS2 to SBP translation unit, you should (let's assume tha
 ## Step 1 (Add a new class to subscribers)
 ```
 // Header file (imu_subscriber.h)
-class IMUSubscriber : public ROS22SBPSubscriber{
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+
+#include <subscribers/dummy_subscriber.h>
+#include <subscribers/ros2_2_sbp_subscriber.h>
+
+class IMUSubscriber : public DummySubscriber, public ROS22SBPSubscriber{
     public:
      IMUSubscriber() = delete;
 
      IMUSubscriber(rclcpp::Node* node, sbp::State* state,
-                   const std::string& topic_name, const bool enabled,
+                   const std::string& topic_name,
                    const LoggerPtr& logger);
 
     protected:
@@ -432,10 +438,12 @@ class IMUSubscriber : public ROS22SBPSubscriber{
 };
 
 // CPP file (imu_subscriber.cpp)
+#include <subscribers/imu_subscriber.h>
+
 IMUSubscriber::IMUSubscriber(rclcpp::Node* node, sbp::State* state,
-                             const std::string& topic_name, const bool enabled,
+                             const std::string& topic_name,
                              const LoggerPtr& logger)
-    : ROS22SBPSubscriber(node, state, enabled, logger),
+    : ROS22SBPSubscriber(node, state, logger),
       subscriber_(node_->create_subscription<sensor_msgs::msg::Imu>(
             topic_name, 10 ,std::bind(&IMUSubscriber::topic_callback, this, _1)))
       {}
@@ -456,60 +464,54 @@ void IMUSubscriber::topic_callback(const sensor_msgs::msg::Imu & msg)
   sbp_msg.imu_raw.gyr_y = msg.angular_velocity.y;
   sbp_msg.imu_raw.gyr_z = msg.angular_velocity.z;
 
-  if (enabled_) send_message(SbpMsgImuRaw, sbp_msg);
+  send_message(SbpMsgImuRaw, sbp_msg);
 }
 ```
 
-## Step 2 (Add the new subscriber, to the driver)
+## Step 2 (Add the new subscriber to subscriber_factory)
+Add the new subscriber Id to the Subscribers enumeration (subscriber_factory.h)
+```
+enum class Subscribers {
+  Invalid,   // Id to use in params.yaml list of enabled subscribers
+  Imu,       //  1  <--- New Subscriber
+};
+```
+Add the creation of the new subscriber to subscriberFactory function (subscriber_factory.cpp)
 ```
 #include <subscribers/imu_subscriber.h>
-
 ...
-  // Whe should modify createSubscribers()
-  void createSubscribers() {
-    bool enabled;
-    std::string topic_name;
 
-    get_parameter<bool>("imu", enabled);
-    get_parameter<std::string>("imu_topic_name", topic_name);
-    imu_subscriber_ = std::make_unique<IMUSubscriber>(this, &state_, topic_name,
-                                                      enabled, logger_);
+  switch (sub_type) {
+    // New subscriber
+    case Subscribers::Imu:
+      sub = std::make_shared<IMUSubscriber>(node, state, topic_name, logger);
+      break;
+
+    default:
+      LOG_ERROR(logger, "Subscriber id: %d isn't valid",
+                static_cast<int>(sub_type));
+      break;
   }
-
-...
-
-  // We should modify declareParameters(), to add the subcribing flags for the new subscriber
-  void declareParameters() {
-    declare_parameter<int32_t>("interface", 0);
-    declare_parameter<std::string>("sbp_file", "");
-    declare_parameter<std::string>("device_name", "");
-    declare_parameter<std::string>("connection_str", "");
-    declare_parameter<std::string>("host_ip", "");
-    declare_parameter<int32_t>("host_port", 0);
-    declare_parameter<bool>("navsatfix", true);
-    declare_parameter<bool>("timereference", true);
-    declare_parameter<bool>("my_pose2d", true);
-    declare_parameter<bool>("log_sbp_messages", false);
-    declare_parameter<std::string>("log_sbp_filepath", "");
-
-    // New flags for the new subscriber
-    declare_parameter<bool>("imu", true);
-    declare_parameter<std::string>("imu_topic_name", "");
-  }
-
-...
-
-  // And finally we add the member variable for the subscriber
-  std::unique_ptr<IMUSubscriber> imu_subscriber_;
-
 ```
 
-### Step 3 (Add the new cpp file to CMakeLists.txt)
+## Step 3 (Add the new subscriber parameters to params.yaml)
+```
+    enabled_subscribers_ids: [1]
+    enabled_subscribers_topics: ["/imudata"]
+```
+Note that in case you don't want any subscriber, you must set the parameters this way:
+```
+    enabled_subscribers_ids: [0]
+    enabled_subscribers_topics: [""]
+```
+
+
+### Step 4 (Add the new cpp file to CMakeLists.txt)
 ```
 add_executable(sbp-to-ros
   src/sbp-to-ros.cpp
-  src/publishers/NavSatFixPublisher.cpp
-  src/publishers/TimeReferencePublisher.cpp
+  src/publishers/navsatfix_publisher.cpp
+  src/publishers/timereference_publisher.cpp
 
   src/subscribers/imu_subscriber.cpp # new file
 
@@ -521,34 +523,6 @@ add_executable(sbp-to-ros
   src/logging/sbp_to_ros2_logger.cpp
   src/logging/sbp_file_logger.cpp
   )
-```
-
-### Step 4 (Add the new parameters to params.yaml)
-```
-SBPRos2Driver:
-  ros__parameters:
-    interface: 3
-    sbp_file: "/workspaces/Swift/24-185316.sbp"
-    device_name: "/dev/ttyS0"
-    connection_str: "115200|N|8|1|N"
-    host_ip: "127.0.0.1"
-    host_port: 8082
-    timeout: 2000
-    enabled_publishers_ids: [1, 3, 4, 5, 6]
-    enabled_publishers_topics:
-      [
-        "angular_rate",
-        "gnss_time_offset",
-        "gpsfix",
-        "imu_aux",
-        "imu_raw"
-      ]
-
-    imu: True                         #New parameter
-    imu_topic_name: "/my_imu_topic"   #New parameter
-
-    log_sbp_messages: True
-    log_sbp_filepath: "/workspaces/Swift"
 ```
 
 # Adding custom ROS2 messages (transcribe to ROS2 an existing SBP message)
@@ -775,4 +749,9 @@ SBPRos2Driver:
 
     log_sbp_messages: True
     log_sbp_filepath: "/workspaces/Swift"
+```
+Note that in case you don't want any publisher, you must set the parameters this way:
+```
+    enabled_publishers_ids: [0]
+    enabled_publishers_topics: [""]
 ```
