@@ -10,9 +10,9 @@ OdometrySubscriber::OdometrySubscriber(rclcpp::Node* node, sbp::State* state,
 
 void OdometrySubscriber::topic_callback(const nav_msgs::msg::Odometry& msg) {
   sbp_msg_t sbp_msg;
-  sbp_msg.odometry.tow =
-      msg.header.stamp.sec * 1000;  // + msg.header.stamp.nsec/10;
-  sbp_msg.odometry.velocity = msg.twist.twist.linear.x * 1000;
+  sbp_msg.odometry.tow = msg.header.stamp.sec * 1000;
+  sbp_msg.odometry.velocity =
+      static_cast<s32>(std::round(msg.twist.twist.linear.x * 1000.0));
   sbp_msg.odometry.flags = 2;
 
   send_message(SbpMsgOdometry, sbp_msg);
