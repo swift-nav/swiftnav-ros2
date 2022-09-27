@@ -10,11 +10,20 @@ IMUSubscriber::IMUSubscriber(rclcpp::Node* node, sbp::State* state,
           std::bind(&IMUSubscriber::topic_callback, this, _1))) {}
 
 void IMUSubscriber::topic_callback(const sensor_msgs::msg::Imu& msg) {
-  // sbp_msg_imu_aux_t sbp_imu_aux_msg; // TODO how to fill this?
   sbp_msg_t sbp_msg;
 
-  sbp_msg.imu_raw.tow = msg.header.stamp.sec * 1000;
-  sbp_msg.imu_raw.tow_f = msg.header.stamp.sec * 1000;
+  const uint32_t ms_since_epoch =
+      (msg.header.stamp.sec * 1000) + (msg.header.stamp.nanosec / 1000000U);
+
+  // I'll use here "Reference is Unknown" because PC epoch is not in the
+  // available options
+  sbp_msg.imu_raw.tow = 0b10000000000000000000000000000000;
+
+  // TODO: ***** This calculation should be confirmed
+  sbp_msg.imu_raw.tow |= ms_since_epoch / 256U;
+  sbp_msg.imu_raw.tow_f = static_cast<u8>(ms_since_epoch % 256U);
+  // TODO: ***** This calculation should be confirmed
+
   sbp_msg.imu_raw.acc_x =
       static_cast<s16>(std::round(msg.linear_acceleration.x));
   sbp_msg.imu_raw.acc_y =
