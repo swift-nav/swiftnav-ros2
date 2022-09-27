@@ -14,7 +14,8 @@
 #include <publishers/publisher_factory.h>
 #include <publishers/publisher_manager.h>
 
-//#include <subscribers/IMUSubscriber.h>
+#include <subscribers/subscriber_factory.h>
+#include <subscribers/subscriber_manager.h>
 
 #include <data_sources/sbp_data_sources.h>
 #include <utils.h>
@@ -142,6 +143,10 @@ class SBPROS2DriverNode : public rclcpp::Node {
                       rclcpp::PARAMETER_INTEGER_ARRAY);
     declare_parameter("enabled_publishers_topics",
                       rclcpp::PARAMETER_STRING_ARRAY);
+    declare_parameter("enabled_subscribers_ids",
+                      rclcpp::PARAMETER_INTEGER_ARRAY);
+    declare_parameter("enabled_subscribers_topics",
+                      rclcpp::PARAMETER_STRING_ARRAY);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
     declare_parameter<std::string>("frame_name", "gps");
@@ -164,8 +169,9 @@ class SBPROS2DriverNode : public rclcpp::Node {
     for (uint32_t i = 0; i < ids.size(); ++i) {
       LOG_INFO(logger_, "Adding publisher id: %d with topic: %s", ids[i],
                topics[i].c_str());
-      manager_.add(publisherFactory(static_cast<Publishers>(ids[i]), &state_,
-                                    topics[i], this, logger_, frame_));
+      pubs_manager_.add(publisherFactory(static_cast<Publishers>(ids[i]),
+                                         &state_, topics[i], this, logger_,
+                                         frame_));
     }
   }
 
@@ -173,7 +179,24 @@ class SBPROS2DriverNode : public rclcpp::Node {
    * @brief Method for creating ROS2 subscribers to SBP messages
    */
   void createSubscribers() {
-    // This method should be used to create the ROS2 to SBP subscribers
+    const auto ids =
+        get_parameter("enabled_subscribers_ids").as_integer_array();
+    const auto topics =
+        get_parameter("enabled_subscribers_topics").as_string_array();
+
+    if (ids.size() != topics.size()) {
+      LOG_FATAL(logger_, "Mistmached number of subscribers ids and topics");
+      exit(0);
+    }
+
+    LOG_INFO(logger_, "Creating %u subscribers", ids.size());
+    for (uint32_t i = 0; i < ids.size(); ++i) {
+      if (ids[i] == 0) continue;
+      LOG_INFO(logger_, "Adding subscriber id: %d with topic: %s", ids[i],
+               topics[i].c_str());
+      subs_manager_.add(subscriberFactory(static_cast<Subscribers>(ids[i]),
+                                          &state_, topics[i], this, logger_));
+    }
   }
 
   sbp::State state_;           /** @brief SBP state object */
@@ -181,7 +204,10 @@ class SBPROS2DriverNode : public rclcpp::Node {
   bool exit_requested_{false}; /** @brief Thread stopping flag */
   std::shared_ptr<SbpDataSource> data_source_; /** @brief data source object */
   std::shared_ptr<ROSLogger> logger_;    /** @brief ROS 2 logging object */
-  PublisherManager manager_; /** @brief Manager for all the active publishers */
+  PublisherManager
+      pubs_manager_; /** @brief Manager for all the active publishers */
+  SubscriberManager
+      subs_manager_; /** @brief Manager for all the active subscribers */
   std::shared_ptr<SBPToROS2Logger>
       sbptoros2_; /** @brief SBP to ROS2 logging object */
   std::string frame_;

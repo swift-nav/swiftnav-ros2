@@ -25,6 +25,8 @@ SBPRos2Driver:
         "wheeltick",
         "posestamped"
       ]
+    enabled_subscribers_ids: [0]
+    enabled_subscribers_topics: [""]
     log_sbp_messages: True
     log_sbp_filepath: "/workspaces/Swift"
     frame_name: "gps"

@@ -46,8 +46,9 @@ add_executable(sbp-to-ros
   src/publishers/odometry_publisher.cpp
   src/publishers/publisher_factory.cpp
   src/publishers/wheeltick_publisher.cpp
-  src/subscribers/IMUSubscriber.cpp
-  src/subscribers/OdometrySubscriber.cpp
+  src/subscribers/imu_subscriber.cpp
+  src/subscribers/odometry_subscriber.cpp
+  src/subscribers/subscriber_factory.cpp
   )
 
 
@@ -114,8 +115,8 @@ if(BUILD_TESTING)
   src/data_sources/tcp.cpp
   src/publishers/navsatfix_publisher.cpp
   src/publishers/timereference_publisher.cpp
-  src/subscribers/IMUSubscriber.cpp
-  src/subscribers/OdometrySubscriber.cpp
+  src/subscribers/imu_subscriber.cpp
+  src/subscribers/odometry_subscriber.cpp
   test/mocked_logger.cpp
   test/test_network.cpp
   test/test_serial.cpp
