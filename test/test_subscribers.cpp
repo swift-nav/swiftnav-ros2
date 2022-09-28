@@ -6,17 +6,17 @@
 #include <string>
 #include <thread>
 
+#include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/exceptions.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/imu.hpp>
 
 #include <gtest/gtest.h>
 
 #include <libsbp/cpp/state.h>
 
 #include <data_sources/sbp_data_sources.h>
-#include <subscribers/imu_subscriber.h>
-#include <subscribers/odometry_subscriber.h>
-
+#include <subscribers/subscriber_factory.h>
 #include<test/mocked_logger.h>
 
 const std::string IMU_TOPIC = "/imudata";
@@ -115,14 +115,26 @@ static bool timedOut(const uint64_t start, const uint64_t timeout) {
 LoggerPtr TestROS2toSBP::logger_;
 SBPRunner TestROS2toSBP::runner_;
 
-// *************************************************************************
-// IMUSubscriber
-TEST_F(TestROS2toSBP, EnabledIMUSubscriber) {
+TEST_F(TestROS2toSBP, CreateInvalidSubscriber) {
   // Node
   auto node = std::make_shared<rclcpp::Node>(IMU_NODE);
 
-  // Enabled Subscriber
-  IMUSubscriber subs(node.get(), runner_.getState(), IMU_TOPIC, logger_);
+  auto subs =
+      subscriberFactory(static_cast<Subscribers>(-1), runner_.getState(),
+                        "topic_test", node.get(), logger_);
+  ASSERT_TRUE(subs == nullptr);
+}
+
+// *************************************************************************
+// IMUSubscriber
+TEST_F(TestROS2toSBP, CreateIMUSubscriber) {
+  // Node
+  auto node = std::make_shared<rclcpp::Node>(IMU_NODE);
+
+  // Subscriber
+  auto subs = subscriberFactory(Subscribers::Imu, runner_.getState(), IMU_TOPIC,
+                                node.get(), logger_);
+  ASSERT_TRUE(subs);
 
   // Publisher
   auto pub = node->create_publisher<sensor_msgs::msg::Imu>(IMU_TOPIC, 1);
@@ -173,13 +185,14 @@ TEST_F(TestROS2toSBP, EnabledIMUSubscriber) {
 
 // *************************************************************************
 // OdometrySubscriber
-TEST_F(TestROS2toSBP, EnabledOdometrySubscriber) {
+TEST_F(TestROS2toSBP, CreateOdometrySubscriber) {
   // Node
   auto node = std::make_shared<rclcpp::Node>(ODOMETRY_NODE);
 
-  // Disabled Subscriber
-  OdometrySubscriber subs(node.get(), runner_.getState(), ODOMETRY_TOPIC,
-                          logger_);
+  // Subscriber
+  auto subs = subscriberFactory(Subscribers::Odometry, runner_.getState(),
+                                ODOMETRY_TOPIC, node.get(), logger_);
+  ASSERT_TRUE(subs);
 
   // Publisher
   auto pub = node->create_publisher<nav_msgs::msg::Odometry>(ODOMETRY_TOPIC, 1);
