@@ -22,9 +22,9 @@ void PoseStampedPublisher::handle_sbp_msg(uint16_t sender_id,
   }
 
   // Last received OBS msg tow is too old
-  u32 time_diff = (last_received_orient_euler_tow_ > msg.tow)
-                      ? last_received_orient_euler_tow_ - msg.tow
-                      : msg.tow - last_received_orient_euler_tow_;
+  const u32 time_diff = (last_received_orient_euler_tow_ > msg.tow)
+                            ? last_received_orient_euler_tow_ - msg.tow
+                            : msg.tow - last_received_orient_euler_tow_;
   if (time_diff > MAX_ORIENT_EULER_TIME_DIFF_) {
     LOG_WARN(logger_,
              "Time difference between ORIENT EULER message and POS ECEF "
@@ -61,6 +61,7 @@ void PoseStampedPublisher::publish() {
   publisher_->publish(msg_);
 }
 
-tf2Scalar PoseStampedPublisher::microdegreesToRads(int32_t microdegrees) {
+tf2Scalar PoseStampedPublisher::microdegreesToRads(
+    const int32_t microdegrees) const {
   return microdegrees * M_PI / 1000000 * 180.0;
 }

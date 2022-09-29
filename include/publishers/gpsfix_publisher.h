@@ -71,7 +71,7 @@ class GPSFixPublisher
    */
   void loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg);
 
-  bool ok_to_publish(const u32& tow);
+  bool ok_to_publish(const u32& tow) const;
 
   u32 last_received_pos_llh_cov_tow_{0};
   u32 last_received_vel_cog_tow_{0};

@@ -46,8 +46,9 @@ add_executable(sbp-to-ros
   src/publishers/odometry_publisher.cpp
   src/publishers/publisher_factory.cpp
   src/publishers/wheeltick_publisher.cpp
-  src/subscribers/IMUSubscriber.cpp
-  src/subscribers/OdometrySubscriber.cpp
+  src/subscribers/imu_subscriber.cpp
+  src/subscribers/odometry_subscriber.cpp
+  src/subscribers/subscriber_factory.cpp
   )
 
 
@@ -112,11 +113,22 @@ if(BUILD_TESTING)
   src/data_sources/sbp_tcp_datasource.cpp
   src/data_sources/serial.cpp
   src/data_sources/tcp.cpp
-  src/publishers/navsatfix_publisher.cpp
-  src/publishers/timereference_publisher.cpp
+  src/publishers/angular_rate_publisher.cpp
+  src/publishers/baseline_heading_publisher.cpp
+  src/publishers/gnss_time_offset_publisher.cpp
   src/publishers/gpsfix_publisher.cpp
-  src/subscribers/IMUSubscriber.cpp
-  src/subscribers/OdometrySubscriber.cpp
+  src/publishers/imu_aux_publisher.cpp
+  src/publishers/imu_raw_publisher.cpp
+  src/publishers/navsatfix_publisher.cpp
+  src/publishers/odometry_publisher.cpp
+  src/publishers/orient_euler_publisher.cpp
+  src/publishers/orient_quat_publisher.cpp
+  src/publishers/posestamped_publisher.cpp
+  src/publishers/timereference_publisher.cpp
+  src/publishers/wheeltick_publisher.cpp
+  src/subscribers/imu_subscriber.cpp
+  src/subscribers/odometry_subscriber.cpp
+  src/subscribers/subscriber_factory.cpp
   test/mocked_logger.cpp
   test/test_network.cpp
   test/test_serial.cpp

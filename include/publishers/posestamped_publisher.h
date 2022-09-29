@@ -60,7 +60,7 @@ class PoseStampedPublisher
   void publish() override;
 
  private:
-  tf2Scalar microdegreesToRads(int32_t microdegrees);
+  tf2Scalar microdegreesToRads(const int32_t microdegrees) const;
 
   u32 last_received_orient_euler_tow_{0};
   tf2::Quaternion quat_;

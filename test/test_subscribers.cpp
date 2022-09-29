@@ -6,17 +6,17 @@
 #include <string>
 #include <thread>
 
+#include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/exceptions.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/imu.hpp>
 
 #include <gtest/gtest.h>
 
 #include <libsbp/cpp/state.h>
 
 #include <data_sources/sbp_data_sources.h>
-#include <subscribers/IMUSubscriber.h>
-#include <subscribers/OdometrySubscriber.h>
-
+#include <subscribers/subscriber_factory.h>
 #include<test/mocked_logger.h>
 
 const std::string IMU_TOPIC = "/imudata";
@@ -115,49 +115,26 @@ static bool timedOut(const uint64_t start, const uint64_t timeout) {
 LoggerPtr TestROS2toSBP::logger_;
 SBPRunner TestROS2toSBP::runner_;
 
-// *************************************************************************
-// IMUSubscriber
-TEST_F(TestROS2toSBP, DisabledIMUSubscriber) {
+TEST_F(TestROS2toSBP, CreateInvalidSubscriber) {
   // Node
   auto node = std::make_shared<rclcpp::Node>(IMU_NODE);
 
-  // Disabled Subscriber
-  IMUSubscriber subs(node.get(), runner_.getState(), IMU_TOPIC, false, logger_);
-
-  // Publisher
-  auto pub = node->create_publisher<sensor_msgs::msg::Imu>(IMU_TOPIC, 1);
-
-  // Create a ROS2 Msg
-  sensor_msgs::msg::Imu imu_msg;
-
-  imu_msg.angular_velocity.x = 34;
-  imu_msg.angular_velocity.y = 23;
-  imu_msg.angular_velocity.z = 12;
-
-  // Publish
-  pub->publish(imu_msg);
-
-  // Spin until a timeout or the message is published
-  rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node);
-  executor.spin_once(std::chrono::nanoseconds(0));
-
-  const auto start =
-      std::chrono::steady_clock::now().time_since_epoch().count();
-  while ((runner_.getDataSource()->getBufferSize() == 0U) &&
-         !timedOut(start, 2 * SECONDS))
-    executor.spin_once(std::chrono::nanoseconds(10000000LL));
-
-  // Check timeout happened and no msg is received
-  ASSERT_EQ(0U, runner_.getDataSource()->getBufferSize());
+  auto subs =
+      subscriberFactory(static_cast<Subscribers>(-1), runner_.getState(),
+                        "topic_test", node.get(), logger_);
+  ASSERT_TRUE(subs == nullptr);
 }
 
-TEST_F(TestROS2toSBP, EnabledIMUSubscriber) {
+// *************************************************************************
+// IMUSubscriber
+TEST_F(TestROS2toSBP, CreateIMUSubscriber) {
   // Node
   auto node = std::make_shared<rclcpp::Node>(IMU_NODE);
 
-  // Enabled Subscriber
-  IMUSubscriber subs(node.get(), runner_.getState(), IMU_TOPIC, true, logger_);
+  // Subscriber
+  auto subs = subscriberFactory(Subscribers::Imu, runner_.getState(), IMU_TOPIC,
+                                node.get(), logger_);
+  ASSERT_TRUE(subs);
 
   // Publisher
   auto pub = node->create_publisher<sensor_msgs::msg::Imu>(IMU_TOPIC, 1);
@@ -208,50 +185,14 @@ TEST_F(TestROS2toSBP, EnabledIMUSubscriber) {
 
 // *************************************************************************
 // OdometrySubscriber
-TEST_F(TestROS2toSBP, DisabledOdometrySubscriber) {
+TEST_F(TestROS2toSBP, CreateOdometrySubscriber) {
   // Node
   auto node = std::make_shared<rclcpp::Node>(ODOMETRY_NODE);
 
-  // Disabled Subscriber
-  OdometrySubscriber subs(node.get(), runner_.getState(), ODOMETRY_TOPIC, false,
-                          logger_);
-
-  // Publisher
-  auto pub = node->create_publisher<nav_msgs::msg::Odometry>(ODOMETRY_TOPIC, 1);
-
-  // Create a ROS2 Msg
-  nav_msgs::msg::Odometry odom_msg;
-
-  odom_msg.pose.pose.position.x = 34;
-  odom_msg.pose.pose.position.y = 23;
-  odom_msg.pose.pose.position.z = 12;
-
-  // Publish
-  runner_.getDataSource()->resetBuffer();
-  pub->publish(odom_msg);
-
-  // Spin until a timeout or the message is published
-  rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node);
-  executor.spin_once(std::chrono::milliseconds(0));
-
-  const auto start =
-      std::chrono::steady_clock::now().time_since_epoch().count();
-  while ((runner_.getDataSource()->getBufferSize() == 0U) &&
-         !timedOut(start, 2 * SECONDS))
-    executor.spin_once(std::chrono::nanoseconds(10000000LL));
-
-  // Check timeout happened and no msg is received
-  ASSERT_EQ(0U, runner_.getDataSource()->getBufferSize());
-}
-
-TEST_F(TestROS2toSBP, EnabledOdometrySubscriber) {
-  // Node
-  auto node = std::make_shared<rclcpp::Node>(ODOMETRY_NODE);
-
-  // Disabled Subscriber
-  OdometrySubscriber subs(node.get(), runner_.getState(), ODOMETRY_TOPIC, true,
-                          logger_);
+  // Subscriber
+  auto subs = subscriberFactory(Subscribers::Odometry, runner_.getState(),
+                                ODOMETRY_TOPIC, node.get(), logger_);
+  ASSERT_TRUE(subs);
 
   // Publisher
   auto pub = node->create_publisher<nav_msgs::msg::Odometry>(ODOMETRY_TOPIC, 1);
