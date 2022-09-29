@@ -51,26 +51,23 @@ add_executable(sbp-to-ros
   src/subscribers/subscriber_factory.cpp
   )
 
-
   rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/AngularRate.msg"
-  "msg/BaselineHeading.msg"
-  "msg/GnssTimeOffset.msg"
-  "msg/ImuAux.msg"
-  "msg/ImuRaw.msg"
-  "msg/Odometry.msg"
-  "msg/OrientEuler.msg"
-  "msg/OrientQuat.msg"
-  "msg/Wheeltick.msg"
-  DEPENDENCIES # Add packages that above messages depend on
+    "msg/AngularRate.msg"
+    "msg/BaselineHeading.msg"
+    "msg/GnssTimeOffset.msg"
+    "msg/ImuAux.msg"
+    "msg/ImuRaw.msg"
+    "msg/Odometry.msg"
+    "msg/OrientEuler.msg"
+    "msg/OrientQuat.msg"
+    "msg/Wheeltick.msg"
+    DEPENDENCIES # Add packages that above messages depend on
   )
 
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 target_link_libraries(sbp-to-ros sbp serialport "${cpp_typesupport_target}")
 target_include_directories(sbp-to-ros PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-  # $<INSTALL_INTERFACE:include>
-  # $<INSTALL_INTERFACE:include/swiftnav_ros2_driver>)
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs nav_msgs gps_msgs tf2)
 ament_export_dependencies(rosidl_default_runtime)
@@ -94,6 +91,9 @@ if(BUILD_TESTING)
   find_package(rclcpp REQUIRED)
   find_package(sensor_msgs REQUIRED)
   find_package(nav_msgs REQUIRED)
+  find_package(gps_msgs REQUIRED)
+  find_package(rosidl_default_generators REQUIRED)
+  find_package(tf2 REQUIRED)
   link_directories("/usr/local/lib/")
   include_directories("/usr/local/include/")
 
@@ -124,6 +124,7 @@ if(BUILD_TESTING)
   src/publishers/orient_euler_publisher.cpp
   src/publishers/orient_quat_publisher.cpp
   src/publishers/posestamped_publisher.cpp
+  src/publishers/publisher_factory.cpp
   src/publishers/timereference_publisher.cpp
   src/publishers/wheeltick_publisher.cpp
   src/subscribers/imu_subscriber.cpp
@@ -134,7 +135,8 @@ if(BUILD_TESTING)
   test/test_serial.cpp
   test/test_subscribers.cpp
   test/publishers/test_nav_sat_fix_publisher.cpp
-  test/publishers/test_time_reference_publisher.cpp
+  # test/publishers/test_time_reference_publisher.cpp
+  test/publishers/test_custom_publishers.cpp
   test/test_main.cpp
   )
 
@@ -142,12 +144,11 @@ if(BUILD_TESTING)
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
 
+  rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
   target_compile_features(${PROJECT_NAME}_test PRIVATE c_std_99 cxx_std_17)  # Require C99 and C++17
-  # target_compile_options(${PROJECT_NAME}_test PRIVATE -fprofile-arcs -ftest-coverage)
-  # target_link_options(${PROJECT_NAME}_test PRIVATE --coverage)
-  # target_link_libraries(${PROJECT_NAME}_test sbp serialport gcov)
-  target_link_libraries(${PROJECT_NAME}_test sbp serialport)
-  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs)
-endif()
+  target_link_libraries(${PROJECT_NAME}_test sbp serialport "${cpp_typesupport_target}")
+  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs gps_msgs tf2)
+  ament_export_dependencies(rosidl_default_runtime)
+  endif()
 
 ament_package()
