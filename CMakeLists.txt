@@ -135,8 +135,8 @@ if(BUILD_TESTING)
   test/test_serial.cpp
   test/test_subscribers.cpp
   test/publishers/test_nav_sat_fix_publisher.cpp
-  # test/publishers/test_time_reference_publisher.cpp
-  test/publishers/test_custom_publishers.cpp
+  test/publishers/test_time_reference_publisher.cpp
+  test/publishers/test_gps_fix_publisher.cpp
   test/test_main.cpp
   )
 

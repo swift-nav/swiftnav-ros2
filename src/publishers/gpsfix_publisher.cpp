@@ -132,25 +132,24 @@ bool GPSFixPublisher::ok_to_publish(const u32& tow) const {
                                 : tow - last_received_obs_tow_;
 
   if (pos_llh_cov_time_diff > MAX_POS_LLH_COV_TIME_DIFF) {
-    std::cout << "MAX_POS_LLH_COV_TIME_DIFF" << std::endl;
     return false;
   } else if (vel_cog_time_diff > MAX_VEL_COG_TIME_DIFF) {
-    std::cout << "MAX_VEL_COG_TIME_DIFF" << std::endl;
-    return false;
+    if(last_received_vel_cog_tow_ != 0){
+      return false;
+    }
   } else if (vel_ned_cov_time_diff > MAX_VEL_NED_COV_TIME_DIFF) {
-    std::cout << "MAX_VEL_NED_COV_TIME_DIFF" << std::endl;
-    return false;
+    if(last_received_vel_ned_cov_tow_ != 0){
+      return false;
+    }
   } else if (orient_euler_time_diff > MAX_ORIENT_EULER_TIME_DIFF) {
-    std::cout << "MAX_ORIENT_EULER_TIME_DIFF" << std::endl;
-    return false;
+    if(last_received_orient_euler_tow_ != 0){
+      return false;
+    }
   } else if (dops_time_diff > MAX_DOPS_TIME_DIFF) {
-    std::cout << "MAX_DOPS_TIME_DIFF" << std::endl;
     return false;
   } else if (gps_time_time_diff > MAX_GPS_TIME_TIME_DIFF) {
-    std::cout << "MAX_GPS_TIME_TIME_DIFF" << std::endl;
     return false;
   } else if (obs_time_diff > MAX_OBS_TIME_DIFF_MS) {
-    std::cout << "MAX_OBS_TIME_DIFF_MS" << std::endl;
     return false;
   }
   return true;
