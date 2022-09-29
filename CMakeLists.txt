@@ -114,6 +114,7 @@ if(BUILD_TESTING)
   src/data_sources/tcp.cpp
   src/publishers/navsatfix_publisher.cpp
   src/publishers/timereference_publisher.cpp
+  src/publishers/gpsfix_publisher.cpp
   src/subscribers/IMUSubscriber.cpp
   src/subscribers/OdometrySubscriber.cpp
   test/mocked_logger.cpp
@@ -122,6 +123,7 @@ if(BUILD_TESTING)
   test/test_subscribers.cpp
   test/publishers/test_nav_sat_fix_publisher.cpp
   test/publishers/test_time_reference_publisher.cpp
+  test/publishers/test_gps_fix_publisher.cpp
   test/test_main.cpp
   )
 
@@ -134,7 +136,7 @@ if(BUILD_TESTING)
   # target_link_options(${PROJECT_NAME}_test PRIVATE --coverage)
   # target_link_libraries(${PROJECT_NAME}_test sbp serialport gcov)
   target_link_libraries(${PROJECT_NAME}_test sbp serialport)
-  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs)
+  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs gps_msgs tf2)
 endif()
 
 ament_package()
