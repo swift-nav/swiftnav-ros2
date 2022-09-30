@@ -5,7 +5,7 @@
 #include <rclcpp/exceptions.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-static const int g_max_loops = 200;
+static const int g_max_loops = 50;
 static const std::chrono::milliseconds g_sleep_per_loop(10);
 
 void inline wait_for_message_to_be_received(
