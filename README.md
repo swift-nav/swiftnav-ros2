@@ -6,6 +6,7 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
     - [Setup a Docker container that works with VSCode](#docker-container-for-vscode)
     - [Cloning the driver's repository](#cloning-the-drivers-repository)
 - [Building the ROS2 driver](#building-the-ros2-driver)
+- [Building the ROS2 driver using docker](#building-the-ros2-driver-using-docker)
 - [ROS2 driver configuration](#ros2-driver-configuration)
 - [Adding a new SBP message to ROS2 topic translation](#adding-a-new-sbp-message-to-ros2-topic-translation)
     - [Step 1 (Add a new class to publishers)](#step-1-add-a-new-class-to-publishers)
@@ -148,8 +149,52 @@ cd /workspaces/swift
 git clone https://github.com/swift-nav/swiftnav-ros2.git
 ```
 
-
 # Building the ROS2 driver
+
+## Step 1 (Install ROS 2 Humble):
+ Follow [instructions to install Ros2 Humble](https://docs.ros.org/en/humble/Installation.html)
+
+## Step 2 (Install libspb):
+  - In any directory you wish, clone libsp v4.4.0, init the repo and install it.
+    ```
+      git clone https://github.com/swift-nav/libsbp.git
+      cd libsbp
+      git checkout v4.4.0
+      cd c
+      git submodule init
+      mkdir build
+      cd build
+      cmake DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ 
+      make
+      sudo make install
+    ```
+## Step 3 (download driver code)
+  - Navigate to workspace directory (ie: ~/workspace)
+    ```
+     cd ~/workspace
+     mkdir src
+     cd src
+     git clone https://github.com/swift-nav/swiftnav-ros2.git
+
+## Step 4 (install dependencies)
+  - Navigate to workspace directory (ie: ~/workspace)
+  ```
+    cd ~/workspace
+    source /opt/ros/humble/setup.bash
+    sudo apt-get update
+    sudo apt-get install libserialport-dev
+    rosdep install --from-paths src --ignore-src -r -y
+  ```
+
+## Step 5 (build)
+  - Navigate to workspace directory (ie: ~/workspace)
+  ```
+    cd ~/workspace
+    source /opt/ros/humble/setup.bash
+    colcon build
+  ```
+
+# Building the ROS2 driver using docker
 In the VSCode terminal execute:
 ```
 colcon build
