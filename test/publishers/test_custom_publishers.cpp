@@ -292,21 +292,85 @@ TEST_F(TestCustomPublishers, CreateOrientEulerPublisher) {
   msg.orient_euler.flags = 4;
   msg.orient_euler.pitch = -300;
   msg.orient_euler.pitch_accuracy = 0.3;
-
-  msg.imu_raw.tow = 11223344;
+  msg.orient_euler.roll = 64;
+  msg.orient_euler.roll_accuracy = 0.92;
+  msg.orient_euler.tow = 53442;
+  msg.orient_euler.yaw = 112;
+  msg.orient_euler.yaw_accuracy = 0.67;
 
   auto check =
       [](const sbp_msg_t& msg,
          const swiftnav_ros2_driver::msg::OrientEuler& ros_msg) -> void {
-    ASSERT_EQ(msg.odometry.flags, ros_msg.flags);
-    ASSERT_EQ(msg.odometry.velocity, ros_msg.velocity);
-    ASSERT_EQ(msg.imu_raw.tow, ros_msg.tow);
+    ASSERT_EQ(msg.orient_euler.flags, ros_msg.flags);
+    ASSERT_EQ(msg.orient_euler.pitch, ros_msg.pitch);
+    ASSERT_TRUE(fabs(msg.orient_euler.pitch_accuracy - ros_msg.pitch_accuracy) <
+                DBL_EPSILON);
+    ASSERT_EQ(msg.orient_euler.roll, ros_msg.roll);
+    ASSERT_TRUE(fabs(msg.orient_euler.roll_accuracy - ros_msg.roll_accuracy) <
+                DBL_EPSILON);
+    ASSERT_EQ(msg.orient_euler.yaw, ros_msg.yaw);
+    ASSERT_TRUE(fabs(msg.orient_euler.yaw_accuracy - ros_msg.yaw_accuracy) <
+                DBL_EPSILON);
+    ASSERT_EQ(msg.orient_euler.tow, ros_msg.tow);
   };
 
   testPublisher<swiftnav_ros2_driver::msg::OrientEuler>(
       Publishers::OrientEuler, msg, SbpMsgOrientEuler, check);
 }
 
-TEST_F(TestCustomPublishers, CreateOrientQuatPublisher) {}
+TEST_F(TestCustomPublishers, CreateOrientQuatPublisher) {
+  sbp_msg_t msg;
 
-TEST_F(TestCustomPublishers, CreateWheeltickPublisher) {}
+  msg.orient_quat.flags = 4;
+  msg.orient_euler.tow = 53442;
+  msg.orient_quat.w = 33;
+  msg.orient_quat.w_accuracy = 0.9;
+  msg.orient_quat.x = 1123;
+  msg.orient_quat.x_accuracy = 0.92;
+  msg.orient_quat.y = 112;
+  msg.orient_quat.y_accuracy = 0.345;
+  msg.orient_quat.z = 21;
+  msg.orient_quat.z_accuracy = 0.81;
+
+  auto check =
+      [](const sbp_msg_t& msg,
+         const swiftnav_ros2_driver::msg::OrientQuat& ros_msg) -> void {
+    ASSERT_EQ(msg.orient_quat.flags, ros_msg.flags);
+    ASSERT_EQ(msg.orient_quat.w, ros_msg.w);
+    ASSERT_TRUE(fabs(msg.orient_quat.w_accuracy - ros_msg.w_accuracy) <
+                DBL_EPSILON);
+    ASSERT_EQ(msg.orient_quat.x, ros_msg.x);
+    ASSERT_TRUE(fabs(msg.orient_quat.x_accuracy - ros_msg.x_accuracy) <
+                DBL_EPSILON);
+    ASSERT_EQ(msg.orient_quat.y, ros_msg.y);
+    ASSERT_TRUE(fabs(msg.orient_quat.y_accuracy - ros_msg.y_accuracy) <
+                DBL_EPSILON);
+    ASSERT_EQ(msg.orient_quat.z, ros_msg.z);
+    ASSERT_TRUE(fabs(msg.orient_quat.z_accuracy - ros_msg.z_accuracy) <
+                DBL_EPSILON);
+    ASSERT_EQ(msg.orient_quat.tow, ros_msg.tow);
+  };
+
+  testPublisher<swiftnav_ros2_driver::msg::OrientQuat>(
+      Publishers::OrientQuat, msg, SbpMsgOrientQuat, check);
+}
+
+TEST_F(TestCustomPublishers, CreateWheeltickPublisher) {
+  sbp_msg_t msg;
+
+  msg.wheeltick.flags = 135;
+  msg.wheeltick.source = 2;
+  msg.wheeltick.ticks = 337454;
+  msg.wheeltick.time = 78323498493;
+
+  auto check = [](const sbp_msg_t& msg,
+                  const swiftnav_ros2_driver::msg::Wheeltick& ros_msg) -> void {
+    ASSERT_EQ(msg.wheeltick.flags, ros_msg.flags);
+    ASSERT_EQ(msg.wheeltick.source, ros_msg.source);
+    ASSERT_EQ(msg.wheeltick.ticks, ros_msg.ticks);
+    ASSERT_EQ(msg.wheeltick.time, ros_msg.time);
+  };
+
+  testPublisher<swiftnav_ros2_driver::msg::Wheeltick>(
+      Publishers::Wheeltick, msg, SbpMsgWheeltick, check);
+}
