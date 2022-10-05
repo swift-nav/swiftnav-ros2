@@ -290,6 +290,7 @@ TEST_F(TestGPSFixPublisher, posllhcovMessageTooOld) {
 }
 
 TEST_F(TestGPSFixPublisher, velCovMsgTooOld) {
+
  auto node = std::make_shared<rclcpp::Node>("TestGPSFixNode");
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
@@ -625,7 +626,7 @@ TEST_F(TestGPSFixPublisher, orientEulerMsgTooOld) {
    [&is_received](
      const gps_msgs::msg::GPSFix & msg) -> void {
        is_received = true;
- 
+
       ASSERT_EQ(msg.status.satellites_used, 3);
       ASSERT_EQ(msg.err_horz, 1);
       ASSERT_EQ(msg.err_vert, 2);
