@@ -137,6 +137,7 @@ if(BUILD_TESTING)
   test/publishers/test_nav_sat_fix_publisher.cpp
   test/publishers/test_time_reference_publisher.cpp
   test/publishers/test_gps_fix_publisher.cpp
+  test/publishers/test_custom_publishers.cpp
   test/test_main.cpp
   )
 
