@@ -3,9 +3,9 @@
 ImuAuxPublisher::ImuAuxPublisher(sbp::State* state,
                                  const std::string& topic_name,
                                  rclcpp::Node* node, const LoggerPtr& logger,
-                                 const bool enabled, const std::string& frame)
+                                 const std::string& frame)
     : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::ImuAux, sbp_msg_imu_aux_t>(
-          state, topic_name, node, logger, enabled, frame) {}
+          state, topic_name, node, logger, frame) {}
 
 void ImuAuxPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_imu_aux_t& msg) {
@@ -18,8 +18,6 @@ void ImuAuxPublisher::handle_sbp_msg(uint16_t sender_id,
 }
 
 void ImuAuxPublisher::publish() {
-  if (enabled_) {
-    publisher_->publish(msg_);
-    msg_ = swiftnav_ros2_driver::msg::ImuAux();
-  }
+  publisher_->publish(msg_);
+  msg_ = swiftnav_ros2_driver::msg::ImuAux();
 }

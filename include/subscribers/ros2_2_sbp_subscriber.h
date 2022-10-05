@@ -23,18 +23,8 @@ class ROS22SBPSubscriber{
     * (false)
     */
    ROS22SBPSubscriber(rclcpp::Node* node, sbp::State* state,
-                     const bool enabled, const LoggerPtr& logger)
-       : state_(state),
-         node_(node),
-         enabled_(enabled),
-         logger_(logger) {}
-
-   /**
-    * @brief Method to enable/disable the publishing of the ROS topic
-    *
-    * @param val Can publish (true), don't publish (false)
-    */
-   void enable(const bool val) { enabled_ = val; }
+                      const LoggerPtr& logger)
+       : state_(state), node_(node), logger_(logger) {}
 
   protected:
    /**
@@ -47,6 +37,5 @@ class ROS22SBPSubscriber{
 
    sbp::State* state_;
    rclcpp::Node* node_; /** @brief ROS 2 node object */
-   bool enabled_; /** @brief Flag that enables or disables the publishing */
    LoggerPtr logger_; /** @brief Logging facility */
 };

@@ -1,25 +1,23 @@
-#include <publishers/NavSatFixPublisher.h>
+#include <publishers/navsatfix_publisher.h>
 #include <iostream>
 
-
-constexpr uint32_t STATUS_MASK = 0b00000111;
+constexpr uint8_t STATUS_MASK = 0x07;
 constexpr uint32_t MAX_TIME_DIFF = 2000;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        const std::string& topic_name,
                                        rclcpp::Node* node,
                                        const LoggerPtr& logger,
-                                       const bool enabled,
                                        const std::string& frame)
-    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
-                        sbp_msg_obs_t, sbp_msg_pos_llh_cov_t>(
-          state, topic_name, node, logger, enabled, frame) {}
+    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_obs_t,
+                        sbp_msg_pos_llh_cov_t>(state, topic_name, node, logger,
+                                               frame) {}
 
-void NavSatFixPublisher::handle_sbp_msg(
-    uint16_t sender_id, const sbp_msg_obs_t& msg) {
+void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                        const sbp_msg_obs_t& msg) {
   (void)sender_id;
 
-  if (msg.header.t.tow != last_received_obs_tow_){
+  if (msg.header.t.tow != last_received_obs_tow_) {
     msg_ = sensor_msgs::msg::NavSatFix();
   }
 
@@ -95,41 +93,30 @@ void NavSatFixPublisher::handle_sbp_msg(
    *
    */
   sbp_packed_obs_content_t obs_content;
-  for(int i = 0; i < msg.n_obs; i++) {
+  for (int i = 0; i < msg.n_obs; i++) {
     obs_content = msg.obs[i];
 
-    if (obs_content.sid.code == 0  ||
-        obs_content.sid.code == 1  ||
-        obs_content.sid.code == 5  ||
-        obs_content.sid.code == 7  ||
-        obs_content.sid.code == 8  ||
-        obs_content.sid.code == 9  ||
-        obs_content.sid.code == 10 ||
-        obs_content.sid.code == 11 ||
-        obs_content.sid.code == 56 ||
-        obs_content.sid.code == 57 ||
-        obs_content.sid.code == 58 ) {
-        msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-      } else if (obs_content.sid.code == 2  ||
-                obs_content.sid.code == 41 ||
-                obs_content.sid.code == 42 ||
-                obs_content.sid.code == 43 ) {
-                  msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-      } else if (obs_content.sid.code >= 31  &&  obs_content.sid.code <= 40 ) {
-                  msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-      } else if (obs_content.sid.code == 3  ||
-                obs_content.sid.code == 4  ||
-                obs_content.sid.code == 29 ||
-                obs_content.sid.code == 30 ) {
-        msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS;
-      } else if (obs_content.sid.code >= 14 &&
-                obs_content.sid.code <= 28 ) {
-        msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO;
-      } else if (obs_content.sid.code == 12 ||
-                obs_content.sid.code == 13 ||
-                ( obs_content.sid.code >= 44 && obs_content.sid.code <= 55 )) {
-        msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS;
-      }
+    if (obs_content.sid.code == 0 || obs_content.sid.code == 1 ||
+        obs_content.sid.code == 5 || obs_content.sid.code == 7 ||
+        obs_content.sid.code == 8 || obs_content.sid.code == 9 ||
+        obs_content.sid.code == 10 || obs_content.sid.code == 11 ||
+        obs_content.sid.code == 56 || obs_content.sid.code == 57 ||
+        obs_content.sid.code == 58) {
+      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
+    } else if (obs_content.sid.code == 2 || obs_content.sid.code == 41 ||
+               obs_content.sid.code == 42 || obs_content.sid.code == 43) {
+      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
+    } else if (obs_content.sid.code >= 31 && obs_content.sid.code <= 40) {
+      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
+    } else if (obs_content.sid.code == 3 || obs_content.sid.code == 4 ||
+               obs_content.sid.code == 29 || obs_content.sid.code == 30) {
+      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS;
+    } else if (obs_content.sid.code >= 14 && obs_content.sid.code <= 28) {
+      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO;
+    } else if (obs_content.sid.code == 12 || obs_content.sid.code == 13 ||
+               (obs_content.sid.code >= 44 && obs_content.sid.code <= 55)) {
+      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS;
+    }
   }
 
   last_received_obs_tow_ = msg.header.t.tow;
@@ -146,11 +133,13 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   }
 
   // Last received OBS msg tow is too old
-  u32 time_diff = (last_received_obs_tow_ > msg.tow) ?
-                      last_received_obs_tow_ - msg.tow :
-                        msg.tow - last_received_obs_tow_;
-  if ( time_diff > MAX_TIME_DIFF ) {
-    LOG_WARN(logger_, "Time difference between OBS message and POS_LLH_COV message is larger than Max");
+  const u32 time_diff = (last_received_obs_tow_ > msg.tow)
+                            ? last_received_obs_tow_ - msg.tow
+                            : msg.tow - last_received_obs_tow_;
+  if (time_diff > MAX_TIME_DIFF) {
+    LOG_WARN(logger_,
+             "Time difference between OBS message and POS_LLH_COV message is "
+             "larger than Max");
     return;
   }
 
@@ -164,7 +153,8 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   publish();
 }
 
-void NavSatFixPublisher::loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg) {
+void NavSatFixPublisher::loadCovarianceMatrix(
+    const sbp_msg_pos_llh_cov_t& msg) {
   msg_.position_covariance[0] = msg.cov_e_e;
   msg_.position_covariance[1] = msg.cov_n_e;
   msg_.position_covariance[2] = -msg.cov_e_d;
@@ -175,17 +165,17 @@ void NavSatFixPublisher::loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg) 
   msg_.position_covariance[7] = -msg.cov_n_d;
   msg_.position_covariance[8] = msg.cov_d_d;
 
-  msg_.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
+  msg_.position_covariance_type =
+      sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
 }
 
 void NavSatFixPublisher::loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg) {
-
   // STATUS_NO_FIX=-1
   // STATUS_FIX=0
   // STATUS_SBAS_FIX=1 Satellite based augmentation
   // STATUS_GBAS_FIX=2 Ground based augmentation
-  uint8_t status = msg.flags & STATUS_MASK;
-  if(status == 0 || status == 5) {
+  const uint8_t status = msg.flags & STATUS_MASK;
+  if (status == 0 || status == 5) {
     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;
   } else if (status == 1) {
     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;
@@ -196,13 +186,8 @@ void NavSatFixPublisher::loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg) {
   }
 }
 
-
 void NavSatFixPublisher::publish() {
-  if (enabled_) {
-
-    msg_.header.stamp = node_->now();
-    msg_.header.frame_id = frame_;
-
-    publisher_->publish(msg_);
-  }
+  msg_.header.stamp = node_->now();
+  msg_.header.frame_id = frame_;
+  publisher_->publish(msg_);
 }

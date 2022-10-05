@@ -6,7 +6,7 @@
 #include<test/test_utils.h>
 #include<test/mocked_logger.h>
 
-#include <publishers/NavSatFixPublisher.h>
+#include <publishers/navsatfix_publisher.h>
 
 class TestNavSatFixPublisher : public ::testing::Test
 {
@@ -31,7 +31,8 @@ TEST_F(TestNavSatFixPublisher, sendMessage) {
 
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
- NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
+ NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml,
+                                          frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
@@ -97,7 +98,8 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GPS_StatusService) {
 
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
- NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
+ NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml,
+                                          frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
@@ -170,7 +172,8 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GLONAS_StatusService) {
 
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
- NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
+ NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml,
+                                          frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
@@ -242,7 +245,8 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GALILEO_StatusService) {
 
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
- NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
+ NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml,
+                                          frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
@@ -314,7 +318,8 @@ TEST_F(TestNavSatFixPublisher, SERVICE_COMPASS_StatusService) {
 
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
- NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
+ NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml,
+                                          frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
@@ -386,7 +391,8 @@ TEST_F(TestNavSatFixPublisher, timeDiff) {
 
  auto node = std::make_shared<rclcpp::Node>("TestNavSatFixNode");
  auto ml = std::make_shared<MockedLogger>();
- NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml, true, frame_name_);
+ NavSatFixPublisher nav_sat_fix_publisher(&state_, topic_name_, node.get(), ml,
+                                          frame_name_);
 
  sbp_msg_t obs_sbp_msg;
  obs_sbp_msg.obs.header.t.tow = 1;
