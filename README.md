@@ -69,12 +69,38 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
     colcon build
   ```
 
+## Step 6 (launching)
+  - Source installed Swift driver and launch driver.
+  ```
+    source install/setup.bash
+    ros2 launch swiftnav_ros2_driver sbpros2_driver.py
+  ```
+
 # Building the ROS2 driver using docker
-In the VSCode terminal execute:
-```
-colcon build
-```
-and that's it, after a few seconds you will have the driver built.
+  - Clone the repo, build Docker image, run docker image.
+  '''
+    git clone https://github.com/swift-nav/swiftnav-ros2.git
+    cd swiftnav-ros2
+    docker build -t swiftnav-ros2 .
+    docker run -it -v :/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash
+  '''
+
+  - Edit configurationo file. [ROS2 driver configuration](#ros2-driver-configuration)
+  '''
+    vi config/params.yaml
+  '''
+
+  - Build driver inside docker image.
+  '''
+    cd /mnt/workspace/
+    colcon build
+  '''
+
+  - Launch Driver
+  '''
+    source install/setup.bash
+    ros2 launch swiftnav_ros2_driver sbpros2_driver.py
+  '''
 
 # ROS2 driver configuration
 The driver offers the following configuration options:
