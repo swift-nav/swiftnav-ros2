@@ -1,10 +1,10 @@
 SBPRos2Driver:
   ros__parameters:
     interface: 3
-    sbp_file: "/workspaces/Swift/24-185316.sbp"
+    sbp_file: "/tmp/Swift/24-185316.sbp"
     device_name: "/dev/ttySAM3"
     connection_str: "115200|N|8|1|N"
-    host_ip: "127.0.0.1"
+    host_ip: "192.168.0.222"
     host_port: 55555
     read_timeout: 2000
     write_timeout: 2000
@@ -27,6 +27,6 @@ SBPRos2Driver:
       ]
     enabled_subscribers_ids: [0]
     enabled_subscribers_topics: [""]
-    log_sbp_messages: True
-    log_sbp_filepath: "/workspaces/Swift"
+    log_sbp_messages: False
+    log_sbp_filepath: "/tmp/Swift"
     frame_name: "gps"
