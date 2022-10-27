@@ -113,7 +113,7 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
   ```
 
 ## Step 4 (launching)
-  - Launch Driver
+  - Launching the driver inside the docker image may require access to serial device or tcp ports inside the docker.
   ```
     source install/setup.bash
     ros2 launch swiftnav_ros2_driver sbpros2_driver.py
