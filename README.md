@@ -61,7 +61,13 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
     rosdep install --from-paths src --ignore-src -r -y
   ```
 
-## Step 5 (build)
+## Step 5 (edit configuration)
+  - Edit configurationo file. See [ROS2 driver configuration](#ros2-driver-configuration)
+  ```
+    vi config/params.yaml
+  ```
+
+## Step 6 (build)
   - Navigate to workspace directory (ie: ~/workspace)
   ```
     cd ~/workspace
@@ -69,11 +75,17 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
     colcon build
   ```
 
-## Step 6 (launching)
+## Step 7 (launching)
   - Source installed Swift driver and launch driver.
   ```
     source install/setup.bash
     ros2 launch swiftnav_ros2_driver sbpros2_driver.py
+  ```
+
+## Step 8 (change configuration)
+  - Changing the configuration files can be done from the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
+  ```
+    vi install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
   ```
 
 # Building the ROS2 driver using docker
@@ -88,7 +100,7 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
   ```
 
 ## Step 2 (edit configuration)
-  - Edit configurationo file. [ROS2 driver configuration](#ros2-driver-configuration)
+  - Edit configurationo file. See [ROS2 driver configuration](#ros2-driver-configuration)
   ```
     vi config/params.yaml
   ```
@@ -105,6 +117,12 @@ Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
   ```
     source install/setup.bash
     ros2 launch swiftnav_ros2_driver sbpros2_driver.py
+  ```
+
+## Step 6 (change configuration)
+  - Changing the configuration files can be done from the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
+  ```
+    vi install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
   ```
 
 # ROS2 driver configuration
