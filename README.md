@@ -1,5 +1,5 @@
 # **swiftnav-ros2**
-Swift Navigation's ROS2 SBP Driver for Piksi multi/Duro, PGM, STEP and EVK
+Swift Navigation's ROS2 SBP Driver for Piksi Multi/Duro, PGM, and PGM EVK
 
 # **Table of contents**
 - [Building the ROS2 driver](#building-the-ros2-driver)
