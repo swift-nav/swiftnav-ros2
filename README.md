@@ -82,10 +82,15 @@ Swift Navigation's ROS2 SBP Driver for Piksi Multi/Duro, PGM, and PGM EVK
     ros2 launch swiftnav_ros2_driver sbpros2_driver.py
   ```
 
-## Step 8 (change configuration)
+## Step 8 (change configuration & viewing topics)
   - Changing the configuration files can be done from the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
   ```
     vi install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
+  ```
+  - Swift specific SBP messages are not part of the ROS2 standard library, thus the following command must be run in any terminal that is used for intergacing with this driver. (ie: echoing the angular_rate message in a new terminal)
+  ```
+    source install/setup.bash
+    ros2 topic echo /angular_rate
   ```
 
 # Building the ROS2 driver using docker

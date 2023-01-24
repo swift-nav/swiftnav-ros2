@@ -128,7 +128,7 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
   // OBS msg has not arrived yet.
   if (last_received_obs_tow_ == 0) {
-    LOG_WARN(logger_, "Obs message has not arrived yet. Not publishing");
+    LOG_WARN(logger_, "Obs message has not arrived yet. Not publishing msg: navsatfix");
     return;
   }
 
