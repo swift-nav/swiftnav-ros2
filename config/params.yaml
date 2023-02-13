@@ -2,10 +2,10 @@ SBPRos2Driver:
   ros__parameters:
     interface: 3
     sbp_file: "/workspaces/Swift/24-185316.sbp"
-    device_name: "/dev/ttySAM3"
+    device_name: "/dev/ttyUSB0"
     connection_str: "115200|N|8|1|N"
     host_ip: "192.168.0.222"
-    host_port: 55555
+    host_port: 55556
     read_timeout: 2000
     write_timeout: 2000
     enabled_publishers_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]

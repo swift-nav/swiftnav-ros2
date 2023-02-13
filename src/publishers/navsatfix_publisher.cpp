@@ -1,190 +1,194 @@
+/*
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include <publishers/navsatfix_publisher.h>
 #include <iostream>
 
-constexpr uint8_t STATUS_MASK = 0x07;
-constexpr uint32_t MAX_TIME_DIFF = 2000;
+
+#define SBP_POS_LLH_FIX_MODE_INVALID (0)
+#define SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION (1)
+#define SBP_POS_LLH_FIX_MODE_DIFFERENTIAL_GNSS (2)
+#define SBP_POS_LLH_FIX_MODE_FLOAT_RTK (3)
+#define SBP_POS_LLH_FIX_MODE_FIXED_RTK (4)
+#define SBP_POS_LLH_FIX_MODE_DEAD_RECKONING (5)
+#define SBP_POS_LLH_FIX_MODE_SBAS_POSITION (6)
+
+
+// GNSS Signal Code Identifier
+typedef enum {
+  CODE_GPS_L1CA = 0,
+  CODE_GPS_L2CM = 1,
+  CODE_SBAS_L1CA = 2,
+  CODE_GLO_L1OF = 3,
+  CODE_GLO_L2OF = 4,
+  CODE_GPS_L1P = 5,
+  CODE_GPS_L2P = 6,
+  CODE_GPS_L2CL = 7,
+  CODE_GPS_L2CX = 8,
+  CODE_GPS_L5I = 9,
+  CODE_GPS_L5Q = 10,
+  CODE_GPS_L5X = 11,
+  CODE_BDS2_B1 = 12,
+  CODE_BDS2_B2 = 13,
+  CODE_GAL_E1B = 14,
+  CODE_GAL_E1C = 15,
+  CODE_GAL_E1X = 16,
+  CODE_GAL_E6B = 17,
+  CODE_GAL_E6C = 18,
+  CODE_GAL_E6X = 19,
+  CODE_GAL_E7I = 20,
+  CODE_GAL_E7Q = 21,
+  CODE_GAL_E7X = 22,
+  CODE_GAL_E8I = 23,
+  CODE_GAL_E8Q = 24,
+  CODE_GAL_E8X = 25,
+  CODE_GAL_E5I = 26,
+  CODE_GAL_E5Q = 27,
+  CODE_GAL_E5X = 28,
+  CODE_GLO_L1P = 29,
+  CODE_GLO_L2P = 30,
+  CODE_BDS3_B1CI = 44,
+  CODE_BDS3_B1CQ = 45,
+  CODE_BDS3_B1CX = 46,
+  CODE_BDS3_B5I = 47,
+  CODE_BDS3_B5Q = 48,
+  CODE_BDS3_B5X = 49,
+  CODE_BDS3_B7I = 50,
+  CODE_BDS3_B7Q = 51,
+  CODE_BDS3_B7X = 52,
+  CODE_BDS3_B3I = 53,
+  CODE_BDS3_B3Q = 54,
+  CODE_BDS3_B3X = 55,
+  CODE_GPS_L1CI = 56,
+  CODE_GPS_L1CQ = 57,
+  CODE_GPS_L1CX = 58
+} gnss_signal_code_t;
+
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        const std::string& topic_name,
                                        rclcpp::Node* node,
                                        const LoggerPtr& logger,
                                        const std::string& frame)
-    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_obs_t,
+    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_measurement_state_t,
                         sbp_msg_pos_llh_cov_t>(state, topic_name, node, logger,
                                                frame) {}
 
-void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                        const sbp_msg_obs_t& msg) {
+void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
+                                         const sbp_msg_measurement_state_t& msg ) {
   (void)sender_id;
 
-  if (msg.header.t.tow != last_received_obs_tow_) {
-    msg_ = sensor_msgs::msg::NavSatFix();
-  }
+  status_service = 0;
 
-  /**
-   * As per sbp lib documentation:
-   *
-   * 0  GPS L1CA
-   * 1  GPS L2CM
-   * 5  GPS L1P
-   * 6  GPS L2P
-   * 7  GPS L2CL
-   * 8  GPS L2CX
-   * 9  GPS L5I
-   * 10 GPS L5Q
-   * 11 GPS L5X
-   * 56 GPS L1CI
-   * 57 GPS L1CQ
-   * 58 GPS L1CX
-   *
-   * 2  SBAS L1CA
-   * 41 SBAS L5I
-   * 42 SBAS L5Q
-   * 43 SBAS L5X
-   *
-   * 3  GLO L1OF
-   * 4  GLO L20F
-   * 29 GLO L1P
-   * 30 GLO L2P
-   *
-   * 12 BDS2 B1
-   * 13 BDS2 B2
-   * 44 BDS3 B1CI
-   * 45 BDS3 B1CQ
-   * 46 BDS3 B1CX
-   * 47 BDS3 B5I
-   * 48 BDS3 B5Q
-   * 49 BDS3 B5X
-   * 50 BDS3 B7I
-   * 51 BDS3 B7Q
-   * 52 BDS3 B7X
-   * 53 BDS3 B3I
-   * 54 BDS3 B3Q
-   * 55 BDS3 B3X
-   *
-   * 14 GAL E1B
-   * 15 GAL E1C
-   * 16 GAL E1X
-   * 17 GAL E6B
-   * 18 GAL E6C
-   * 19 GAL E6X
-   * 20 GAL E7I
-   * 21 GAL E7Q
-   * 22 GAL E7X
-   * 23 GAL E8I
-   * 24 GAL E8I
-   * 25 GAL E8X
-   * 26 GAL E5I
-   * 27 GAL E5Q
-   * 28 GAL E5X
-   *
-   * 31 QZS L1CA
-   * 32 QZS L1CI
-   * 33 QZS L1CQ
-   * 34 QZS L1CX
-   * 35 QZS L2CM
-   * 36 QZS L2CL
-   *
-   * NavStatus message definition:
-   * SERVICE_GPS=1
-   * SERVICE_GLONASS=2
-   * SERVICE_COMPASS=4
-   * SERVICE_GALILEO=8
-   *
-   */
-  sbp_packed_obs_content_t obs_content;
-  for (int i = 0; i < msg.n_obs; i++) {
-    obs_content = msg.obs[i];
+  sbp_measurement_state_t state;
+  for ( int i = 0; i < msg.n_states; i++ ) {
+    state = msg.states[i];
 
-    if (obs_content.sid.code == 0 || obs_content.sid.code == 1 ||
-        obs_content.sid.code == 5 || obs_content.sid.code == 7 ||
-        obs_content.sid.code == 8 || obs_content.sid.code == 9 ||
-        obs_content.sid.code == 10 || obs_content.sid.code == 11 ||
-        obs_content.sid.code == 56 || obs_content.sid.code == 57 ||
-        obs_content.sid.code == 58) {
-      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-    } else if (obs_content.sid.code == 2 || obs_content.sid.code == 41 ||
-               obs_content.sid.code == 42 || obs_content.sid.code == 43) {
-      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-    } else if (obs_content.sid.code >= 31 && obs_content.sid.code <= 40) {
-      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
-    } else if (obs_content.sid.code == 3 || obs_content.sid.code == 4 ||
-               obs_content.sid.code == 29 || obs_content.sid.code == 30) {
-      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS;
-    } else if (obs_content.sid.code >= 14 && obs_content.sid.code <= 28) {
-      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO;
-    } else if (obs_content.sid.code == 12 || obs_content.sid.code == 13 ||
-               (obs_content.sid.code >= 44 && obs_content.sid.code <= 55)) {
-      msg_.status.service |= sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS;
+    if ( state.cn0 > 0 ) {
+      switch( state.mesid.code ) {
+        case CODE_GPS_L1CA:
+        case CODE_GPS_L2CM:
+        case CODE_GPS_L1P:
+        case CODE_GPS_L2P:
+        case CODE_GPS_L2CL:
+        case CODE_GPS_L2CX:
+        case CODE_GPS_L5I:
+        case CODE_GPS_L5Q:
+        case CODE_GPS_L5X:
+        case CODE_GPS_L1CI:
+        case CODE_GPS_L1CQ:
+        case CODE_GPS_L1CX: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS; break;
+
+        case CODE_GLO_L1OF:
+        case CODE_GLO_L2OF:
+        case CODE_GLO_L1P:
+        case CODE_GLO_L2P: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS; break;
+
+        case CODE_GAL_E1B:
+        case CODE_GAL_E1C:
+        case CODE_GAL_E1X:
+        case CODE_GAL_E6B:
+        case CODE_GAL_E6C:
+        case CODE_GAL_E6X:
+        case CODE_GAL_E7I:
+        case CODE_GAL_E7Q:
+        case CODE_GAL_E7X:
+        case CODE_GAL_E8I:
+        case CODE_GAL_E8Q:
+        case CODE_GAL_E8X:
+        case CODE_GAL_E5I:
+        case CODE_GAL_E5Q:
+        case CODE_GAL_E5X: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO; break;
+
+        case CODE_BDS2_B1:
+        case CODE_BDS2_B2:
+        case CODE_BDS3_B1CI:
+        case CODE_BDS3_B1CQ:
+        case CODE_BDS3_B1CX:
+        case CODE_BDS3_B5I:
+        case CODE_BDS3_B5Q:
+        case CODE_BDS3_B5X:
+        case CODE_BDS3_B7I:
+        case CODE_BDS3_B7Q:
+        case CODE_BDS3_B7X:
+        case CODE_BDS3_B3I:
+        case CODE_BDS3_B3Q:
+        case CODE_BDS3_B3X: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS; break;
+
+      } // switch()
     }
-  }
-
-  last_received_obs_tow_ = msg.header.t.tow;
+  } // for()
 }
 
-void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                        const sbp_msg_pos_llh_cov_t& msg) {
+
+void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
+                                         const sbp_msg_pos_llh_cov_t& msg ) {
   (void)sender_id;
 
-  // OBS msg has not arrived yet.
-  if (last_received_obs_tow_ == 0) {
-    LOG_WARN(logger_, "Obs message has not arrived yet. Not publishing msg: navsatfix");
-    return;
+  msg_ = sensor_msgs::msg::NavSatFix();
+
+  switch( msg.flags & SBP_POS_LLH_FIX_MODE_MASK ) {
+    case SBP_POS_LLH_FIX_MODE_INVALID :              msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;   break;
+    case SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION: msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;      break;
+    case SBP_POS_LLH_FIX_MODE_DIFFERENTIAL_GNSS:     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX; break;
+    case SBP_POS_LLH_FIX_MODE_FLOAT_RTK:             msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX; break;
+    case SBP_POS_LLH_FIX_MODE_FIXED_RTK:             msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX; break;
+    case SBP_POS_LLH_FIX_MODE_DEAD_RECKONING:        msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;      break;
+    case SBP_POS_LLH_FIX_MODE_SBAS_POSITION:         msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_SBAS_FIX; break;
+    default:                                         msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;
+  } // switch()
+
+  if ( sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX != msg_.status.status ) {
+    msg_.status.service = status_service;
+
+    msg_.latitude  = msg.lat;
+    msg_.longitude = msg.lon;
+    msg_.altitude  = msg.height;
+
+    msg_.position_covariance[0] =  msg.cov_e_e;
+    msg_.position_covariance[1] =  msg.cov_n_e;
+    msg_.position_covariance[2] = -msg.cov_e_d;
+    msg_.position_covariance[3] =  msg.cov_n_e;
+    msg_.position_covariance[4] =  msg.cov_n_n;
+    msg_.position_covariance[5] = -msg.cov_n_d;
+    msg_.position_covariance[6] = -msg.cov_e_d;
+    msg_.position_covariance[7] = -msg.cov_n_d;
+    msg_.position_covariance[8] =  msg.cov_d_d;
+    msg_.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
   }
-
-  // Last received OBS msg tow is too old
-  const u32 time_diff = (last_received_obs_tow_ > msg.tow)
-                            ? last_received_obs_tow_ - msg.tow
-                            : msg.tow - last_received_obs_tow_;
-  if (time_diff > MAX_TIME_DIFF) {
-    LOG_WARN(logger_,
-             "Time difference between OBS message and POS_LLH_COV message is "
-             "larger than Max");
-    return;
-  }
-
-  loadCovarianceMatrix(msg);
-  loadStatusFlag(msg);
-
-  msg_.latitude = msg.lat;
-  msg_.longitude = msg.lon;
-  msg_.altitude = msg.height;
 
   publish();
 }
 
-void NavSatFixPublisher::loadCovarianceMatrix(
-    const sbp_msg_pos_llh_cov_t& msg) {
-  msg_.position_covariance[0] = msg.cov_e_e;
-  msg_.position_covariance[1] = msg.cov_n_e;
-  msg_.position_covariance[2] = -msg.cov_e_d;
-  msg_.position_covariance[3] = msg.cov_n_e;
-  msg_.position_covariance[4] = msg.cov_n_n;
-  msg_.position_covariance[5] = -msg.cov_n_d;
-  msg_.position_covariance[6] = -msg.cov_e_d;
-  msg_.position_covariance[7] = -msg.cov_n_d;
-  msg_.position_covariance[8] = msg.cov_d_d;
-
-  msg_.position_covariance_type =
-      sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
-}
-
-void NavSatFixPublisher::loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg) {
-  // STATUS_NO_FIX=-1
-  // STATUS_FIX=0
-  // STATUS_SBAS_FIX=1 Satellite based augmentation
-  // STATUS_GBAS_FIX=2 Ground based augmentation
-  const uint8_t status = msg.flags & STATUS_MASK;
-  if (status == 0 || status == 5) {
-    msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;
-  } else if (status == 1) {
-    msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;
-  } else if (status >= 2 && status <= 4) {
-    msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX;
-  } else if (status == 6) {
-    msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_SBAS_FIX;
-  }
-}
 
 void NavSatFixPublisher::publish() {
   msg_.header.stamp = node_->now();
