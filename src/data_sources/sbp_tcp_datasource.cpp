@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2010-2022 Swift Navigation Inc.
+ * Contact: Swift Navigation <dev@swift-nav.com>
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include <data_sources/sbp_tcp_datasource.h>
 #include <cstring>
 #include <iostream>
@@ -14,6 +26,7 @@ SbpTCPDataSource::SbpTCPDataSource(const LoggerPtr& logger,
 }
 
 s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
+  int32_t read_bytes = 0;
   if (!buffer) {
     LOG_ERROR(logger_, "Buffer passed to SbpTCPDataSource::read is NULL");
     return -1;
@@ -25,7 +38,13 @@ s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
     return -1;
   }
 
-  return tcp_->read(buffer, buffer_length);
+  read_bytes = tcp_->read(buffer, buffer_length);
+
+  // Attempt to reconnect on error
+  if (-1 == read_bytes){
+      tcp_->open();
+  }
+  return read_bytes;
 }
 
 s32 SbpTCPDataSource::write(const u8* buffer, u32 buffer_length) {

@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2010-2022 Swift Navigation Inc.
+ * Contact: Swift Navigation <dev@swift-nav.com>
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include <data_sources/tcp.h>
 
 #if defined(__linux__)
@@ -175,7 +187,7 @@ bool TCP::setNonBlocking() noexcept {
 bool TCP::connectSocket() noexcept {
   struct sockaddr_in server;
 
-  LOG_INFO(logger_, "Connecting...");
+  LOG_INFO(logger_, "Attempting to connecting to %s:%u",ip_.c_str(),port_);
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = inet_addr(ip_.c_str());
   server.sin_port = htons(port_);
@@ -203,6 +215,7 @@ bool TCP::connectSocket() noexcept {
         break;
 
       default:
+        LOG_INFO(logger_, "Connected");
         return (FD_ISSET(socket_id_, &connect_set));
         break;
     }
