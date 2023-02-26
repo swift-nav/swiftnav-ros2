@@ -14,63 +14,54 @@
 #include <iostream>
 
 
-#define SBP_POS_LLH_FIX_MODE_INVALID (0)
-#define SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION (1)
-#define SBP_POS_LLH_FIX_MODE_DIFFERENTIAL_GNSS (2)
-#define SBP_POS_LLH_FIX_MODE_FLOAT_RTK (3)
-#define SBP_POS_LLH_FIX_MODE_FIXED_RTK (4)
-#define SBP_POS_LLH_FIX_MODE_DEAD_RECKONING (5)
-#define SBP_POS_LLH_FIX_MODE_SBAS_POSITION (6)
-
-
 // GNSS Signal Code Identifier
 typedef enum {
-  CODE_GPS_L1CA = 0,
-  CODE_GPS_L2CM = 1,
-  CODE_SBAS_L1CA = 2,
-  CODE_GLO_L1OF = 3,
-  CODE_GLO_L2OF = 4,
-  CODE_GPS_L1P = 5,
-  CODE_GPS_L2P = 6,
-  CODE_GPS_L2CL = 7,
-  CODE_GPS_L2CX = 8,
-  CODE_GPS_L5I = 9,
-  CODE_GPS_L5Q = 10,
-  CODE_GPS_L5X = 11,
-  CODE_BDS2_B1 = 12,
-  CODE_BDS2_B2 = 13,
-  CODE_GAL_E1B = 14,
-  CODE_GAL_E1C = 15,
-  CODE_GAL_E1X = 16,
-  CODE_GAL_E6B = 17,
-  CODE_GAL_E6C = 18,
-  CODE_GAL_E6X = 19,
-  CODE_GAL_E7I = 20,
-  CODE_GAL_E7Q = 21,
-  CODE_GAL_E7X = 22,
-  CODE_GAL_E8I = 23,
-  CODE_GAL_E8Q = 24,
-  CODE_GAL_E8X = 25,
-  CODE_GAL_E5I = 26,
-  CODE_GAL_E5Q = 27,
-  CODE_GAL_E5X = 28,
-  CODE_GLO_L1P = 29,
-  CODE_GLO_L2P = 30,
-  CODE_BDS3_B1CI = 44,
-  CODE_BDS3_B1CQ = 45,
-  CODE_BDS3_B1CX = 46,
-  CODE_BDS3_B5I = 47,
-  CODE_BDS3_B5Q = 48,
-  CODE_BDS3_B5X = 49,
-  CODE_BDS3_B7I = 50,
-  CODE_BDS3_B7Q = 51,
-  CODE_BDS3_B7X = 52,
-  CODE_BDS3_B3I = 53,
-  CODE_BDS3_B3Q = 54,
-  CODE_BDS3_B3X = 55,
-  CODE_GPS_L1CI = 56,
-  CODE_GPS_L1CQ = 57,
-  CODE_GPS_L1CX = 58
+  CODE_GPS_L1CA   =  0,
+  CODE_GPS_L2CM   =  1,
+  CODE_SBAS_L1CA  =  2,
+  CODE_GLO_L1OF   =  3,
+  CODE_GLO_L2OF   =  4,
+  CODE_GPS_L1P    =  5,
+  CODE_GPS_L2P    =  6,
+  CODE_GPS_L2CL   =  7,
+  CODE_GPS_L2CX   =  8,
+  CODE_GPS_L5I    =  9,
+  CODE_GPS_L5Q    = 10,
+  CODE_GPS_L5X    = 11,
+  CODE_BDS2_B1    = 12,
+  CODE_BDS2_B2    = 13,
+  CODE_GAL_E1B    = 14,
+  CODE_GAL_E1C    = 15,
+  CODE_GAL_E1X    = 16,
+  CODE_GAL_E6B    = 17,
+  CODE_GAL_E6C    = 18,
+  CODE_GAL_E6X    = 19,
+  CODE_GAL_E7I    = 20,
+  CODE_GAL_E7Q    = 21,
+  CODE_GAL_E7X    = 22,
+  CODE_GAL_E8I    = 23,
+  CODE_GAL_E8Q    = 24,
+  CODE_GAL_E8X    = 25,
+  CODE_GAL_E5I    = 26,
+  CODE_GAL_E5Q    = 27,
+  CODE_GAL_E5X    = 28,
+  CODE_GLO_L1P    = 29,
+  CODE_GLO_L2P    = 30,
+  CODE_BDS3_B1CI  = 44,
+  CODE_BDS3_B1CQ  = 45,
+  CODE_BDS3_B1CX  = 46,
+  CODE_BDS3_B5I   = 47,
+  CODE_BDS3_B5Q   = 48,
+  CODE_BDS3_B5X   = 49,
+  CODE_BDS3_B7I   = 50,
+  CODE_BDS3_B7Q   = 51,
+  CODE_BDS3_B7X   = 52,
+  CODE_BDS3_B3I   = 53,
+  CODE_BDS3_B3Q   = 54,
+  CODE_BDS3_B3X   = 55,
+  CODE_GPS_L1CI   = 56,
+  CODE_GPS_L1CQ   = 57,
+  CODE_GPS_L1CX   = 58
 } gnss_signal_code_t;
 
 
@@ -85,11 +76,12 @@ NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
 
 void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
                                          const sbp_msg_measurement_state_t& msg ) {
+  sbp_measurement_state_t state;
+
   (void)sender_id;
 
   status_service = 0;
 
-  sbp_measurement_state_t state;
   for ( int i = 0; i < msg.n_states; i++ ) {
     state = msg.states[i];
 
@@ -106,12 +98,16 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
         case CODE_GPS_L5X:
         case CODE_GPS_L1CI:
         case CODE_GPS_L1CQ:
-        case CODE_GPS_L1CX: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS; break;
+        case CODE_GPS_L1CX:
+          status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
+          break;
 
         case CODE_GLO_L1OF:
         case CODE_GLO_L2OF:
         case CODE_GLO_L1P:
-        case CODE_GLO_L2P: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS; break;
+        case CODE_GLO_L2P:
+          status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS;
+          break;
 
         case CODE_GAL_E1B:
         case CODE_GAL_E1C:
@@ -127,7 +123,9 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
         case CODE_GAL_E8X:
         case CODE_GAL_E5I:
         case CODE_GAL_E5Q:
-        case CODE_GAL_E5X: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO; break;
+        case CODE_GAL_E5X:
+          status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO;
+          break;
 
         case CODE_BDS2_B1:
         case CODE_BDS2_B2:
@@ -142,10 +140,12 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
         case CODE_BDS3_B7X:
         case CODE_BDS3_B3I:
         case CODE_BDS3_B3Q:
-        case CODE_BDS3_B3X: status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS; break;
+        case CODE_BDS3_B3X:
+          status_service |= sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS;
+          break;
 
       } // switch()
-    }
+    } // if()
   } // for()
 }
 
@@ -157,7 +157,6 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
   msg_ = sensor_msgs::msg::NavSatFix();
 
   switch( msg.flags & SBP_POS_LLH_FIX_MODE_MASK ) {
-    case SBP_POS_LLH_FIX_MODE_INVALID :              msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;   break;
     case SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION: msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;      break;
     case SBP_POS_LLH_FIX_MODE_DIFFERENTIAL_GNSS:     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX; break;
     case SBP_POS_LLH_FIX_MODE_FLOAT_RTK:             msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX; break;
