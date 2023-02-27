@@ -22,13 +22,14 @@
 #include <publishers/sbp2ros2_publisher.h>
 
 /**
- * @brief Class that listens for sbp_msg_pos_llh_cov_t,
- * publishing a sensor_msgs::msg::NavSatFix ros2 message.
+ * @brief Class publishing ROS2 sensor_msgs::msg::NavSatFix message.
  *
  */
 class NavSatFixPublisher
     : public DummyPublisher,
-      public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_measurement_state_t,
+      public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
+                               sbp_msg_measurement_state_t,
+                               sbp_msg_utc_time_t,
                                sbp_msg_pos_llh_cov_t> {
  public:
   NavSatFixPublisher() = delete;
@@ -55,6 +56,15 @@ class NavSatFixPublisher
   void handle_sbp_msg(uint16_t sender_id, const sbp_msg_measurement_state_t& msg);
 
   /**
+   * @brief Handles a sbp_msg_utc_time_t message. It gets the
+   * time stamp.
+   *
+   * @param sender_id Ignored
+   * @param msg Incoming sbp_msg_utc_time_t
+   */
+  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_utc_time_t& msg);
+
+  /**
    * @brief Handles a sbp_msg_pos_llh_cov_t message. It gets the position mode,
    * latitude, longitude, altitude and covariance matrix.
    *
@@ -73,6 +83,8 @@ class NavSatFixPublisher
 
  private:
 
-  uint16_t status_service;
+  uint32_t last_received_utc_time_tow    = -1;
+  uint32_t last_received_pos_llh_cov_tow = -2;
 
+  uint16_t status_service;
 };

@@ -14,6 +14,73 @@
 #include <iostream>
 
 
+//!! Temporary here
+//--------------------------------------------------------
+#define LINUX_TIME_20200101   1577836800
+
+#define FIRST_YEAR            2020
+#define DAYS_IN_2020_YEAR     366
+
+#define DAYS_IN_YEAR          365
+#define DAYS_IN_LEAP_YEAR     (DAYS_IN_YEAR + 1)
+#define DAYS_IN_WEEK          7
+#define HOURS_IN_DAY          24
+#define MINUTES_IN_HOUR       60
+#define SECONDS_IN_MINUTE     60
+#define SECONDS_IN_HOUR       (SECONDS_IN_MINUTE * MINUTES_IN_HOUR)
+#define SECONDS_IN_DAY        (HOURS_IN_DAY * SECONDS_IN_HOUR)
+#define SECONDS_IN_WEEK       (DAYS_IN_WEEK * SECONDS_IN_DAY)
+
+
+const int days_in_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+
+static int IsLeapYear( int year ) {
+
+  return ((0 == (year % 4)) && (0 != (year % 100))) || (0 == (year % 400));
+}
+
+
+time_t Utils_UtcToLinuxTime( unsigned int year, unsigned int month, unsigned int day,
+                             unsigned int hours, unsigned int minutes, unsigned int seconds )
+{
+   unsigned int i;
+   unsigned int yr   = FIRST_YEAR;
+   unsigned int days = 0;
+   time_t linux_seconds;
+
+   while ( yr < year )
+   {
+      days += IsLeapYear(yr) ? DAYS_IN_LEAP_YEAR : DAYS_IN_YEAR;
+      yr++;
+   }
+
+   for ( i = 0; i < (month-1); i++ )
+   {
+      days += days_in_month[ i ];
+   }
+
+   if ( IsLeapYear(year) && (month > 2) )
+   {
+      days += day;
+   }
+   else
+   {
+      days += day - 1;
+   }
+
+   linux_seconds = LINUX_TIME_20200101 +
+                   days    * SECONDS_IN_DAY +
+                   hours   * SECONDS_IN_HOUR +
+                   minutes * SECONDS_IN_MINUTE +
+                   seconds;
+
+   return linux_seconds;
+}
+//--------------------------------------------------------
+
+
+
 // GNSS Signal Code Identifier
 typedef enum {
   CODE_GPS_L1CA   =  0,
@@ -70,9 +137,10 @@ NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        rclcpp::Node* node,
                                        const LoggerPtr& logger,
                                        const std::string& frame)
-    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_measurement_state_t,
+    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_measurement_state_t, sbp_msg_utc_time_t,
                         sbp_msg_pos_llh_cov_t>(state, topic_name, node, logger,
                                                frame) {}
+
 
 void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
                                          const sbp_msg_measurement_state_t& msg ) {
@@ -151,10 +219,24 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
 
 
 void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
-                                         const sbp_msg_pos_llh_cov_t& msg ) {
+                                         const sbp_msg_utc_time_t& msg ) {
   (void)sender_id;
 
-  msg_ = sensor_msgs::msg::NavSatFix();
+  if ( SBP_UTC_TIME_TIME_SOURCE_NONE != (msg.flags & SBP_UTC_TIME_TIME_SOURCE_MASK) ) {
+    msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day,
+                                                      msg.hours, msg.minutes, msg.seconds );
+    msg_.header.stamp.nanosec = msg.ns;
+  }
+
+  last_received_utc_time_tow = msg.tow;
+
+  publish();
+}
+
+
+void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
+                                         const sbp_msg_pos_llh_cov_t& msg ) {
+  (void)sender_id;
 
   switch( msg.flags & SBP_POS_LLH_FIX_MODE_MASK ) {
     case SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION: msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;      break;
@@ -185,12 +267,26 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
     msg_.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
   }
 
+  last_received_pos_llh_cov_tow = msg.tow;
+
   publish();
 }
 
 
 void NavSatFixPublisher::publish() {
-  msg_.header.stamp = node_->now();
-  msg_.header.frame_id = frame_;
-  publisher_->publish(msg_);
+
+  if ( last_received_utc_time_tow == last_received_pos_llh_cov_tow ) {
+
+    if ( 0 == msg_.header.stamp.sec ) {
+      msg_.header.stamp = node_->now();
+    }
+
+    msg_.header.frame_id = frame_;
+
+    publisher_->publish(msg_);
+
+    msg_ = sensor_msgs::msg::NavSatFix();
+    last_received_utc_time_tow    = -1;
+    last_received_pos_llh_cov_tow = -2;
+  }
 }
