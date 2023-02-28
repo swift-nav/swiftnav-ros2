@@ -12,9 +12,9 @@
 
 #include <publishers/timereference_publisher.h>
 
-
-#define GPS_EPOCH           315964800u
-#define GPS_MINUS_UTC_SECS         18u  // Since 2017-01-01
+// Temporary here
+extern time_t Utils_UtcToLinuxTime( unsigned int year, unsigned int month, unsigned int day,
+                             unsigned int hours, unsigned int minutes, unsigned int seconds );
 
 
 TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
@@ -22,32 +22,42 @@ TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
                                                rclcpp::Node* node,
                                                const LoggerPtr& logger,
                                                const std::string& frame)
-    : SBP2ROS2Publisher<sensor_msgs::msg::TimeReference, sbp_msg_gps_time_t>(
-          state, topic_name, node, logger, frame) {}
+    : SBP2ROS2Publisher<sensor_msgs::msg::TimeReference,
+                        sbp_msg_utc_time_t,
+                        sbp_msg_gps_time_t>(state, topic_name, node, logger, frame) {}
+
+
+void TimeReferencePublisher::handle_sbp_msg( uint16_t sender_id,
+                                             const sbp_msg_utc_time_t& msg ) {
+  (void)sender_id;
+
+  if ( SBP_UTC_TIME_TIME_SOURCE_NONE != (msg.flags & SBP_UTC_TIME_TIME_SOURCE_MASK) ) {
+
+    msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day,
+                                                      msg.hours, msg.minutes, msg.seconds );
+    msg_.header.stamp.nanosec = msg.ns;
+  }
+
+  last_received_utc_time_tow = msg.tow;
+
+  publish();
+}
 
 
 void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
                                             const sbp_msg_gps_time_t& msg) {
   (void)sender_id;
 
-  msg_ = sensor_msgs::msg::TimeReference();
-
   if ( SBP_GPS_TIME_TIME_SOURCE_NONE != (msg.flags & SBP_GPS_TIME_TIME_SOURCE_MASK) ) {
 
-    unsigned int  s = msg.wn * 604800 + msg.tow / 1000u;
-    unsigned int ns = ((msg.tow % 1000u) * 1000000u) + msg.ns_residual;
-
-    // Linux time
-    msg_.header.stamp.sec     = GPS_EPOCH - GPS_MINUS_UTC_SECS + s;
-    msg_.header.stamp.nanosec = ns;
-
-    // GPS time
-    msg_.time_ref.sec         = s;
-    msg_.time_ref.nanosec     = ns;
+    msg_.time_ref.sec     = msg.wn * 604800u + msg.tow / 1000u;
+    msg_.time_ref.nanosec = ((msg.tow % 1000u) * 1000000u) + msg.ns_residual;
   }
   else {
     msg_.time_ref.sec = -1;
   }
+
+  last_received_gps_time_tow = msg.tow;
 
   publish();
 }
@@ -55,11 +65,18 @@ void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
 
 void TimeReferencePublisher::publish() {
 
-  if ( 0 == msg_.header.stamp.sec ) {
-    msg_.header.stamp = node_->now();
+  if ( last_received_utc_time_tow == last_received_gps_time_tow ) {
+
+    if ( 0 == msg_.header.stamp.sec ) {
+      msg_.header.stamp = node_->now();
+    }
+
+    msg_.source = frame_;
+
+    publisher_->publish(msg_);
+
+    msg_ = sensor_msgs::msg::TimeReference();
+    last_received_utc_time_tow = -1;
+    last_received_gps_time_tow = -2;
   }
-
-  msg_.source = frame_;
-
-  publisher_->publish(msg_);
 }

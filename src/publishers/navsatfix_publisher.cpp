@@ -137,9 +137,10 @@ NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        rclcpp::Node* node,
                                        const LoggerPtr& logger,
                                        const std::string& frame)
-    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_measurement_state_t, sbp_msg_utc_time_t,
-                        sbp_msg_pos_llh_cov_t>(state, topic_name, node, logger,
-                                               frame) {}
+    : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
+                        sbp_msg_measurement_state_t,
+                        sbp_msg_utc_time_t,
+                        sbp_msg_pos_llh_cov_t>(state, topic_name, node, logger, frame) {}
 
 
 void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
@@ -223,6 +224,7 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
   (void)sender_id;
 
   if ( SBP_UTC_TIME_TIME_SOURCE_NONE != (msg.flags & SBP_UTC_TIME_TIME_SOURCE_MASK) ) {
+
     msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day,
                                                       msg.hours, msg.minutes, msg.seconds );
     msg_.header.stamp.nanosec = msg.ns;
