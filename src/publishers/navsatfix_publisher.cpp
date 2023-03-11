@@ -16,6 +16,12 @@
 
 //!! Temporary here
 //--------------------------------------------------------
+
+// Move to config file
+static bool timestamp_source_gnss = true;
+
+
+// Move to utils.cpp
 #define LINUX_TIME_20200101   1577836800
 
 #define FIRST_YEAR            2020
@@ -223,16 +229,18 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
                                          const sbp_msg_utc_time_t& msg ) {
   (void)sender_id;
 
-  if ( SBP_UTC_TIME_TIME_SOURCE_NONE != (msg.flags & SBP_UTC_TIME_TIME_SOURCE_MASK) ) {
+  if ( timestamp_source_gnss ) {
+    if ( SBP_UTC_TIME_TIME_SOURCE_NONE != (msg.flags & SBP_UTC_TIME_TIME_SOURCE_MASK) ) {
 
-    msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day,
-                                                      msg.hours, msg.minutes, msg.seconds );
-    msg_.header.stamp.nanosec = msg.ns;
+      msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day,
+                                                        msg.hours, msg.minutes, msg.seconds );
+      msg_.header.stamp.nanosec = msg.ns;
+    }
+
+    last_received_utc_time_tow = msg.tow;
+
+    publish();
   }
-
-  last_received_utc_time_tow = msg.tow;
-
-  publish();
 }
 
 
@@ -277,9 +285,9 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
 
 void NavSatFixPublisher::publish() {
 
-  if ( last_received_utc_time_tow == last_received_pos_llh_cov_tow ) {
-
+  if ( !timestamp_source_gnss || (last_received_utc_time_tow == last_received_pos_llh_cov_tow) ) {
     if ( 0 == msg_.header.stamp.sec ) {
+      // Use current platform time if time from the GNSS receiver is not available or if local time source is selected
       msg_.header.stamp = node_->now();
     }
 
