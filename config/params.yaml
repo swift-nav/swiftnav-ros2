@@ -8,6 +8,8 @@ SBPRos2Driver:
     host_port: 55556
     read_timeout: 2000
     write_timeout: 2000
+    frame_name: "swiftnav-gnss"
+    timestamp_source_gnss: True
     enabled_publishers_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
     enabled_publishers_topics:
       [
@@ -29,4 +31,4 @@ SBPRos2Driver:
     enabled_subscribers_topics: [""]
     log_sbp_messages: False
     log_sbp_filepath: "/workspaces/Swift"
-    frame_name: "gps"
+
