@@ -230,10 +230,9 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
   (void)sender_id;
 
   if ( timestamp_source_gnss ) {
-    if ( SBP_UTC_TIME_TIME_SOURCE_NONE != (msg.flags & SBP_UTC_TIME_TIME_SOURCE_MASK) ) {
+    if ( SBP_UTC_TIME_GNSS_TIME_SOURCE_NONE != SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags) ) {
 
-      msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day,
-                                                        msg.hours, msg.minutes, msg.seconds );
+      msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds );
       msg_.header.stamp.nanosec = msg.ns;
     }
 
@@ -248,7 +247,7 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
                                          const sbp_msg_pos_llh_cov_t& msg ) {
   (void)sender_id;
 
-  switch( msg.flags & SBP_POS_LLH_FIX_MODE_MASK ) {
+  switch( SBP_POS_LLH_FIX_MODE_GET(msg.flags) ) {
     case SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION: msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;      break;
     case SBP_POS_LLH_FIX_MODE_DIFFERENTIAL_GNSS:     msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX; break;
     case SBP_POS_LLH_FIX_MODE_FLOAT_RTK:             msg_.status.status = sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX; break;
@@ -261,19 +260,19 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
   if ( sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX != msg_.status.status ) {
     msg_.status.service = status_service;
 
-    msg_.latitude  = msg.lat;
-    msg_.longitude = msg.lon;
-    msg_.altitude  = msg.height;
+    msg_.latitude  = msg.lat;     // [deg]
+    msg_.longitude = msg.lon;     // [deg]
+    msg_.altitude  = msg.height;  // [m]
 
-    msg_.position_covariance[0] =  msg.cov_e_e;
-    msg_.position_covariance[1] =  msg.cov_n_e;
-    msg_.position_covariance[2] = -msg.cov_e_d;
-    msg_.position_covariance[3] =  msg.cov_n_e;
-    msg_.position_covariance[4] =  msg.cov_n_n;
-    msg_.position_covariance[5] = -msg.cov_n_d;
-    msg_.position_covariance[6] = -msg.cov_e_d;
-    msg_.position_covariance[7] = -msg.cov_n_d;
-    msg_.position_covariance[8] =  msg.cov_d_d;
+    msg_.position_covariance[0] =  msg.cov_e_e;   // [m]
+    msg_.position_covariance[1] =  msg.cov_n_e;   // [m]
+    msg_.position_covariance[2] = -msg.cov_e_d;   // [m]
+    msg_.position_covariance[3] =  msg.cov_n_e;   // [m]
+    msg_.position_covariance[4] =  msg.cov_n_n;   // [m]
+    msg_.position_covariance[5] = -msg.cov_n_d;   // [m]
+    msg_.position_covariance[6] = -msg.cov_e_d;   // [m]
+    msg_.position_covariance[7] = -msg.cov_n_d;   // [m]
+    msg_.position_covariance[8] =  msg.cov_d_d;   // [m]
     msg_.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
   }
 
@@ -285,9 +284,10 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
 
 void NavSatFixPublisher::publish() {
 
-  if ( !timestamp_source_gnss || (last_received_utc_time_tow == last_received_pos_llh_cov_tow) ) {
+  if ( (last_received_pos_llh_cov_tow == last_received_utc_time_tow) || !timestamp_source_gnss ) {
+
     if ( 0 == msg_.header.stamp.sec ) {
-      // Use current platform time if time from the GNSS receiver is not available or if local time source is selected
+      // Use current platform time if time from the GNSS receiver is not available or if a local time source is selected
       msg_.header.stamp = node_->now();
     }
 

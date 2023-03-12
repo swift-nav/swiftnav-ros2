@@ -1,176 +1,306 @@
+/*
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include <publishers/gpsfix_publisher.h>
+
+
+
+//!! TODO Temporary here
+
+// Move to config file
+static bool timestamp_source_gnss = true;
+static double track_update_min_speed_mps = 0.2; // [m/s]
+
+
+// Move to utils.h
+extern time_t Utils_UtcToLinuxTime( unsigned int year, unsigned int month, unsigned int day,
+                             unsigned int hours, unsigned int minutes, unsigned int seconds );
+
+
+// Move to utils.cpp
+double cov2ehe( double cov_n_n, double cov_n_e, double cov_e_e )
+{
+   double mx_det, mx_mean_trace, a, e1, e2, ehe_squared;
+
+   mx_det        = cov_n_n * cov_e_e - cov_n_e * cov_n_e;
+   mx_mean_trace = (cov_n_n + cov_e_e) / 2.0;
+
+   a  = sqrt( mx_mean_trace * mx_mean_trace - mx_det );
+   e1 = mx_mean_trace + a;
+   e2 = mx_mean_trace - a;
+
+   ehe_squared  = std::max( e1, e2 ); // 39.35%
+   ehe_squared *= 2.2952;             // 68.27%
+
+   return sqrt( ehe_squared );
+
+} // cov2ehe()
+
+
+double cov2ede( void ) {
+
+  //!! TODO
+  return -1.0;
+
+} // cov2ede()
+
+
+
 
 GPSFixPublisher::GPSFixPublisher(sbp::State* state,
                                  const std::string& topic_name,
                                  rclcpp::Node* node, const LoggerPtr& logger,
                                  const std::string& frame)
-    : SBP2ROS2Publisher<gps_msgs::msg::GPSFix, sbp_msg_pos_llh_acc_t,
-                        sbp_msg_pos_llh_cov_t, sbp_msg_vel_cog_t,
-                        sbp_msg_vel_ned_cov_t, sbp_msg_orient_euler_t,
-                        sbp_msg_dops_t, sbp_msg_gps_time_t, sbp_msg_obs_t>(
+    : SBP2ROS2Publisher<gps_msgs::msg::GPSFix,
+              sbp_msg_gps_time_t,
+              sbp_msg_utc_time_t,
+              sbp_msg_pos_llh_cov_t,
+              sbp_msg_vel_ned_cov_t,
+              sbp_msg_orient_euler_t,
+              sbp_msg_dops_t>(
           state, topic_name, node, logger, frame) {}
 
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                     const sbp_msg_pos_llh_acc_t& msg) {
-  (void)sender_id;
-  msg_.status.satellites_used = msg.n_sats;
-  // msg_.satellite_used_prn = ?
-  msg_.err_horz = msg.h_accuracy;
-  msg_.err_vert = msg.v_accuracy;
-  msg_.err_track = msg.at_accuracy;
-
-  if (ok_to_publish(msg.tow)) {
-    publish();
-  }
-
-  return;
-}
-
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                     const sbp_msg_pos_llh_cov_t& msg) {
-  (void)sender_id;
-  msg_.latitude = msg.lat;
-  msg_.longitude = msg.lon;
-  msg_.altitude = msg.height;
-  msg_.time = msg.tow;
-
-  loadCovarianceMatrix(msg);
-  last_received_pos_llh_cov_tow_ = msg.tow;
-}
-
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                     const sbp_msg_vel_cog_t& msg) {
-  (void)sender_id;
-  msg_.track = msg.cog;
-  msg_.speed = msg.sog;
-  msg_.climb = msg.v_up;
-  msg_.err_speed = msg.sog_accuracy;
-  msg_.err_climb = msg.v_up_accuracy;
-
-  last_received_vel_cog_tow_ = msg.tow;
-}
-
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                     const sbp_msg_vel_ned_cov_t& msg) {
-  (void)sender_id;
-  last_received_vel_ned_cov_tow_ = msg.tow;
-  // TODO are we using this for something? else remove
-}
-
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                     const sbp_msg_orient_euler_t& msg) {
-  (void)sender_id;
-  msg_.pitch = msg.pitch;
-  msg_.roll = msg.roll;
-  msg_.dip = msg.yaw;
-  msg_.err_pitch = msg.pitch_accuracy;
-  msg_.err_roll = msg.roll_accuracy;
-  msg_.err_dip = msg.yaw_accuracy;
-
-  last_received_orient_euler_tow_ = msg.tow;
-}
-
-void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                     const sbp_msg_dops_t& msg) {
-  (void)sender_id;
-  msg_.gdop = msg.gdop;
-  msg_.pdop = msg.pdop;
-  msg_.hdop = msg.hdop;
-  msg_.vdop = msg.vdop;
-  msg_.tdop = msg.tdop;
-
-  last_received_dops_tow_ = msg.tow;
-}
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_gps_time_t& msg) {
   (void)sender_id;
-  last_received_gps_time_tow_ = msg.tow;
+
+  if ( SBP_GPS_TIME_GNSS_TIME_SOURCE_NONE != SBP_GPS_TIME_GNSS_TIME_SOURCE_GET(msg.flags) ) {
+
+    msg_.time = (double)(msg.wn) * 604800.0 + (double)msg.tow / 1e3 + (double)msg.ns_residual / 1e9;  // [s]
+  }
+
+  last_received_gps_time_tow = msg.tow;
+
+  publish();
 }
+
+
+void GPSFixPublisher::handle_sbp_msg( uint16_t sender_id,
+                                      const sbp_msg_utc_time_t& msg ) {
+  (void)sender_id;
+
+  if ( timestamp_source_gnss ) {
+    // Use GNSS receiver reported time to stamp the data
+    if ( SBP_UTC_TIME_GNSS_TIME_SOURCE_NONE != SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags) ) {
+
+      msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds );
+      msg_.header.stamp.nanosec = msg.ns;
+    }
+
+    last_received_utc_time_tow = msg.tow;
+
+    publish();
+  }
+}
+
+
+void GPSFixPublisher::handle_sbp_msg( uint16_t sender_id,
+                                      const sbp_msg_pos_llh_cov_t& msg ) {
+  (void)sender_id;
+
+  switch( SBP_POS_LLH_FIX_MODE_GET(msg.flags) ) {
+    case SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION: msg_.status.status = gps_msgs::msg::GPSStatus::STATUS_FIX;      break;
+    case SBP_POS_LLH_FIX_MODE_DIFFERENTIAL_GNSS:     msg_.status.status = gps_msgs::msg::GPSStatus::STATUS_DGPS_FIX; break;
+    case SBP_POS_LLH_FIX_MODE_FLOAT_RTK:             msg_.status.status = gps_msgs::msg::GPSStatus::STATUS_GBAS_FIX; break;
+    case SBP_POS_LLH_FIX_MODE_FIXED_RTK:             msg_.status.status = gps_msgs::msg::GPSStatus::STATUS_GBAS_FIX; break;
+    case SBP_POS_LLH_FIX_MODE_DEAD_RECKONING:        msg_.status.status = gps_msgs::msg::GPSStatus::STATUS_FIX;      break;
+    case SBP_POS_LLH_FIX_MODE_SBAS_POSITION:         msg_.status.status = gps_msgs::msg::GPSStatus::STATUS_SBAS_FIX; break;
+    default:                                         msg_.status.status = gps_msgs::msg::GPSStatus::STATUS_NO_FIX;
+  } // switch()
+
+  if ( gps_msgs::msg::GPSStatus::STATUS_NO_FIX != msg_.status.status ) {
+
+    msg_.status.satellites_used = msg.n_sats;
+    msg_.status.position_source = 0;
+
+    if ( SBP_POS_LLH_FIX_MODE_DEAD_RECKONING != SBP_POS_LLH_FIX_MODE_GET(msg.flags) ) {
+      msg_.status.position_source |= gps_msgs::msg::GPSStatus::SOURCE_GPS;
+    }
+
+    if ( SBP_POS_LLH_INERTIAL_NAVIGATION_MODE_NONE != SBP_POS_LLH_INERTIAL_NAVIGATION_MODE_GET(msg.flags) ) {
+      msg_.status.position_source   |= gps_msgs::msg::GPSStatus::SOURCE_GYRO | gps_msgs::msg::GPSStatus::SOURCE_ACCEL;
+    }
+
+    msg_.latitude  = msg.lat;     // [deg]
+    msg_.longitude = msg.lon;     // [deg]
+    msg_.altitude  = msg.height;  // [m]
+
+    msg_.position_covariance[0] =  msg.cov_e_e;   // [m]
+    msg_.position_covariance[1] =  msg.cov_n_e;   // [m]
+    msg_.position_covariance[2] = -msg.cov_e_d;   // [m]
+    msg_.position_covariance[3] =  msg.cov_n_e;   // [m]
+    msg_.position_covariance[4] =  msg.cov_n_n;   // [m]
+    msg_.position_covariance[5] = -msg.cov_n_d;   // [m]
+    msg_.position_covariance[6] = -msg.cov_e_d;   // [m]
+    msg_.position_covariance[7] = -msg.cov_n_d;   // [m]
+    msg_.position_covariance[8] =  msg.cov_d_d;   // [m]
+    msg_.position_covariance_type = gps_msgs::msg::GPSFix::COVARIANCE_TYPE_KNOWN;
+
+    msg_.err = 0.0; //!! TODO
+    msg_.err_horz = cov2ehe( (double)msg.cov_n_n, (double)msg.cov_n_e, (double)msg.cov_e_e ) * 2.0;  // [m], scaled to 95% confidence
+    msg_.err_vert = sqrt( (double)msg.cov_d_d ) * 2.0; // [m], scaled to 95% confidence
+  }
+
+  last_received_pos_llh_cov_tow = msg.tow;
+
+  publish();
+}
+
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
-                                     const sbp_msg_obs_t& msg) {
+                                     const sbp_msg_vel_ned_cov_t& msg) {
   (void)sender_id;
-  last_received_obs_tow_ = msg.header.t.tow;
 
-  msg_.status.satellites_visible = msg.n_obs;
-  sbp_packed_obs_content_t obs_content;
-  for (int i = 0; i < msg.n_obs; i++) {
-    obs_content = msg.obs[i];
-    msg_.status.satellite_visible_prn.push_back(obs_content.sid.code);
+  if ( SBP_VEL_NED_VELOCITY_MODE_INVALID != SBP_VEL_NED_VELOCITY_MODE_GET(msg.flags) ) {
+
+    msg_.status.motion_source = 0;
+
+    if ( SBP_VEL_NED_VELOCITY_MODE_DEAD_RECKONING != SBP_VEL_NED_VELOCITY_MODE_GET(msg.flags) ) {
+      msg_.status.motion_source |= gps_msgs::msg::GPSStatus::SOURCE_GPS;
+    }
+
+    if ( SBP_VEL_NED_INS_NAVIGATION_MODE_NONE != SBP_VEL_NED_INS_NAVIGATION_MODE_GET(msg.flags) ) {
+      msg_.status.motion_source |= gps_msgs::msg::GPSStatus::SOURCE_GYRO | gps_msgs::msg::GPSStatus::SOURCE_ACCEL;
+    }
+
+    msg_.speed = sqrt( (double)(msg.n)*(double)(msg.n) + (double)(msg.e)*(double)(msg.e) ) / 1e3;  // [m/s], horizontal
+    msg_.climb = (double)msg.d / -1e3;  // [m/s], vertical
+
+    msg_.err_speed = cov2ehe( (double)msg.cov_n_n, (double)msg.cov_n_e, (double)msg.cov_e_e ) * 2.0;  // [m/s], scaled to 95% confidence
+    msg_.err_climb = sqrt( (double)msg.cov_d_d ) * 2.0; // [m/s], scaled to 95% confidence
+
+    if ( msg_.speed >= track_update_min_speed_mps ) {
+      double cog_rad = atan2( (double)msg.e, (double)msg.n );
+      if ( cog_rad < 0.0 ) {
+        cog_rad += 2.0 * M_PI;
+      }
+      vel_ned_track       = cog_rad * 180.0 / M_PI;  // [deg]
+      vel_ned_err_track   = cov2ede() * 2.0;         //!! TODO [deg], scaled to 95% confidence
+      vel_ned_track_valid = true;
+    }
+  }
+
+  last_received_vel_ned_cov_tow = msg.tow;
+
+  publish();
+}
+
+
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_orient_euler_t& msg) {
+  (void)sender_id;
+
+  if ( SBP_ORIENT_EULER_INS_NAVIGATION_MODE_INVALID != SBP_ORIENT_EULER_INS_NAVIGATION_MODE_GET(msg.flags) ) {
+
+    msg_.pitch = (double)msg.pitch / 1e3;   // [deg]
+    msg_.roll  = (double)msg.roll  / 1e3;   // [deg]
+
+    msg_.err_pitch = (double)msg.pitch_accuracy * 2.0;  // [deg], scaled to 95% confidence
+    msg_.err_roll  = (double)msg.roll_accuracy  * 2.0;  // [deg], scaled to 95% confidence
+
+    orientation_track       = ( msg.yaw < 0 ) ? (double)msg.yaw / 1e3 + 360.0 : (double)msg.yaw / 1e3;  // [deg], in 0 to 360 range
+    orientation_err_track   = (double)msg.yaw_accuracy   * 2.0;  // [deg], scaled to 95% confidence
+    orientation_track_valid = true;
+
+    orientation_present = true;
+  }
+
+  last_received_orient_euler_tow = msg.tow;
+
+  publish();
+}
+
+
+void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
+                                     const sbp_msg_dops_t& msg) {
+  (void)sender_id;
+
+  if ( SBP_DOPS_FIX_MODE_INVALID != SBP_DOPS_FIX_MODE_GET(msg.flags) ) {
+
+    gdop = (double)msg.gdop / 1e2;
+    pdop = (double)msg.pdop / 1e2;
+    hdop = (double)msg.hdop / 1e2;
+    vdop = (double)msg.vdop / 1e2;
+    tdop = (double)msg.tdop / 1e2;
+
+    time( &dops_time_s );
   }
 }
 
-bool GPSFixPublisher::ok_to_publish(const u32& tow) const {
-  const u32 pos_llh_cov_time_diff = (last_received_pos_llh_cov_tow_ > tow)
-                                        ? last_received_pos_llh_cov_tow_ - tow
-                                        : tow - last_received_pos_llh_cov_tow_;
-
-  const u32 vel_cog_time_diff = (last_received_vel_cog_tow_ > tow)
-                                    ? last_received_vel_cog_tow_ - tow
-                                    : tow - last_received_vel_cog_tow_;
-
-  const u32 vel_ned_cov_time_diff = (last_received_vel_ned_cov_tow_ > tow)
-                                        ? last_received_vel_ned_cov_tow_ - tow
-                                        : tow - last_received_vel_ned_cov_tow_;
-
-  const u32 orient_euler_time_diff =
-      (last_received_orient_euler_tow_ > tow)
-          ? last_received_orient_euler_tow_ - tow
-          : tow - last_received_orient_euler_tow_;
-
-  const u32 dops_time_diff = (last_received_dops_tow_ > tow)
-                                 ? last_received_dops_tow_ - tow
-                                 : tow - last_received_dops_tow_;
-
-  const u32 gps_time_time_diff = (last_received_gps_time_tow_ > tow)
-                                     ? last_received_gps_time_tow_ - tow
-                                     : tow - last_received_gps_time_tow_;
-
-  const u32 obs_time_diff = (last_received_obs_tow_ > tow)
-                                ? last_received_obs_tow_ - tow
-                                : tow - last_received_obs_tow_;
-
-  if (pos_llh_cov_time_diff > MAX_POS_LLH_COV_TIME_DIFF) {
-    return false;
-  } else if (vel_cog_time_diff > MAX_VEL_COG_TIME_DIFF) {
-    if(last_received_vel_cog_tow_ != 0){
-      return false;
-    }
-  } else if (vel_ned_cov_time_diff > MAX_VEL_NED_COV_TIME_DIFF) {
-    if(last_received_vel_ned_cov_tow_ != 0){
-      return false;
-    }
-  } else if (orient_euler_time_diff > MAX_ORIENT_EULER_TIME_DIFF) {
-    if(last_received_orient_euler_tow_ != 0){
-      return false;
-    }
-  } else if (dops_time_diff > MAX_DOPS_TIME_DIFF) {
-    return false;
-  } else if (gps_time_time_diff > MAX_GPS_TIME_TIME_DIFF) {
-    return false;
-  } else if (obs_time_diff > MAX_OBS_TIME_DIFF_MS) {
-    return false;
-  }
-  return true;
-}
 
 void GPSFixPublisher::publish() {
-  msg_.header.stamp = node_->now();
-  msg_.header.frame_id = frame_;
-  publisher_->publish(msg_);
-}
 
-void GPSFixPublisher::loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg) {
-  msg_.position_covariance[0] = msg.cov_e_e;
-  msg_.position_covariance[1] = msg.cov_n_e;
-  msg_.position_covariance[2] = -msg.cov_e_d;
-  msg_.position_covariance[3] = msg.cov_n_e;
-  msg_.position_covariance[4] = msg.cov_n_n;
-  msg_.position_covariance[5] = -msg.cov_n_d;
-  msg_.position_covariance[6] = -msg.cov_e_d;
-  msg_.position_covariance[7] = -msg.cov_n_d;
-  msg_.position_covariance[8] = msg.cov_d_d;
+  if ( ( (last_received_gps_time_tow == last_received_utc_time_tow) || !timestamp_source_gnss ) &&
+       (  last_received_gps_time_tow == last_received_pos_llh_cov_tow ) &&
+       (  last_received_gps_time_tow == last_received_vel_ned_cov_tow ) &&
+       ( (last_received_gps_time_tow == last_received_orient_euler_tow) || !orientation_present )
+     ) {
 
-  msg_.position_covariance_type = gps_msgs::msg::GPSFix::COVARIANCE_TYPE_KNOWN;
+    if ( 0 == msg_.header.stamp.sec ) {
+      // Use current platform time if time from the GNSS receiver is not available or if a local time source is selected
+      msg_.header.stamp = node_->now();
+    }
+
+    msg_.header.frame_id = frame_;
+
+    if ( orientation_track_valid ) {
+      // Use yaw for track if ORIENT EULER message is present and INS solution is valid
+      msg_.track     = orientation_track;
+      msg_.err_track = orientation_err_track;
+
+      last_track       = msg_.track;
+      last_err_track   = msg_.err_track;
+      last_track_valid = true;
+
+      orientation_track_valid = false;
+
+      msg_.status.orientation_source = msg_.status.position_source; // Orientation is provided by the INS fusion only.
+    }
+    else if ( vel_ned_track_valid ) {
+    // Use computed Course Over Ground (COG) for track if VEL NED COV message is present and speed is valid
+      msg_.track     = vel_ned_track;
+      msg_.err_track = vel_ned_err_track;
+
+      last_track       = msg_.track;
+      last_err_track   = msg_.err_track;
+      last_track_valid = true;
+
+      vel_ned_track_valid = false;
+    }
+    else if ( last_track_valid ) {
+      // Use last valid track when there is no valid update
+      msg_.track     = last_track;
+      msg_.err_track = last_err_track;
+    }
+
+    time_t current_time_s;
+    time( &current_time_s );
+
+    if ( difftime(current_time_s,dops_time_s) < 2.0 ) { // Publish DOPs if not older than 2 seconds.
+      msg_.gdop = gdop;
+      msg_.pdop = pdop;
+      msg_.hdop = hdop;
+      msg_.vdop = vdop;
+      msg_.tdop = tdop;
+    }
+
+    publisher_->publish(msg_);
+
+    msg_ = gps_msgs::msg::GPSFix();
+    last_received_gps_time_tow     = -1;
+    last_received_utc_time_tow     = -2;
+    last_received_pos_llh_cov_tow  = -3;
+    last_received_vel_ned_cov_tow  = -4;
+    last_received_orient_euler_tow = -5;
+  }
 }
