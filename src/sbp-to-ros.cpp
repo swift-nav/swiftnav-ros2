@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include <chrono>
 #include <functional>
 #include <iostream>
@@ -149,7 +161,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
                       rclcpp::PARAMETER_STRING_ARRAY);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
-    declare_parameter<std::string>("frame_name", "gps");
+    declare_parameter<std::string>("frame_name", "swiftnav-gnss");
   }
 
   /**
