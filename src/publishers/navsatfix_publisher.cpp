@@ -230,7 +230,7 @@ void NavSatFixPublisher::handle_sbp_msg( uint16_t sender_id,
   (void)sender_id;
 
   if ( timestamp_source_gnss ) {
-    if ( SBP_UTC_TIME_GNSS_TIME_SOURCE_NONE != SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags) ) {
+    if ( SBP_UTC_TIME_TIME_SOURCE_NONE != SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags) ) {
 
       msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds );
       msg_.header.stamp.nanosec = msg.ns;

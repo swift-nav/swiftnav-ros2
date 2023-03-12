@@ -74,7 +74,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_gps_time_t& msg) {
   (void)sender_id;
 
-  if ( SBP_GPS_TIME_GNSS_TIME_SOURCE_NONE != SBP_GPS_TIME_GNSS_TIME_SOURCE_GET(msg.flags) ) {
+  if ( SBP_GPS_TIME_TIME_SOURCE_NONE != SBP_GPS_TIME_TIME_SOURCE_GET(msg.flags) ) {
 
     msg_.time = (double)(msg.wn) * 604800.0 + (double)msg.tow / 1e3 + (double)msg.ns_residual / 1e9;  // [s]
   }
@@ -91,7 +91,7 @@ void GPSFixPublisher::handle_sbp_msg( uint16_t sender_id,
 
   if ( timestamp_source_gnss ) {
     // Use GNSS receiver reported time to stamp the data
-    if ( SBP_UTC_TIME_GNSS_TIME_SOURCE_NONE != SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags) ) {
+    if ( SBP_UTC_TIME_TIME_SOURCE_NONE != SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags) ) {
 
       msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds );
       msg_.header.stamp.nanosec = msg.ns;
@@ -267,7 +267,7 @@ void GPSFixPublisher::publish() {
       msg_.status.orientation_source = msg_.status.position_source; // Orientation is provided by the INS fusion only.
     }
     else if ( vel_ned_track_valid ) {
-    // Use computed Course Over Ground (COG) for track if VEL NED COV message is present and speed is valid
+      // Use computed Course Over Ground (COG) for track if VEL NED COV message is present and speed is valid
       msg_.track     = vel_ned_track;
       msg_.err_track = vel_ned_err_track;
 
