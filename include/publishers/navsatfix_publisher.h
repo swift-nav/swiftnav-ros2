@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
@@ -10,13 +22,13 @@
 #include <publishers/sbp2ros2_publisher.h>
 
 /**
- * @brief Class that listens for sbp_msg_obs_t and sbp_msg_pos_llh_cov_t,
- * publishing a sensor_msgs::msg::NavSatFix ros2 message.
+ * @brief Class publishing ROS2 sensor_msgs::msg::NavSatFix message.
  *
  */
 class NavSatFixPublisher
     : public DummyPublisher,
-      public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix, sbp_msg_obs_t,
+      public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
+                               sbp_msg_measurement_state_t, sbp_msg_utc_time_t,
                                sbp_msg_pos_llh_cov_t> {
  public:
   NavSatFixPublisher() = delete;
@@ -37,43 +49,24 @@ class NavSatFixPublisher
    * @brief Handles a sbp_msg_measurement_state_t message. It gets the
    * constellation for each satellite in the measurement states.
    *
-   * As per sbp lib documentation, the code for satellite constelation are:
-   *
-   * 0 GPS L1CA
-   * 1 GPS L2CM
-   * 2 SBAS L1CA
-   * 3 GLO L1CA
-   * 4 GLO L2CA
-   * 5 GPS L1P
-   * 6 GPS L2P
-   * 12 BDS2 B1
-   * 13 BDS2 B2
-   * 14 GAL E1B
-   * 20 GAL E7I
-   * 47 BDS3 B2a
-   *
-   * Ros2 NavStatus message definition for service:
-   * SERVICE_GPS=1
-   * SERVICE_GLONASS=2
-   * SERVICE_COMPASS=4
-   * SERVICE_GALILEO=8
-   *
-   * Mapping:
-   *
-   *  GPS L1CA, SBAS L1CA, GPS L2CM, GPS L1P, GPS L2P => SERVICE_GPS
-   *  GLO L1CA, GLO L2CA => SERVICE_GLONASS
-   *  GAL E1B, GAL E7I => SERVICE_GALILEO
-   *  BDS2 B1, BDS2 B2, BDS3 B2a => SERVICE_COMPASS
-   *
    * @param sender_id Ignored
-   * @param msg Incoming sbp_msg_obs_t
+   * @param msg Incoming sbp_msg_measurement_state_t
    */
-  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_obs_t& msg);
+  void handle_sbp_msg(uint16_t sender_id,
+                      const sbp_msg_measurement_state_t& msg);
 
   /**
-   * @brief Handles a sbp_msg_pos_llh_cov_t message. It gets the latitude,
-   * longitude and altitude from the sbp message and calls methods for
-   * covariance matrix and status flag.
+   * @brief Handles a sbp_msg_utc_time_t message. It gets the
+   * time stamp.
+   *
+   * @param sender_id Ignored
+   * @param msg Incoming sbp_msg_utc_time_t
+   */
+  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_utc_time_t& msg);
+
+  /**
+   * @brief Handles a sbp_msg_pos_llh_cov_t message. It gets the position mode,
+   * latitude, longitude, altitude and covariance matrix.
    *
    * @param sender_id Ignored
    * @param msg Incoming sbp_msg_pos_llh_cov_t
@@ -82,51 +75,15 @@ class NavSatFixPublisher
 
  protected:
   /**
-   * @brief Checks that the Ros2 sensor_msgs::msg::NavSatFix is complete, if so,
+   * @brief Checks that the ROS2 sensor_msgs::msg::NavSatFix is complete, if so,
    * it publishes it
    *
    */
   void publish() override;
 
  private:
-  /**
-   * @brief Loads the covariance matrix values in the ROS2 message from values
-   * in the sbp message. To do so it converts the covariance matrix from NED to
-   * ENU.
-   *
-   * @param msg sbp_msg_pos_llh_cov_t
-   */
-  void loadCovarianceMatrix(const sbp_msg_pos_llh_cov_t& msg);
+  uint32_t last_received_utc_time_tow = -1;
+  uint32_t last_received_pos_llh_cov_tow = -2;
 
-  /**
-   * @brief Loads the status flag in the ROS2 message from values in the
-   * sbp_msg_pos_llh_cov_t message.
-   *
-   * As per sbp library documentation:
-   *
-   *  0 Invalid
-   *  1 Single Point Position (SPP)
-   *  2 Differential GNSS (DGNSS)
-   *  3 Float RTK
-   *  4 Fixed RTK
-   *  5 Dead Reckoning
-   *  6 SBAS Position
-   *
-   * As per Ros2 sensor_msgs::msg::NavSatStatus message:
-   *   STATUS_NO_FIX=-1
-   *   STATUS_FIX=0
-   *   STATUS_SBAS_FIX=1 Satellite based augmentation
-   *   STATUS_GBAS_FIX=2 Ground based augmentation
-   *
-   * Mapping:
-   *   Invalid => STATUS_NO_FIX
-   *   Single Point Position (SPP) => STATUS_FIX
-   *   Differential GNSS (DGNSS), Float RTK, Fixed RTK, Dead Reckoning =>
-   * STATUS_GBAS_FIX SBAS Position => STATUS_SBAS_FIX
-   *
-   * @param msg sbp_msg_pos_llh_cov_t
-   */
-  void loadStatusFlag(const sbp_msg_pos_llh_cov_t& msg);
-
-  u32 last_received_obs_tow_{0};
+  uint16_t status_service;
 };

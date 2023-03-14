@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2010-2022 Swift Navigation Inc.
+ * Contact: Swift Navigation <dev@swift-nav.com>
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include <gtest/gtest.h>
 
 #include <rclcpp/exceptions.hpp>
@@ -32,13 +44,6 @@ TEST_F(TestGPSFixPublisher, sendMessage) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 2100;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 2100;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -56,14 +61,6 @@ TEST_F(TestGPSFixPublisher, sendMessage) {
  pos_llh_cov_sbp_msg.pos_llh_cov.cov_d_d = 1;
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
- 
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 2100;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
  
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 2100;
@@ -145,13 +142,10 @@ TEST_F(TestGPSFixPublisher, sendMessage) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -163,13 +157,7 @@ TEST_F(TestGPSFixPublisher, posllhcovMessageTooOld) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 2100;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -188,14 +176,7 @@ TEST_F(TestGPSFixPublisher, posllhcovMessageTooOld) {
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
  
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 4500;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
- 
+
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 4500;
  
@@ -276,13 +257,11 @@ TEST_F(TestGPSFixPublisher, posllhcovMessageTooOld) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
+
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -295,13 +274,7 @@ TEST_F(TestGPSFixPublisher, velCovMsgTooOld) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 4500;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -320,14 +293,7 @@ TEST_F(TestGPSFixPublisher, velCovMsgTooOld) {
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
  
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 2100;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
- 
+
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 4500;
  
@@ -408,13 +374,10 @@ TEST_F(TestGPSFixPublisher, velCovMsgTooOld) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -426,13 +389,7 @@ TEST_F(TestGPSFixPublisher, velNedCovMsgTooOld) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 4500;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -450,14 +407,6 @@ TEST_F(TestGPSFixPublisher, velNedCovMsgTooOld) {
  pos_llh_cov_sbp_msg.pos_llh_cov.cov_d_d = 1;
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
- 
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 4500;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
  
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 2100;
@@ -539,13 +488,10 @@ TEST_F(TestGPSFixPublisher, velNedCovMsgTooOld) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -557,12 +503,6 @@ TEST_F(TestGPSFixPublisher, orientEulerMsgTooOld) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
  
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 4500;
@@ -582,14 +522,7 @@ TEST_F(TestGPSFixPublisher, orientEulerMsgTooOld) {
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
  
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 4500;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
- 
+
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 4500;
  
@@ -670,13 +603,10 @@ TEST_F(TestGPSFixPublisher, orientEulerMsgTooOld) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -688,13 +618,7 @@ TEST_F(TestGPSFixPublisher,dopsMsgTooOld) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 4500;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -713,13 +637,6 @@ TEST_F(TestGPSFixPublisher,dopsMsgTooOld) {
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
  
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 4500;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
  
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 4500;
@@ -801,13 +718,10 @@ TEST_F(TestGPSFixPublisher,dopsMsgTooOld) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -819,13 +733,7 @@ TEST_F(TestGPSFixPublisher,gpstimeMsgTooOld) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 4500;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -843,14 +751,6 @@ TEST_F(TestGPSFixPublisher,gpstimeMsgTooOld) {
  pos_llh_cov_sbp_msg.pos_llh_cov.cov_d_d = 1;
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
- 
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 4500;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
  
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 4500;
@@ -932,13 +832,10 @@ TEST_F(TestGPSFixPublisher,gpstimeMsgTooOld) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -950,13 +847,7 @@ TEST_F(TestGPSFixPublisher, obsMsgTooOld) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 4500;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -975,14 +866,7 @@ TEST_F(TestGPSFixPublisher, obsMsgTooOld) {
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
  
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 4500;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
- 
+
  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 4500;
  
@@ -1062,13 +946,10 @@ TEST_F(TestGPSFixPublisher, obsMsgTooOld) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -1079,14 +960,7 @@ TEST_F(TestGPSFixPublisher, noVelCogMsg) {
  auto node = std::make_shared<rclcpp::Node>("TestGPSFixNode");
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
- 
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 4500;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 4500;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -1188,8 +1062,7 @@ TEST_F(TestGPSFixPublisher, noVelCogMsg) {
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
+
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -1201,12 +1074,6 @@ TEST_F(TestGPSFixPublisher, noVelCovMessage) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 2100;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
  
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 2100;
@@ -1226,13 +1093,6 @@ TEST_F(TestGPSFixPublisher, noVelCovMessage) {
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
  
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 2100;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
  
  sbp_msg_t orient_euler_sbp_msg;
  orient_euler_sbp_msg.orient_euler.tow = 2100;
@@ -1311,12 +1171,9 @@ TEST_F(TestGPSFixPublisher, noVelCovMessage) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, orient_euler_sbp_msg.orient_euler);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -1328,13 +1185,7 @@ TEST_F(TestGPSFixPublisher, noOrientdMessage) {
  auto ml = std::make_shared<MockedLogger>();
   GPSFixPublisher gps_fix_publisher(&state_, topic_name_, node.get(), ml, frame_name_);
  
- sbp_msg_t pos_llh_acc_sbp_msg;
- pos_llh_acc_sbp_msg.pos_llh_acc.tow = 2100;
- pos_llh_acc_sbp_msg.pos_llh_acc.n_sats = 3;
- pos_llh_acc_sbp_msg.pos_llh_acc.h_accuracy = 1;
- pos_llh_acc_sbp_msg.pos_llh_acc.v_accuracy = 2;
- pos_llh_acc_sbp_msg.pos_llh_acc.at_accuracy= 3;
- 
+
  sbp_msg_t pos_llh_cov_sbp_msg;
  pos_llh_cov_sbp_msg.pos_llh_cov.tow = 2100;
  pos_llh_cov_sbp_msg.pos_llh_cov.lat = 10;
@@ -1353,15 +1204,8 @@ TEST_F(TestGPSFixPublisher, noOrientdMessage) {
  
  pos_llh_cov_sbp_msg.pos_llh_cov.flags = 1;
  
- sbp_msg_t vel_cog_sbp_msg;
- vel_cog_sbp_msg.vel_cog.tow = 2100;
- vel_cog_sbp_msg.vel_cog.cog = 2;
- vel_cog_sbp_msg.vel_cog.sog = 2;
- vel_cog_sbp_msg.vel_cog.v_up = 2;
- vel_cog_sbp_msg.vel_cog.sog_accuracy = 2;
- vel_cog_sbp_msg.vel_cog.v_up_accuracy = 2;
- 
- sbp_msg_t vel_ned_cov_sbp_msg;
+
+  sbp_msg_t vel_ned_cov_sbp_msg;
  vel_ned_cov_sbp_msg.vel_ned_cov.tow = 2100;
  
  sbp_msg_t dops_sbp_msg;
@@ -1432,12 +1276,9 @@ TEST_F(TestGPSFixPublisher, noOrientdMessage) {
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
  gps_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
- gps_fix_publisher.handle_sbp_msg(0, vel_cog_sbp_msg.vel_cog);
  gps_fix_publisher.handle_sbp_msg(0, vel_ned_cov_sbp_msg.vel_ned_cov);
  gps_fix_publisher.handle_sbp_msg(0, dops_sbp_msg.dops);
  gps_fix_publisher.handle_sbp_msg(0, gps_time_sbp_msg.gps_time);
- gps_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
- gps_fix_publisher.handle_sbp_msg(0, pos_llh_acc_sbp_msg.pos_llh_acc);
 
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
