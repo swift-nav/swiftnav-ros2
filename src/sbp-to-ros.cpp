@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2010-2022 Swift Navigation Inc.
- * Contact: Swift Navigation <dev@swift-nav.com>
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
  *
  * This source is subject to the license found in the file 'LICENSE' which must
  * be be distributed together with this source. All other rights reserved.
@@ -20,8 +20,8 @@
 #include <logging/ros_logger.h>
 #include <logging/sbp_to_ros2_logger.h>
 
-#include <libsbp/cpp/state.h>
 #include <libsbp/cpp/message_handler.h>
+#include <libsbp/cpp/state.h>
 
 #include <publishers/publisher_factory.h>
 #include <publishers/publisher_manager.h>
@@ -161,7 +161,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
                       rclcpp::PARAMETER_STRING_ARRAY);
     declare_parameter<bool>("log_sbp_messages", false);
     declare_parameter<std::string>("log_sbp_filepath", "");
-    declare_parameter<std::string>("frame_name", "gps");
+    declare_parameter<std::string>("frame_name", "swiftnav-gnss");
   }
 
   /**
@@ -216,7 +216,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
   std::thread sbp_thread_;     /** @brief SBP messages processing thread */
   bool exit_requested_{false}; /** @brief Thread stopping flag */
   std::shared_ptr<SbpDataSource> data_source_; /** @brief data source object */
-  std::shared_ptr<ROSLogger> logger_;    /** @brief ROS 2 logging object */
+  std::shared_ptr<ROSLogger> logger_; /** @brief ROS 2 logging object */
   PublisherManager
       pubs_manager_; /** @brief Manager for all the active publishers */
   SubscriberManager

@@ -29,7 +29,7 @@ void PoseStampedPublisher::handle_sbp_msg(uint16_t sender_id,
   // OBS msg has not arrived yet.
   if (last_received_orient_euler_tow_ == 0) {
     LOG_WARN(logger_,
-             "Orient euler message has not arrived yet. Not publishing");
+             "Orient euler message has not arrived yet. Not publishing msg: posestamped");
     return;
   }
 

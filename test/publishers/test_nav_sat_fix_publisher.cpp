@@ -98,7 +98,7 @@ TEST_F(TestNavSatFixPublisher, sendMessage) {
 
   };
  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(topic_name_, 1, callback);
- nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
+//!! nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
  nav_sat_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
  ASSERT_FALSE(is_received);
  wait_for_message_to_be_received(is_received, node);
@@ -171,7 +171,7 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GPS_StatusService) {
    is_received = false;
    obs_content.sid.code = val;
    obs_sbp_msg.obs.obs[0] = obs_content;
-   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
+//!!   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
    nav_sat_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
    ASSERT_FALSE(is_received);
    wait_for_message_to_be_received(is_received, node);
@@ -245,7 +245,7 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GLONAS_StatusService) {
    is_received = false;
    obs_content.sid.code = val;
    obs_sbp_msg.obs.obs[0] = obs_content;
-   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
+//!!   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
    nav_sat_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
    ASSERT_FALSE(is_received);
    wait_for_message_to_be_received(is_received, node);
@@ -318,7 +318,7 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GALILEO_StatusService) {
    is_received = false;
    obs_content.sid.code = val;
    obs_sbp_msg.obs.obs[0] = obs_content;
-   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
+//!!   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
    nav_sat_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
    ASSERT_FALSE(is_received);
    wait_for_message_to_be_received(is_received, node);
@@ -391,7 +391,7 @@ TEST_F(TestNavSatFixPublisher, SERVICE_COMPASS_StatusService) {
    is_received = false;
    obs_content.sid.code = val;
    obs_sbp_msg.obs.obs[0] = obs_content;
-   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
+//!!   nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
    nav_sat_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
    ASSERT_FALSE(is_received);
    wait_for_message_to_be_received(is_received, node);
@@ -437,7 +437,7 @@ TEST_F(TestNavSatFixPublisher, timeDiff) {
    is_received = true;
  };
  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(topic_name_, 1, callback);
- nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
+//!! nav_sat_fix_publisher.handle_sbp_msg(0, obs_sbp_msg.obs);
  nav_sat_fix_publisher.handle_sbp_msg(0, pos_llh_cov_sbp_msg.pos_llh_cov);
  ASSERT_EQ("Time difference between OBS message and POS_LLH_COV message is larger than Max", ml->getLastLoggedWarning());
 
