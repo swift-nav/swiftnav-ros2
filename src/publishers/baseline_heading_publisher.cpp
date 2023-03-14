@@ -42,8 +42,8 @@ void BaselineHeadingPublisher::handle_sbp_msg( uint16_t sender_id,
   if ( timestamp_source_gnss ) {
     if ( SBP_UTC_TIME_TIME_SOURCE_NONE != SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags) ) {
 
-//      msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds );
-//      msg_.header.stamp.nanosec = msg.ns;
+//!!      msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds );
+//!!      msg_.header.stamp.nanosec = msg.ns;
     }
 
     last_received_utc_time_tow = msg.tow;
@@ -88,13 +88,13 @@ void BaselineHeadingPublisher::handle_sbp_msg( uint16_t sender_id,
       else if ( msg_.baseline_dir_deg >= 360.0 ) {
         msg_.baseline_dir_deg -= 360.0;
       }
-      msg_.baseline_dir_err_deg = -1;  //!! TODO
+      msg_.baseline_dir_err_deg = fabs( atan2(msg_.baseline_err_h_m, msg_.baseline_length_h_m) ) * 180.0 / M_PI;
 
-      // RTK Dip
+      // Baseline Dip
       double dip_rad = atan2( msg_.baseline_d_m, msg_.baseline_length_h_m );
       msg_.baseline_dip_deg = dip_rad * 180.0 / M_PI + baseline_dip_offset_deg;  // [deg]
 
-      msg_.baseline_dip_err_deg = -1;  //!! TODO
+      msg_.baseline_dip_err_deg = fabs( atan2(msg_.baseline_err_v_m, msg_.baseline_length_h_m) ) * 180.0 / M_PI;
 
       msg_.baseline_orientation_valid = true;
     }
@@ -109,7 +109,7 @@ void BaselineHeadingPublisher::handle_sbp_msg( uint16_t sender_id,
 void BaselineHeadingPublisher::publish() {
 
   if ( (last_received_baseline_ned_tow == last_received_utc_time_tow) || !timestamp_source_gnss ) {
-#if 0
+#if 0 //!!
     if ( 0 == msg_.header.stamp.sec ) {
       // Use current platform time if time from the GNSS receiver is not available or if a local time source is selected
       msg_.header.stamp = node_->now();
