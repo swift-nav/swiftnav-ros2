@@ -4,7 +4,7 @@
 #        corresponding satellite time may be reported using the
 #        sensor_msgs/TimeReference message).
 #
-#std_msgs/Header header
+std_msgs/Header header
 
 # Mode
 uint8 mode

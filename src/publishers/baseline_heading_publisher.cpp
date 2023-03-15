@@ -11,6 +11,7 @@
  */
 
 #include <publishers/baseline_heading_publisher.h>
+#include <utils/utils.h>
 
 //!! Temporary here
 //--------------------------------------------------------
@@ -19,11 +20,6 @@
 static bool timestamp_source_gnss = true;
 static double baseline_dir_offset_deg = 0.0;
 static double baseline_dip_offset_deg = 0.0;
-
-// Move to utils.h
-extern time_t Utils_UtcToLinuxTime(unsigned int year, unsigned int month,
-                                   unsigned int day, unsigned int hours,
-                                   unsigned int minutes, unsigned int seconds);
 
 BaselineHeadingPublisher::BaselineHeadingPublisher(
     sbp::State* state, const std::string& topic_name, rclcpp::Node* node,
@@ -39,9 +35,16 @@ void BaselineHeadingPublisher::handle_sbp_msg(uint16_t sender_id,
   if (timestamp_source_gnss) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
-      //!!      msg_.header.stamp.sec     = Utils_UtcToLinuxTime( msg.year,
-      //!msg.month, msg.day, msg.hours, msg.minutes, msg.seconds ); !
-      //!msg_.header.stamp.nanosec = msg.ns;
+      struct tm utc;
+
+      utc.tm_year = msg.year;
+      utc.tm_mon = msg.month;
+      utc.tm_mday = msg.day;
+      utc.tm_hour = msg.hours;
+      utc.tm_min = msg.minutes;
+      utc.tm_sec = msg.seconds;
+      msg_.header.stamp.sec = TimeUtils::utcToLinuxTime(utc);
+      msg_.header.stamp.nanosec = msg.ns;
     }
 
     last_received_utc_time_tow = msg.tow;
@@ -110,14 +113,13 @@ void BaselineHeadingPublisher::handle_sbp_msg(
 void BaselineHeadingPublisher::publish() {
   if ((last_received_baseline_ned_tow == last_received_utc_time_tow) ||
       !timestamp_source_gnss) {
-#if 0  //!!
-    if ( 0 == msg_.header.stamp.sec ) {
-      // Use current platform time if time from the GNSS receiver is not available or if a local time source is selected
+    if (0 == msg_.header.stamp.sec) {
+      // Use current platform time if time from the GNSS receiver is not
+      // available or if a local time source is selected
       msg_.header.stamp = node_->now();
     }
 
     msg_.header.frame_id = frame_;
-#endif
     publisher_->publish(msg_);
 
     msg_ = swiftnav_ros2_driver::msg::BaselineHeading();

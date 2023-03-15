@@ -11,7 +11,8 @@
  */
 
 #include <publishers/navsatfix_publisher.h>
-#include <iostream>
+#include <utils/utils.h>
+//#include <iostream>
 
 //!! Temporary here
 //--------------------------------------------------------
@@ -20,56 +21,6 @@
 static bool timestamp_source_gnss = true;
 
 // Move to utils.cpp
-#define LINUX_TIME_20200101 1577836800
-
-#define FIRST_YEAR 2020
-#define DAYS_IN_2020_YEAR 366
-
-#define DAYS_IN_YEAR 365
-#define DAYS_IN_LEAP_YEAR (DAYS_IN_YEAR + 1)
-#define DAYS_IN_WEEK 7
-#define HOURS_IN_DAY 24
-#define MINUTES_IN_HOUR 60
-#define SECONDS_IN_MINUTE 60
-#define SECONDS_IN_HOUR (SECONDS_IN_MINUTE * MINUTES_IN_HOUR)
-#define SECONDS_IN_DAY (HOURS_IN_DAY * SECONDS_IN_HOUR)
-#define SECONDS_IN_WEEK (DAYS_IN_WEEK * SECONDS_IN_DAY)
-
-const int days_in_month[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-static int IsLeapYear(int year) {
-  return ((0 == (year % 4)) && (0 != (year % 100))) || (0 == (year % 400));
-}
-
-time_t Utils_UtcToLinuxTime(unsigned int year, unsigned int month,
-                            unsigned int day, unsigned int hours,
-                            unsigned int minutes, unsigned int seconds) {
-  unsigned int i;
-  unsigned int yr = FIRST_YEAR;
-  unsigned int days = 0;
-  time_t linux_seconds;
-
-  while (yr < year) {
-    days += IsLeapYear(yr) ? DAYS_IN_LEAP_YEAR : DAYS_IN_YEAR;
-    yr++;
-  }
-
-  for (i = 0; i < (month - 1); i++) {
-    days += days_in_month[i];
-  }
-
-  if (IsLeapYear(year) && (month > 2)) {
-    days += day;
-  } else {
-    days += day - 1;
-  }
-
-  linux_seconds = LINUX_TIME_20200101 + days * SECONDS_IN_DAY +
-                  hours * SECONDS_IN_HOUR + minutes * SECONDS_IN_MINUTE +
-                  seconds;
-
-  return linux_seconds;
-}
 //--------------------------------------------------------
 
 // GNSS Signal Code Identifier
@@ -214,8 +165,15 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
   if (timestamp_source_gnss) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
-      msg_.header.stamp.sec = Utils_UtcToLinuxTime(
-          msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds);
+      struct tm utc;
+
+      utc.tm_year = msg.year;
+      utc.tm_mon = msg.month;
+      utc.tm_mday = msg.day;
+      utc.tm_hour = msg.hours;
+      utc.tm_min = msg.minutes;
+      utc.tm_sec = msg.seconds;
+      msg_.header.stamp.sec = TimeUtils::utcToLinuxTime(utc);
       msg_.header.stamp.nanosec = msg.ns;
     }
 
