@@ -11,41 +11,13 @@
  */
 
 #include <publishers/gpsfix_publisher.h>
+#include <utils/utils.h>
 
 //!! TODO Temporary here
 
 // Move to config file
 static bool timestamp_source_gnss = true;
 static double track_update_min_speed_mps = 0.2;  // [m/s]
-
-// Move to utils.h
-extern time_t Utils_UtcToLinuxTime(unsigned int year, unsigned int month,
-                                   unsigned int day, unsigned int hours,
-                                   unsigned int minutes, unsigned int seconds);
-
-// Move to utils.cpp
-double cov2ehe(double cov_n_n, double cov_n_e, double cov_e_e) {
-  double mx_det, mx_mean_trace, a, e1, e2, ehe_squared;
-
-  mx_det = cov_n_n * cov_e_e - cov_n_e * cov_n_e;
-  mx_mean_trace = (cov_n_n + cov_e_e) / 2.0;
-
-  a = sqrt(mx_mean_trace * mx_mean_trace - mx_det);
-  e1 = mx_mean_trace + a;
-  e2 = mx_mean_trace - a;
-
-  ehe_squared = std::max(e1, e2);  // 39.35%
-  ehe_squared *= 2.2952;           // 68.27%
-
-  return sqrt(ehe_squared);
-
-}  // cov2ehe()
-
-double cov2ede(void) {
-  //!! TODO
-  return -1.0;
-
-}  // cov2ede()
 
 GPSFixPublisher::GPSFixPublisher(sbp::State* state,
                                  const std::string& topic_name,
@@ -80,8 +52,14 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     // Use GNSS receiver reported time to stamp the data
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
-      msg_.header.stamp.sec = Utils_UtcToLinuxTime(
-          msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds);
+      struct tm utc;
+      utc.tm_year = msg.year;
+      utc.tm_mon = msg.month;
+      utc.tm_mday = msg.day;
+      utc.tm_hour = msg.hours;
+      utc.tm_min = msg.minutes;
+      utc.tm_sec = msg.seconds;
+      msg_.header.stamp.sec = TimeUtils::utcToLinuxTime(utc);
       msg_.header.stamp.nanosec = msg.ns;
     }
 
@@ -150,11 +128,9 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
         gps_msgs::msg::GPSFix::COVARIANCE_TYPE_KNOWN;
 
     msg_.err = 0.0;  //!! TODO
-    msg_.err_horz =
-        cov2ehe((double)msg.cov_n_n, (double)msg.cov_n_e, (double)msg.cov_e_e) *
-        2.0;  // [m], scaled to 95% confidence
-    msg_.err_vert =
-        sqrt((double)msg.cov_d_d) * 2.0;  // [m], scaled to 95% confidence
+    msg_.err_horz = Covariance::cov2ehe(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
+                    2.0;                      // [m], scaled to 95% confidence
+    msg_.err_vert = sqrt(msg.cov_d_d) * 2.0;  // [m], scaled to 95% confidence
   }
 
   last_received_pos_llh_cov_tow = msg.tow;
@@ -187,10 +163,10 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.climb = (double)msg.d / -1e3;  // [m/s], vertical
 
     msg_.err_speed =
-        cov2ehe((double)msg.cov_n_n, (double)msg.cov_n_e, (double)msg.cov_e_e) *
+        Covariance::cov2ehe(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
         2.0;  // [m/s], scaled to 95% confidence
     msg_.err_climb =
-        sqrt((double)msg.cov_d_d) * 2.0;  // [m/s], scaled to 95% confidence
+        sqrt(msg.cov_d_d) * 2.0;  // [m/s], scaled to 95% confidence
 
     if (msg_.speed >= track_update_min_speed_mps) {
       double cog_rad = atan2((double)msg.e, (double)msg.n);
@@ -198,8 +174,8 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
         cog_rad += 2.0 * M_PI;
       }
       vel_ned_track = cog_rad * 180.0 / M_PI;  // [deg]
-      vel_ned_err_track =
-          cov2ede() * 2.0;  //!! TODO [deg], scaled to 95% confidence
+      vel_ned_err_track = Covariance::cov2ede() *
+                          2.0;  //!! TODO [deg], scaled to 95% confidence
       vel_ned_track_valid = true;
     }
   }

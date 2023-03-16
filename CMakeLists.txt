@@ -12,6 +12,7 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(gps_msgs REQUIRED)
@@ -29,6 +30,7 @@ add_executable(sbp-to-ros
   src/data_sources/sbp_data_sources.cpp
   src/data_sources/serial.cpp
   src/data_sources/tcp.cpp
+  src/utils/utils.cpp
   src/logging/ros_logger.cpp
   src/logging/sbp_to_ros2_logger.cpp
   src/logging/sbp_file_logger.cpp
@@ -61,7 +63,7 @@ add_executable(sbp-to-ros
     "msg/OrientEuler.msg"
     "msg/OrientQuat.msg"
     "msg/Wheeltick.msg"
-    DEPENDENCIES # Add packages that above messages depend on
+    DEPENDENCIES std_msgs # Add packages that above messages depend on
   )
 
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
@@ -89,6 +91,7 @@ install(DIRECTORY
 
 if(BUILD_TESTING)
   find_package(rclcpp REQUIRED)
+  find_package(std_msgs REQUIRED)
   find_package(sensor_msgs REQUIRED)
   find_package(nav_msgs REQUIRED)
   find_package(gps_msgs REQUIRED)
@@ -113,6 +116,7 @@ if(BUILD_TESTING)
   src/data_sources/sbp_tcp_datasource.cpp
   src/data_sources/serial.cpp
   src/data_sources/tcp.cpp
+  src/utils/utils.cpp
   src/publishers/angular_rate_publisher.cpp
   src/publishers/baseline_heading_publisher.cpp
   src/publishers/gnss_time_offset_publisher.cpp

@@ -11,16 +11,12 @@
  */
 
 #include <publishers/timereference_publisher.h>
+#include <utils/utils.h>
 
 //!! TODO Temporary here
 
 // Move to config file
 static bool timestamp_source_gnss = false;
-
-// move to utils.h
-extern time_t Utils_UtcToLinuxTime(unsigned int year, unsigned int month,
-                                   unsigned int day, unsigned int hours,
-                                   unsigned int minutes, unsigned int seconds);
 
 TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
                                                const std::string& topic_name,
@@ -38,8 +34,15 @@ void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
   if (timestamp_source_gnss) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
-      msg_.header.stamp.sec = Utils_UtcToLinuxTime(
-          msg.year, msg.month, msg.day, msg.hours, msg.minutes, msg.seconds);
+      struct tm utc;
+
+      utc.tm_year = msg.year;
+      utc.tm_mon = msg.month;
+      utc.tm_mday = msg.day;
+      utc.tm_hour = msg.hours;
+      utc.tm_min = msg.minutes;
+      utc.tm_sec = msg.seconds;
+      msg_.header.stamp.sec = TimeUtils::utcToLinuxTime(utc);
       msg_.header.stamp.nanosec = msg.ns;
     }
 

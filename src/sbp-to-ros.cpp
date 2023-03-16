@@ -30,9 +30,10 @@
 #include <subscribers/subscriber_manager.h>
 
 #include <data_sources/sbp_data_sources.h>
-#include <utils.h>
+#include <utils/utils.h>
 
-static const int64_t LOG_REPUBLISH_DELAY = 2_ns;
+static const int64_t LOG_REPUBLISH_DELAY =
+    TimeUtils::secondsToNanoseconds(2ULL);
 
 /**
  * @brief Class that represents the ROS 2 driver node
