@@ -43,7 +43,8 @@ class NavSatFixPublisher
    */
   NavSatFixPublisher(sbp::State* state, const std::string& topic_name,
                      rclcpp::Node* node, const LoggerPtr& logger,
-                     const std::string& frame);
+                     const std::string& frame,
+                     const std::shared_ptr<Config>& config);
 
   /**
    * @brief Handles a sbp_msg_measurement_state_t message. It gets the

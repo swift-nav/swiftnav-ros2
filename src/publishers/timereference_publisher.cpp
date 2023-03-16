@@ -13,25 +13,19 @@
 #include <publishers/timereference_publisher.h>
 #include <utils/utils.h>
 
-//!! TODO Temporary here
-
-// Move to config file
-static bool timestamp_source_gnss = false;
-
-TimeReferencePublisher::TimeReferencePublisher(sbp::State* state,
-                                               const std::string& topic_name,
-                                               rclcpp::Node* node,
-                                               const LoggerPtr& logger,
-                                               const std::string& frame)
+TimeReferencePublisher::TimeReferencePublisher(
+    sbp::State* state, const std::string& topic_name, rclcpp::Node* node,
+    const LoggerPtr& logger, const std::string& frame,
+    const std::shared_ptr<Config>& config)
     : SBP2ROS2Publisher<sensor_msgs::msg::TimeReference, sbp_msg_utc_time_t,
                         sbp_msg_gps_time_t>(state, topic_name, node, logger,
-                                            frame) {}
+                                            frame, config) {}
 
 void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
                                             const sbp_msg_utc_time_t& msg) {
   (void)sender_id;
 
-  if (timestamp_source_gnss) {
+  if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
       struct tm utc;
@@ -46,7 +40,7 @@ void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
       msg_.header.stamp.nanosec = msg.ns;
     }
 
-    last_received_utc_time_tow = msg.tow;
+    last_received_utc_time_tow_ = msg.tow;
 
     publish();
   }
@@ -64,14 +58,14 @@ void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.time_ref.sec = -1;
   }
 
-  last_received_gps_time_tow = msg.tow;
+  last_received_gps_time_tow_ = msg.tow;
 
   publish();
 }
 
 void TimeReferencePublisher::publish() {
-  if ((last_received_gps_time_tow == last_received_utc_time_tow) ||
-      !timestamp_source_gnss) {
+  if ((last_received_gps_time_tow_ == last_received_utc_time_tow_) ||
+      !config_->getTimeStampSourceGNSS()) {
     if (0 == msg_.header.stamp.sec) {
       // Use current platform time if time from the GNSS receiver is not
       // available or if a local time source is selected
@@ -83,7 +77,7 @@ void TimeReferencePublisher::publish() {
     publisher_->publish(msg_);
 
     msg_ = sensor_msgs::msg::TimeReference();
-    last_received_utc_time_tow = -1;
-    last_received_gps_time_tow = -2;
+    last_received_utc_time_tow_ = -1;
+    last_received_gps_time_tow_ = -2;
   }
 }

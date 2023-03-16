@@ -15,9 +15,10 @@
 ImuAuxPublisher::ImuAuxPublisher(sbp::State* state,
                                  const std::string& topic_name,
                                  rclcpp::Node* node, const LoggerPtr& logger,
-                                 const std::string& frame)
+                                 const std::string& frame,
+                                 const std::shared_ptr<Config>& config)
     : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::ImuAux, sbp_msg_imu_aux_t>(
-          state, topic_name, node, logger, frame) {}
+          state, topic_name, node, logger, frame, config) {}
 
 void ImuAuxPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_imu_aux_t& msg) {
