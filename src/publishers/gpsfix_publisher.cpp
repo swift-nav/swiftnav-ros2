@@ -127,10 +127,10 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.position_covariance_type =
         gps_msgs::msg::GPSFix::COVARIANCE_TYPE_KNOWN;
 
-    msg_.err = 0.0;  //!! TODO
     msg_.err_horz = Covariance::cov2ehe(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
                     2.0;                      // [m], scaled to 95% confidence
     msg_.err_vert = sqrt(msg.cov_d_d) * 2.0;  // [m], scaled to 95% confidence
+    msg_.err = sqrt( msg_.err_horz*msg_.err_horz + msg_.err_vert*msg_.err_vert ); // [m], 95% confidence
   }
 
   last_received_pos_llh_cov_tow = msg.tow;
