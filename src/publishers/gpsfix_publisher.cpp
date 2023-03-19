@@ -169,8 +169,8 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
         cog_rad += 2.0 * M_PI;
       }
       vel_ned_track = cog_rad * 180.0 / M_PI;  // [deg]
-      vel_ned_err_track = Covariance::cov2ede() *
-                          2.0;  //!! TODO [deg], scaled to 95% confidence
+      vel_ned_err_track = Covariance::cov2ehde( msg.n, msg.e, msg.cov_n_n, msg.cov_e_e ) *
+                          2.0;  // [deg], scaled to 95% confidence
       vel_ned_track_valid = true;
     }
   }
