@@ -1,15 +1,21 @@
 SBPRos2Driver:
   ros__parameters:
-    interface: 3
+    # SwiftNav GNSS Receiver Interface
+    interface: 3 # 1: File, 2: Serial, 3: TCP Client
+    # File (interface: 1)
     sbp_file: "/workspaces/Swift/24-185316.sbp"
+    # Serial (interface: 2)
     device_name: "/dev/ttyUSB0"
     connection_str: "115200|N|8|1|N"
+    # TCP Client (interface: 3)
     host_ip: "192.168.0.222"
     host_port: 55556
-    read_timeout: 2000
-    write_timeout: 2000
+    read_timeout: 2000  # [ms]
+    write_timeout: 2000 # [ms]
+    # ROS2
     frame_name: "swiftnav-gnss"
     timestamp_source_gnss: True
+    # Publishers
     enabled_publishers_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
     enabled_publishers_topics:
       [
@@ -27,8 +33,10 @@ SBPRos2Driver:
         "wheeltick",
         "posestamped"
       ]
+    # Subscribers
     enabled_subscribers_ids: [0]
     enabled_subscribers_topics: [""]
+    # SBP Logging
     log_sbp_messages: False
-    log_sbp_filepath: "/workspaces/Swift"
+    log_sbp_filepath: "/home/swiftnav/ros2logs"
 
