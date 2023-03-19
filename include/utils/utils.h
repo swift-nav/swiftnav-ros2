@@ -45,7 +45,7 @@ time_t utcToLinuxTime(const struct tm& utc);
 
 namespace Covariance {
 /**
- * @brief
+ * @brief Computes estimated horizonal error from covariance matrix
  *
  * @param cov_n_n Estimated variance of northing [m^2]
  * @param cov_n_e Covariance of northing and easting [m^2]
@@ -56,9 +56,9 @@ double cov2ehe(const double cov_n_n, const double cov_n_e,
                const double cov_e_e);
 
 /**
- * @brief
+ * @brief Computes estimated horizonal direction error from covariance matrix
  *
  * @return double
  */
-double cov2ede();
+double cov2ehde( const double n, const double e, const double cov_n_n, const double cov_e_e );
 }  // namespace Covariance
