@@ -16,7 +16,7 @@
 #include <publishers/gpsfix_publisher.h>
 #include <publishers/navsatfix_publisher.h>
 #include <publishers/timereference_publisher.h>
-#include <publishers/imu_publisher.h>
+//#include <publishers/imu_publisher.h>
 
 PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
                               const std::string& topic_name, rclcpp::Node* node,
