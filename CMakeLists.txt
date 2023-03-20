@@ -43,6 +43,7 @@ add_executable(sbp-to-ros
   src/publishers/orient_euler_publisher.cpp
   src/publishers/orient_quat_publisher.cpp
   src/publishers/gnss_time_offset_publisher.cpp
+  src/publishers/imu_publisher.cpp
   src/publishers/imu_aux_publisher.cpp
   src/publishers/imu_raw_publisher.cpp
   src/publishers/odometry_publisher.cpp
@@ -121,6 +122,7 @@ if(BUILD_TESTING)
   src/publishers/baseline_heading_publisher.cpp
   src/publishers/gnss_time_offset_publisher.cpp
   src/publishers/gpsfix_publisher.cpp
+  src/publishers/imu_publisher.cpp
   src/publishers/imu_aux_publisher.cpp
   src/publishers/imu_raw_publisher.cpp
   src/publishers/navsatfix_publisher.cpp

@@ -25,6 +25,7 @@
 #include <publishers/posestamped_publisher.h>
 #include <publishers/timereference_publisher.h>
 #include <publishers/wheeltick_publisher.h>
+#include <publishers/imu_publisher.h>
 
 PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
                               const std::string& topic_name, rclcpp::Node* node,
@@ -96,6 +97,11 @@ PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
     case Publishers::PoseStamped:
       pub = std::make_shared<PoseStampedPublisher>(state, topic_name, node,
                                                    logger, frame);
+      break;
+
+    case Publishers::Imu:
+      pub = std::make_shared<ImuPublisher>(state, topic_name, node,
+                                                     logger, frame);
       break;
 
     default:

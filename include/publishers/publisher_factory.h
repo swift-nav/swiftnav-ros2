@@ -32,6 +32,7 @@ enum class Publishers {
   TimeReference,    // 11
   Wheeltick,        // 12
   PoseStamped,      // 13
+  Imu,              // 14
 };
 
 /**
