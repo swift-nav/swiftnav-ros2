@@ -33,7 +33,8 @@ class TimeReferencePublisher
   TimeReferencePublisher() = delete;
   TimeReferencePublisher(sbp::State* state, const std::string& topic_name,
                          rclcpp::Node* node, const LoggerPtr& logger,
-                         const std::string& frame);
+                         const std::string& frame,
+                         const std::shared_ptr<Config>& config);
 
   void handle_sbp_msg(uint16_t sender_id, const sbp_msg_utc_time_t& msg);
   void handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg);
@@ -42,6 +43,6 @@ class TimeReferencePublisher
   void publish() override;
 
  private:
-  uint32_t last_received_utc_time_tow = -1;
-  uint32_t last_received_gps_time_tow = -2;
+  int32_t last_received_utc_time_tow_{-1};
+  int32_t last_received_gps_time_tow_{-2};
 };

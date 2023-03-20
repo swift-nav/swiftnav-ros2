@@ -21,6 +21,8 @@
 
 #include <logging/issue_logger.h>
 
+#include <utils/config.h>
+
 /**
  * @brief Template abstract base class for the publishers
  *
@@ -46,11 +48,13 @@ class SBP2ROS2Publisher : private sbp::MessageHandler<SBPMsgTypes...> {
    */
   SBP2ROS2Publisher(sbp::State* state, const std::string& topic_name,
                     rclcpp::Node* node, const LoggerPtr& logger,
-                    const std::string& frame)
+                    const std::string& frame,
+                    const std::shared_ptr<Config>& config)
       : sbp::MessageHandler<SBPMsgTypes...>(state),
         node_(node),
         frame_(frame),
-        logger_(logger) {
+        logger_(logger),
+        config_(config) {
     publisher_ = node_->create_publisher<ROS2MsgType>(topic_name, 10);
   }
 
@@ -68,4 +72,5 @@ class SBP2ROS2Publisher : private sbp::MessageHandler<SBPMsgTypes...> {
   rclcpp::Node* node_; /** @brief ROS 2 node object */
   std::string frame_;
   LoggerPtr logger_; /** @brief Logging facility */
+  std::shared_ptr<Config> config_; /** Node configuration */
 };

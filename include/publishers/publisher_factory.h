@@ -15,6 +15,7 @@
 #include <libsbp/cpp/state.h>
 #include <logging/issue_logger.h>
 #include <publishers/dummy_publisher.h>
+#include <utils/config.h>
 #include <rclcpp/rclcpp.hpp>
 
 enum class Publishers {
@@ -49,5 +50,5 @@ enum class Publishers {
  */
 PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
                               const std::string& topic_name, rclcpp::Node* node,
-                              const LoggerPtr& logger,
-                              const std::string& frame);
+                              const LoggerPtr& logger, const std::string& frame,
+                              const std::shared_ptr<Config>& config);

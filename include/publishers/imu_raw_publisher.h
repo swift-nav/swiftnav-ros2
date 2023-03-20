@@ -29,7 +29,8 @@ class ImuRawPublisher
   ImuRawPublisher() = delete;
   ImuRawPublisher(sbp::State* state, const std::string& topic_name,
                   rclcpp::Node* node, const LoggerPtr& logger,
-                  const std::string& frame);
+                  const std::string& frame,
+                  const std::shared_ptr<Config>& config);
 
   void handle_sbp_msg(uint16_t sender_id, const sbp_msg_imu_raw_t& msg);
 
