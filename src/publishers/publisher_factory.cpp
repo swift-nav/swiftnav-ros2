@@ -18,6 +18,7 @@
 #include <publishers/imu_raw_publisher.h>
 #include <publishers/navsatfix_publisher.h>
 #include <publishers/timereference_publisher.h>
+#include <publishers/imu_publisher.h>
 
 PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
                               const std::string& topic_name, rclcpp::Node* node,
@@ -54,6 +55,11 @@ PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
     case Publishers::TimeReference:
       pub = std::make_shared<TimeReferencePublisher>(state, topic_name, node,
                                                      logger, frame, config);
+      break;
+
+    case Publishers::Imu:
+      pub = std::make_shared<ImuPublisher>(state, topic_name, node,
+                                                     logger, frame);
       break;
 
     default:
