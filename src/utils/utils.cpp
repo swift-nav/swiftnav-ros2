@@ -12,7 +12,6 @@
 
 #include <utils/utils.h>
 #include <algorithm>
-#include <cmath>
 
 namespace TimeUtils {
 constexpr uint32_t LINUX_TIME_20200101 = 1577836800U;
@@ -96,4 +95,3 @@ double cov2ehde( const double n, const double e, const double cov_n_n, const dou
 }
 
 }  // namespace Covariance
-

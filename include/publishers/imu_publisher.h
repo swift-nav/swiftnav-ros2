@@ -51,25 +51,23 @@ class ImuPublisher
   void publish() override;
 
  private:
+  void compute_utc_offset();
 
-  void compute_utc_offset( void );
+  int32_t last_received_utc_time_tow_{-1};
+  int32_t last_received_gps_time_tow_{-2};
 
-  uint32_t last_received_utc_time_tow = -1;
-  uint32_t last_received_gps_time_tow = -2;
+  double linux_stamp_s_{0.0};
+  double gps_stamp_s_{0.0};
 
-  double linux_stamp_s = 0.0;
-  double gps_stamp_s   = 0.0;
+  bool gps_week_valid_{false};
+  uint32_t gps_week_{0U};
 
-  bool     gps_week_valid        = false;
-  uint32_t gps_week              = 0;
+  bool utc_offset_valid_{false};
+  double utc_offset_s_{0.0};
 
-  bool     utc_offset_valid      = false;
-  double   utc_offset_s          = 0.0;
+  bool gps_time_offset_valid_{false};
+  double gps_time_offset_s_{0.0};
 
-  bool     gps_time_offset_valid = false;
-  double   gps_time_offset_s     = 0.0;
-
-  double acc_res_mps2 = 0.0;
-  double gyro_res_rad = 0.0;
-
+  double acc_res_mps2_{0.0};
+  double gyro_res_rad_{0.0};
 };

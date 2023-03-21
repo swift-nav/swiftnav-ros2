@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 #include <ctime>
 
@@ -63,4 +64,10 @@ double cov2ehe(const double cov_n_n, const double cov_n_e,
 double cov2ehde( const double n, const double e, const double cov_n_n, const double cov_e_e );
 }  // namespace Covariance
 
+namespace Conversions {
+constexpr double STANDARD_GRAVITY_MPS2 = 9.80665;
 
+inline double G2MPS2(const double x) { return x * STANDARD_GRAVITY_MPS2; }
+inline double DEG2RAD(const double x) { return x * M_PI / 180.0; }
+
+}  // namespace Conversions
