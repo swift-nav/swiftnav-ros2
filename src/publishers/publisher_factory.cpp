@@ -14,8 +14,6 @@
 
 #include <publishers/baseline_publisher.h>
 #include <publishers/gpsfix_publisher.h>
-#include <publishers/imu_aux_publisher.h>
-#include <publishers/imu_raw_publisher.h>
 #include <publishers/navsatfix_publisher.h>
 #include <publishers/timereference_publisher.h>
 #include <publishers/imu_publisher.h>
@@ -35,16 +33,6 @@ PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
 
     case Publishers::GpsFix:
       pub = std::make_shared<GPSFixPublisher>(state, topic_name, node, logger,
-                                              frame, config);
-      break;
-
-    case Publishers::ImuAux:
-      pub = std::make_shared<ImuAuxPublisher>(state, topic_name, node, logger,
-                                              frame, config);
-      break;
-
-    case Publishers::ImuRaw:
-      pub = std::make_shared<ImuRawPublisher>(state, topic_name, node, logger,
                                               frame, config);
       break;
 
