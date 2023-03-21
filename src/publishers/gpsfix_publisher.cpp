@@ -123,7 +123,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
         gps_msgs::msg::GPSFix::COVARIANCE_TYPE_KNOWN;
 
     msg_.err_horz = Covariance::cov2ehe(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
-                    2.0;                      // [m], scaled to 95% confidence
+                    2.6926;                   // [m], scaled to 95% confidence
     msg_.err_vert = sqrt(msg.cov_d_d) * 2.0;  // [m], scaled to 95% confidence
     msg_.err = sqrt( msg_.err_horz*msg_.err_horz + msg_.err_vert*msg_.err_vert ); // [m], 95% confidence
   }
@@ -159,7 +159,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
     msg_.err_speed =
         Covariance::cov2ehe(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
-        2.0;  // [m/s], scaled to 95% confidence
+        2.6926;                   // [m/s], scaled to 95% confidence
     msg_.err_climb =
         sqrt(msg.cov_d_d) * 2.0;  // [m/s], scaled to 95% confidence
 
@@ -170,7 +170,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
       }
       vel_ned_track = cog_rad * 180.0 / M_PI;  // [deg]
       vel_ned_err_track = Covariance::cov2ehde( msg.n, msg.e, msg.cov_n_n, msg.cov_e_e ) *
-                          2.0;  // [deg], scaled to 95% confidence
+                          2.6926;  // [deg], scaled to 95% confidence
       vel_ned_track_valid = true;
     }
   }
