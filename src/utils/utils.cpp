@@ -96,4 +96,3 @@ double covarianceToEstimatedHorizonatalDirectionError(
 }
 
 }  // namespace Covariance
-
