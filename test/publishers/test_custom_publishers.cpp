@@ -27,15 +27,10 @@
 #include <data_sources/sbp_data_sources.h>
 #include <publishers/publisher_factory.h>
 
-#include <swiftnav_ros2_driver/msg/angular_rate.hpp>
+#include <utils/config.h>
 #include <swiftnav_ros2_driver/msg/baseline_heading.hpp>
-#include <swiftnav_ros2_driver/msg/gnss_time_offset.hpp>
 #include <swiftnav_ros2_driver/msg/imu_aux.hpp>
 #include <swiftnav_ros2_driver/msg/imu_raw.hpp>
-#include <swiftnav_ros2_driver/msg/odometry.hpp>
-#include <swiftnav_ros2_driver/msg/orient_euler.hpp>
-#include <swiftnav_ros2_driver/msg/orient_quat.hpp>
-#include <swiftnav_ros2_driver/msg/wheeltick.hpp>
 
 constexpr uint32_t MAX_MSG_SIZE = 255;
 constexpr uint64_t SECONDS = 1000000000ULL;
@@ -126,8 +121,10 @@ class TestCustomPublishers : public ::testing::Test {
     bool test_finished = false;
     bool timed_out = false;
     auto node = std::make_shared<rclcpp::Node>("TestCustomPublishersNode");
+    auto node_ptr = node.get();
+    auto config = std::make_shared<Config>(node_ptr);
     auto pub = publisherFactory(pub_type, runner_.getState(), topic_name_,
-                                node.get(), logger_, frame_name_);
+                                node.get(), logger_, frame_name_, config);
     auto subs_call = [&msg, &test_finished, &comp](const rosT& ros_msg) {
       comp(msg, ros_msg);
       test_finished = true;
@@ -148,7 +145,7 @@ class TestCustomPublishers : public ::testing::Test {
     while (!test_finished && !timed_out) {
       executor.spin_once(std::chrono::nanoseconds(10000000LL));
       timed_out = timedOut(start, 2 * SECONDS);
-    }
+  }
 
     ASSERT_FALSE(timed_out);
   }
@@ -164,36 +161,16 @@ SBPRunner TestCustomPublishers::runner_;
 
 TEST_F(TestCustomPublishers, CreateInvalidPublisher) {
   auto node = std::make_shared<rclcpp::Node>("TestCustomPublishersNode");
-  auto pub = publisherFactory(static_cast<Publishers>(-1), runner_.getState(),
-                              topic_name_, node.get(), logger_, frame_name_);
+  auto node_ptr = node.get();
+  auto config = std::make_shared<Config>(node_ptr);
+  auto pub =
+      publisherFactory(static_cast<Publishers>(-1), runner_.getState(),
+                       topic_name_, node.get(), logger_, frame_name_, config);
   ASSERT_FALSE(pub);
 }
 
-TEST_F(TestCustomPublishers, CreateAngularRatePublisher) {
-  sbp_msg_t msg;
-
-  msg.angular_rate.tow = 1234;
-  msg.angular_rate.x = 10;
-  msg.angular_rate.y = 20;
-  msg.angular_rate.z = 30;
-  msg.angular_rate.flags = 0x0C;
-
-  auto check =
-      [](const sbp_msg_t& msg,
-         const swiftnav_ros2_driver::msg::AngularRate& ros_msg) -> void {
-    ASSERT_EQ(msg.angular_rate.flags, ros_msg.flags);
-    ASSERT_EQ(msg.angular_rate.tow, ros_msg.tow);
-    ASSERT_EQ(msg.angular_rate.x, ros_msg.x);
-    ASSERT_EQ(msg.angular_rate.y, ros_msg.y);
-    ASSERT_EQ(msg.angular_rate.z, ros_msg.z);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::AngularRate>(
-      Publishers::AngularRate, msg, SbpMsgAngularRate, check);
-}
-
-TEST_F(TestCustomPublishers, CreateBaselineHeadingPublisher) {
-#if 0 //!! TODO
+TEST_F(TestCustomPublishers, CreateBaselinePublisher) {
+#if 0 // TODO !!
   sbp_msg_t msg;
 
   msg.baseline_heading.flags = 0x0D;
@@ -213,27 +190,6 @@ TEST_F(TestCustomPublishers, CreateBaselineHeadingPublisher) {
   testPublisher<swiftnav_ros2_driver::msg::BaselineHeading>(
       Publishers::BaselineHeading, msg, SbpMsgBaselineHeading, check);
 #endif
-}
-
-TEST_F(TestCustomPublishers, CreateGnssTimeOffsetPublisher) {
-  sbp_msg_t msg;
-
-  msg.gnss_time_offset.flags = 0x1E;
-  msg.gnss_time_offset.microseconds = 17;
-  msg.gnss_time_offset.milliseconds = 3;
-  msg.gnss_time_offset.weeks = 1;
-
-  auto check =
-      [](const sbp_msg_t& msg,
-         const swiftnav_ros2_driver::msg::GnssTimeOffset& ros_msg) -> void {
-    ASSERT_EQ(msg.gnss_time_offset.flags, ros_msg.flags);
-    ASSERT_EQ(msg.gnss_time_offset.microseconds, ros_msg.microseconds);
-    ASSERT_EQ(msg.gnss_time_offset.milliseconds, ros_msg.milliseconds);
-    ASSERT_EQ(msg.gnss_time_offset.weeks, ros_msg.weeks);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::GnssTimeOffset>(
-      Publishers::GnssTimeOffset, msg, SbpMsgGnssTimeOffset, check);
 }
 
 TEST_F(TestCustomPublishers, CreateImuAuxPublisher) {
@@ -280,111 +236,4 @@ TEST_F(TestCustomPublishers, CreateImuRawPublisher) {
 
   testPublisher<swiftnav_ros2_driver::msg::ImuRaw>(Publishers::ImuRaw, msg,
                                                    SbpMsgImuRaw, check);
-}
-
-TEST_F(TestCustomPublishers, CreateOdometryPublisher) {
-  sbp_msg_t msg;
-
-  msg.odometry.flags = 13;
-  msg.odometry.velocity = 3343;
-  msg.imu_raw.tow = 11223344;
-
-  auto check = [](const sbp_msg_t& msg,
-                  const swiftnav_ros2_driver::msg::Odometry& ros_msg) -> void {
-    ASSERT_EQ(msg.odometry.flags, ros_msg.flags);
-    ASSERT_EQ(msg.odometry.velocity, ros_msg.velocity);
-    ASSERT_EQ(msg.imu_raw.tow, ros_msg.tow);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::Odometry>(Publishers::Odometry, msg,
-                                                     SbpMsgOdometry, check);
-}
-
-TEST_F(TestCustomPublishers, CreateOrientEulerPublisher) {
-  sbp_msg_t msg;
-
-  msg.orient_euler.flags = 4;
-  msg.orient_euler.pitch = -300;
-  msg.orient_euler.pitch_accuracy = 0.3;
-  msg.orient_euler.roll = 64;
-  msg.orient_euler.roll_accuracy = 0.92;
-  msg.orient_euler.tow = 53442;
-  msg.orient_euler.yaw = 112;
-  msg.orient_euler.yaw_accuracy = 0.67;
-
-  auto check =
-      [](const sbp_msg_t& msg,
-         const swiftnav_ros2_driver::msg::OrientEuler& ros_msg) -> void {
-    ASSERT_EQ(msg.orient_euler.flags, ros_msg.flags);
-    ASSERT_EQ(msg.orient_euler.pitch, ros_msg.pitch);
-    ASSERT_TRUE(fabs(msg.orient_euler.pitch_accuracy - ros_msg.pitch_accuracy) <
-                DBL_EPSILON);
-    ASSERT_EQ(msg.orient_euler.roll, ros_msg.roll);
-    ASSERT_TRUE(fabs(msg.orient_euler.roll_accuracy - ros_msg.roll_accuracy) <
-                DBL_EPSILON);
-    ASSERT_EQ(msg.orient_euler.yaw, ros_msg.yaw);
-    ASSERT_TRUE(fabs(msg.orient_euler.yaw_accuracy - ros_msg.yaw_accuracy) <
-                DBL_EPSILON);
-    ASSERT_EQ(msg.orient_euler.tow, ros_msg.tow);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::OrientEuler>(
-      Publishers::OrientEuler, msg, SbpMsgOrientEuler, check);
-}
-
-TEST_F(TestCustomPublishers, CreateOrientQuatPublisher) {
-  sbp_msg_t msg;
-
-  msg.orient_quat.flags = 4;
-  msg.orient_euler.tow = 53442;
-  msg.orient_quat.w = 33;
-  msg.orient_quat.w_accuracy = 0.9;
-  msg.orient_quat.x = 1123;
-  msg.orient_quat.x_accuracy = 0.92;
-  msg.orient_quat.y = 112;
-  msg.orient_quat.y_accuracy = 0.345;
-  msg.orient_quat.z = 21;
-  msg.orient_quat.z_accuracy = 0.81;
-
-  auto check =
-      [](const sbp_msg_t& msg,
-         const swiftnav_ros2_driver::msg::OrientQuat& ros_msg) -> void {
-    ASSERT_EQ(msg.orient_quat.flags, ros_msg.flags);
-    ASSERT_EQ(msg.orient_quat.w, ros_msg.w);
-    ASSERT_TRUE(fabs(msg.orient_quat.w_accuracy - ros_msg.w_accuracy) <
-                DBL_EPSILON);
-    ASSERT_EQ(msg.orient_quat.x, ros_msg.x);
-    ASSERT_TRUE(fabs(msg.orient_quat.x_accuracy - ros_msg.x_accuracy) <
-                DBL_EPSILON);
-    ASSERT_EQ(msg.orient_quat.y, ros_msg.y);
-    ASSERT_TRUE(fabs(msg.orient_quat.y_accuracy - ros_msg.y_accuracy) <
-                DBL_EPSILON);
-    ASSERT_EQ(msg.orient_quat.z, ros_msg.z);
-    ASSERT_TRUE(fabs(msg.orient_quat.z_accuracy - ros_msg.z_accuracy) <
-                DBL_EPSILON);
-    ASSERT_EQ(msg.orient_quat.tow, ros_msg.tow);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::OrientQuat>(
-      Publishers::OrientQuat, msg, SbpMsgOrientQuat, check);
-}
-
-TEST_F(TestCustomPublishers, CreateWheeltickPublisher) {
-  sbp_msg_t msg;
-
-  msg.wheeltick.flags = 135;
-  msg.wheeltick.source = 2;
-  msg.wheeltick.ticks = 337454;
-  msg.wheeltick.time = 78323498493;
-
-  auto check = [](const sbp_msg_t& msg,
-                  const swiftnav_ros2_driver::msg::Wheeltick& ros_msg) -> void {
-    ASSERT_EQ(msg.wheeltick.flags, ros_msg.flags);
-    ASSERT_EQ(msg.wheeltick.source, ros_msg.source);
-    ASSERT_EQ(msg.wheeltick.ticks, ros_msg.ticks);
-    ASSERT_EQ(msg.wheeltick.time, ros_msg.time);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::Wheeltick>(
-      Publishers::Wheeltick, msg, SbpMsgWheeltick, check);
 }

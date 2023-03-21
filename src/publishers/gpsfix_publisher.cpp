@@ -13,21 +13,16 @@
 #include <publishers/gpsfix_publisher.h>
 #include <utils/utils.h>
 
-//!! TODO Temporary here
-
-// Move to config file
-static bool timestamp_source_gnss = true;
-static double track_update_min_speed_mps = 0.2;  // [m/s]
-
 GPSFixPublisher::GPSFixPublisher(sbp::State* state,
                                  const std::string& topic_name,
                                  rclcpp::Node* node, const LoggerPtr& logger,
-                                 const std::string& frame)
+                                 const std::string& frame,
+                                 const std::shared_ptr<Config>& config)
     : SBP2ROS2Publisher<gps_msgs::msg::GPSFix, sbp_msg_gps_time_t,
                         sbp_msg_utc_time_t, sbp_msg_pos_llh_cov_t,
                         sbp_msg_vel_ned_cov_t, sbp_msg_orient_euler_t,
-                        sbp_msg_dops_t>(state, topic_name, node, logger,
-                                        frame) {}
+                        sbp_msg_dops_t>(state, topic_name, node, logger, frame,
+                                        config) {}
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_gps_time_t& msg) {
@@ -48,7 +43,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_utc_time_t& msg) {
   (void)sender_id;
 
-  if (timestamp_source_gnss) {
+  if (config_->getTimeStampSourceGNSS()) {
     // Use GNSS receiver reported time to stamp the data
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
@@ -168,7 +163,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.err_climb =
         sqrt(msg.cov_d_d) * 2.0;  // [m/s], scaled to 95% confidence
 
-    if (msg_.speed >= track_update_min_speed_mps) {
+    if (msg_.speed >= config_->getTrackUpdateMinSpeedMps()) {
       double cog_rad = atan2((double)msg.e, (double)msg.n);
       if (cog_rad < 0.0) {
         cog_rad += 2.0 * M_PI;
@@ -231,7 +226,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void GPSFixPublisher::publish() {
   if (((last_received_gps_time_tow == last_received_utc_time_tow) ||
-       !timestamp_source_gnss) &&
+       !config_->getTimeStampSourceGNSS()) &&
       (last_received_gps_time_tow == last_received_pos_llh_cov_tow) &&
       (last_received_gps_time_tow == last_received_vel_ned_cov_tow) &&
       ((last_received_gps_time_tow == last_received_orient_euler_tow) ||

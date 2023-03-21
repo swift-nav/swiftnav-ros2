@@ -10,29 +10,24 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <publishers/baseline_heading_publisher.h>
+#include <publishers/baseline_publisher.h>
 #include <utils/utils.h>
 
-//!! Temporary here
-//--------------------------------------------------------
-
-// Move to config file
-static bool timestamp_source_gnss = true;
-static double baseline_dir_offset_deg = 0.0;
-static double baseline_dip_offset_deg = 0.0;
-
-BaselineHeadingPublisher::BaselineHeadingPublisher(
-    sbp::State* state, const std::string& topic_name, rclcpp::Node* node,
-    const LoggerPtr& logger, const std::string& frame)
+BaselinePublisher::BaselinePublisher(sbp::State* state,
+                                     const std::string& topic_name,
+                                     rclcpp::Node* node,
+                                     const LoggerPtr& logger,
+                                     const std::string& frame,
+                                     const std::shared_ptr<Config>& config)
     : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::BaselineHeading,
                         sbp_msg_utc_time_t, sbp_msg_baseline_ned_t>(
-          state, topic_name, node, logger, frame) {}
+          state, topic_name, node, logger, frame, config) {}
 
-void BaselineHeadingPublisher::handle_sbp_msg(uint16_t sender_id,
-                                              const sbp_msg_utc_time_t& msg) {
+void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
+                                       const sbp_msg_utc_time_t& msg) {
   (void)sender_id;
 
-  if (timestamp_source_gnss) {
+  if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
       struct tm utc;
@@ -47,14 +42,14 @@ void BaselineHeadingPublisher::handle_sbp_msg(uint16_t sender_id,
       msg_.header.stamp.nanosec = msg.ns;
     }
 
-    last_received_utc_time_tow = msg.tow;
+    last_received_utc_time_tow_ = msg.tow;
 
     publish();
   }
 }
 
-void BaselineHeadingPublisher::handle_sbp_msg(
-    uint16_t sender_id, const sbp_msg_baseline_ned_t& msg) {
+void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
+                                       const sbp_msg_baseline_ned_t& msg) {
   (void)sender_id;
 
   msg_.mode = SBP_BASELINE_NED_FIX_MODE_GET(msg.flags);
@@ -62,12 +57,12 @@ void BaselineHeadingPublisher::handle_sbp_msg(
   if (SBP_BASELINE_NED_FIX_MODE_INVALID != msg_.mode) {
     msg_.satellites_used = msg.n_sats;
 
-    msg_.baseline_n_m = (double)msg.n / 1e3;
-    msg_.baseline_e_m = (double)msg.e / 1e3;
-    msg_.baseline_d_m = (double)msg.d / 1e3;
+    msg_.baseline_n_m = static_cast<double>(msg.n) / 1e3;
+    msg_.baseline_e_m = static_cast<double>(msg.e) / 1e3;
+    msg_.baseline_d_m = static_cast<double>(msg.d) / 1e3;
 
-    msg_.baseline_err_h_m = (double)msg.h_accuracy / 1e3;
-    msg_.baseline_err_v_m = (double)msg.v_accuracy / 1e3;
+    msg_.baseline_err_h_m = static_cast<double>(msg.h_accuracy) / 1e3;
+    msg_.baseline_err_v_m = static_cast<double>(msg.v_accuracy) / 1e3;
 
     double b_m = msg_.baseline_n_m * msg_.baseline_n_m +
                  msg_.baseline_e_m * msg_.baseline_e_m;
@@ -82,7 +77,7 @@ void BaselineHeadingPublisher::handle_sbp_msg(
         dir_rad += 2.0 * M_PI;
       }
       msg_.baseline_dir_deg =
-          dir_rad * 180.0 / M_PI + baseline_dir_offset_deg;  // [deg]
+          dir_rad * 180.0 / M_PI + config_->getBaseLineDirOffsetDeg();  // [deg]
       if (msg_.baseline_dir_deg < 0.0) {
         msg_.baseline_dir_deg += 360.0;
       } else if (msg_.baseline_dir_deg >= 360.0) {
@@ -95,7 +90,7 @@ void BaselineHeadingPublisher::handle_sbp_msg(
       // Baseline Dip
       double dip_rad = atan2(msg_.baseline_d_m, msg_.baseline_length_h_m);
       msg_.baseline_dip_deg =
-          dip_rad * 180.0 / M_PI + baseline_dip_offset_deg;  // [deg]
+          dip_rad * 180.0 / M_PI + config_->getBaseLineDipOffsetDeg();  // [deg]
 
       msg_.baseline_dip_err_deg =
           atan2(msg_.baseline_err_v_m, msg_.baseline_length_h_m) * 180.0 /
@@ -105,14 +100,14 @@ void BaselineHeadingPublisher::handle_sbp_msg(
     }
   }
 
-  last_received_baseline_ned_tow = msg.tow;
+  last_received_baseline_ned_tow_ = msg.tow;
 
   publish();
 }
 
-void BaselineHeadingPublisher::publish() {
-  if ((last_received_baseline_ned_tow == last_received_utc_time_tow) ||
-      !timestamp_source_gnss) {
+void BaselinePublisher::publish() {
+  if ((last_received_baseline_ned_tow_ == last_received_utc_time_tow_) ||
+      !config_->getTimeStampSourceGNSS()) {
     if (0 == msg_.header.stamp.sec) {
       // Use current platform time if time from the GNSS receiver is not
       // available or if a local time source is selected
@@ -123,7 +118,7 @@ void BaselineHeadingPublisher::publish() {
     publisher_->publish(msg_);
 
     msg_ = swiftnav_ros2_driver::msg::BaselineHeading();
-    last_received_utc_time_tow = -1;
-    last_received_baseline_ned_tow = -2;
+    last_received_utc_time_tow_ = -1;
+    last_received_baseline_ned_tow_ = -2;
   }
 }

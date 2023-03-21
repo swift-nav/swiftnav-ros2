@@ -96,3 +96,4 @@ double cov2ehde( const double n, const double e, const double cov_n_n, const dou
 }
 
 }  // namespace Covariance
+

@@ -1,0 +1,171 @@
+/*
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
+ *
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
+#include <publishers/imu_publisher.h>
+#include <utils/utils.h>
+
+
+//!! TODO Temporary here, move to utils
+
+#define STANDARD_GRAVITY_MPS2 9.80665
+
+#define G2MPS2(x)  ( (x)*STANDARD_GRAVITY_MPS2 )
+
+#define DEG2RAD(x) ( (x)*M_PI/180.0 )
+
+
+
+
+ImuPublisher::ImuPublisher(sbp::State* state,
+                                               const std::string& topic_name,
+                                               rclcpp::Node* node,
+                                               const LoggerPtr& logger,
+                                               const std::string& frame,
+                                               const std::shared_ptr<Config>& config)
+    : SBP2ROS2Publisher<sensor_msgs::msg::Imu,
+                        sbp_msg_utc_time_t,
+                        sbp_msg_gps_time_t,
+                        sbp_msg_gnss_time_offset_t,
+                        sbp_msg_imu_aux_t,
+                        sbp_msg_imu_raw_t
+                       >(state, topic_name, node, logger, frame, config) {}
+
+
+void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
+                                  const sbp_msg_utc_time_t& msg) {
+  (void)sender_id;
+
+  if (config_->getTimeStampSourceGNSS()) {
+    if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
+        SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
+      struct tm utc;
+
+      utc.tm_year = msg.year;
+      utc.tm_mon = msg.month;
+      utc.tm_mday = msg.day;
+      utc.tm_hour = msg.hours;
+      utc.tm_min = msg.minutes;
+      utc.tm_sec = msg.seconds;
+
+      linux_stamp_s = static_cast<double>(TimeUtils::utcToLinuxTime(utc)) + static_cast<double>(msg.ns) / 1e9;
+      last_received_utc_time_tow = msg.tow;
+      compute_utc_offset();
+    }
+  }
+}
+
+void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
+                                  const sbp_msg_gps_time_t& msg) {
+  (void)sender_id;
+
+  if (config_->getTimeStampSourceGNSS()) {
+    if (SBP_GPS_TIME_TIME_SOURCE_NONE !=
+        SBP_GPS_TIME_TIME_SOURCE_GET(msg.flags)) {
+
+      gps_stamp_s = static_cast<double>(msg.wn * 604800u) + static_cast<double>(msg.tow) / 1e3 + static_cast<double>(msg.ns_residual) /1e9;
+      last_received_gps_time_tow = msg.tow;
+      compute_utc_offset();
+    }
+  }
+}
+
+void ImuPublisher::compute_utc_offset( void ) {
+
+  if ( last_received_gps_time_tow == last_received_utc_time_tow) {
+
+    utc_offset_s = linux_stamp_s - gps_stamp_s - 315964800.0;
+
+    last_received_utc_time_tow = -1;
+    last_received_gps_time_tow = -2;
+  }
+}
+
+
+
+void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
+                                  const sbp_msg_gnss_time_offset_t& msg) {
+  (void)sender_id;
+
+  gnss_time_offset_s = static_cast<double>(msg.weeks) * 604800.0 +
+                       static_cast<double>(msg.milliseconds) / 1e3 +
+                       static_cast<double>(msg.microseconds) / 1e6;
+
+}
+
+
+void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
+                                  const sbp_msg_imu_aux_t& msg) {
+
+  const double list_acc_res_mps2[16] = {
+    G2MPS2(2.0)/32768.0, G2MPS2(4.0)/32768.0, G2MPS2(8.0)/32768.0, G2MPS2(16.0)/32768.0,
+    0.0,0.0,0.0,0.0, 0.0,0.0,0.0,0.0, 0.0,0.0,0.0,0.0 };
+
+  const double list_gyro_res_rad[16] = {
+    DEG2RAD(2000.0)/32768.0, DEG2RAD(1000.0)/32768.0, DEG2RAD(500.0)/32768.0, DEG2RAD(250.0)/32768.0,
+    DEG2RAD(125.0)/32768.0, 0.0,0.0,0.0, 0.0,0.0,0.0,0.0, 0.0,0.0,0.0,0.0 };
+
+  (void)sender_id;
+
+  acc_res_mps2 = list_acc_res_mps2[ SBP_IMU_AUX_ACCELEROMETER_RANGE_GET(msg.imu_conf) ];
+
+  gyro_res_rad = list_gyro_res_rad[ SBP_IMU_AUX_GYROSCOPE_RANGE_GET(msg.imu_conf) ];
+
+}
+
+
+void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
+                                  const sbp_msg_imu_raw_t& msg) {
+  (void)sender_id;
+
+#if 0 //!!
+  msg_.tow = msg.tow;
+  msg_.tow_f = msg.tow_f;
+#endif
+
+  msg_.orientation_covariance[0] = -1.0;  // Orientation is not provided
+
+  if ( acc_res_mps2 > 0.0 ) {
+    msg_.linear_acceleration.x = static_cast<double>(msg.acc_x) * acc_res_mps2;
+    msg_.linear_acceleration.y = static_cast<double>(msg.acc_y) * acc_res_mps2;
+    msg_.linear_acceleration.z = static_cast<double>(msg.acc_z) * acc_res_mps2;
+  }
+  else {
+    msg_.linear_acceleration_covariance[0] = -1.0;  // Acceleration is not valid
+  }
+
+  if ( gyro_res_rad > 0.0 ) {
+    msg_.angular_velocity.x = static_cast<double>(msg.gyr_x) * gyro_res_rad;
+    msg_.angular_velocity.y = static_cast<double>(msg.gyr_y) * gyro_res_rad;
+    msg_.angular_velocity.z = static_cast<double>(msg.gyr_z) * gyro_res_rad;
+  }
+  else {
+    msg_.angular_velocity_covariance[0] = -1.0; // Angular velocity is not valid
+  }
+
+  publish();
+}
+
+
+void ImuPublisher::publish() {
+  if ( (0 == msg_.header.stamp.sec) || !config_->getTimeStampSourceGNSS() ) {
+    // Use current platform time if time from the GNSS receiver is not
+    // available or if a local time source is selected
+    msg_.header.stamp = node_->now();
+  }
+
+  msg_.header.frame_id = frame_;
+
+  publisher_->publish(msg_);
+
+  msg_ = sensor_msgs::msg::Imu();
+
+}

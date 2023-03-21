@@ -13,7 +13,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <swiftnav_ros2_driver/msg/orient_euler.hpp>
+#include <swiftnav_ros2_driver/msg/baseline_heading.hpp>
 
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
@@ -21,18 +21,24 @@
 #include <publishers/dummy_publisher.h>
 #include <publishers/sbp2ros2_publisher.h>
 
-class OrientEulerPublisher
+class BaselinePublisher
     : public DummyPublisher,
-      public SBP2ROS2Publisher<swiftnav_ros2_driver::msg::OrientEuler,
-                               sbp_msg_orient_euler_t> {
+      public SBP2ROS2Publisher<swiftnav_ros2_driver::msg::BaselineHeading,
+                               sbp_msg_utc_time_t, sbp_msg_baseline_ned_t> {
  public:
-  OrientEulerPublisher() = delete;
-  OrientEulerPublisher(sbp::State* state, const std::string& topic_name,
-                       rclcpp::Node* node, const LoggerPtr& logger,
-                       const std::string& frame);
+  BaselinePublisher() = delete;
+  BaselinePublisher(sbp::State* state, const std::string& topic_name,
+                    rclcpp::Node* node, const LoggerPtr& logger,
+                    const std::string& frame,
+                    const std::shared_ptr<Config>& config);
 
-  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_orient_euler_t& msg);
+  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_utc_time_t& msg);
+  void handle_sbp_msg(uint16_t sender_id, const sbp_msg_baseline_ned_t& msg);
 
  protected:
   void publish() override;
+
+ private:
+  int32_t last_received_utc_time_tow_{-1};
+  int32_t last_received_baseline_ned_tow_{-2};
 };

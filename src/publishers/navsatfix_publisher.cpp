@@ -12,16 +12,6 @@
 
 #include <publishers/navsatfix_publisher.h>
 #include <utils/utils.h>
-//#include <iostream>
-
-//!! Temporary here
-//--------------------------------------------------------
-
-// Move to config file
-static bool timestamp_source_gnss = true;
-
-// Move to utils.cpp
-//--------------------------------------------------------
 
 // GNSS Signal Code Identifier
 typedef enum {
@@ -77,11 +67,12 @@ NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
                                        const std::string& topic_name,
                                        rclcpp::Node* node,
                                        const LoggerPtr& logger,
-                                       const std::string& frame)
+                                       const std::string& frame,
+                                       const std::shared_ptr<Config>& config)
     : SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
                         sbp_msg_measurement_state_t, sbp_msg_utc_time_t,
                         sbp_msg_pos_llh_cov_t>(state, topic_name, node, logger,
-                                               frame) {}
+                                               frame, config) {}
 
 void NavSatFixPublisher::handle_sbp_msg(
     uint16_t sender_id, const sbp_msg_measurement_state_t& msg) {
@@ -162,7 +153,7 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_utc_time_t& msg) {
   (void)sender_id;
 
-  if (timestamp_source_gnss) {
+  if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
         SBP_UTC_TIME_TIME_SOURCE_GET(msg.flags)) {
       struct tm utc;
@@ -237,7 +228,7 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void NavSatFixPublisher::publish() {
   if ((last_received_pos_llh_cov_tow == last_received_utc_time_tow) ||
-      !timestamp_source_gnss) {
+      !config_->getTimeStampSourceGNSS()) {
     if (0 == msg_.header.stamp.sec) {
       // Use current platform time if time from the GNSS receiver is not
       // available or if a local time source is selected
