@@ -17,7 +17,7 @@ std::shared_ptr<SbpDataSource> dataSourceFactory(
     std::shared_ptr<Config>& config, const LoggerPtr& logger) {
   const int32_t interface = config->getInterface();
 
-  LOG_INFO(logger, "Using interface type: %d", interface);
+  LOG_INFO(logger, "Interface type: %d", interface);
   switch (interface) {
     case FILE_DATA_SOURCE: {
       return std::make_shared<SbpFileDataSource>(config->getFile(), logger);
@@ -40,7 +40,7 @@ std::shared_ptr<SbpDataSource> dataSourceFactory(
     } break;
 
     default:
-      LOG_FATAL(logger, "Could not create a data source of type: %d",
+      LOG_FATAL(logger, "Could not open interface: %d",
                 interface);
       return {};
       break;
