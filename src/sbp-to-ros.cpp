@@ -41,7 +41,7 @@ class SBPROS2DriverNode : public rclcpp::Node {
   /**
    * @brief Construct a new SBPROS2DriverNode object
    */
-  SBPROS2DriverNode() : Node("SBPRos2Driver") {
+  SBPROS2DriverNode() : Node("swiftnav_ros2_driver") {
     config_ = std::make_shared<Config>(this);
     logger_ = std::make_shared<ROSLogger>(LOG_REPUBLISH_DELAY);
 
