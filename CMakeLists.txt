@@ -151,7 +151,12 @@ if(BUILD_TESTING)
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
 
-  rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+  if(${FOUND_ROS2_DISTRO} STREQUAL "foxy")
+    rosidl_target_interfaces(sbp-to-ros ${PROJECT_NAME} "rosidl_typesupport_cpp")
+  else()
+    rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+  endif()
+
   target_compile_features(${PROJECT_NAME}_test PRIVATE c_std_99 cxx_std_17)  # Require C99 and C++17
   target_link_libraries(${PROJECT_NAME}_test sbp serialport "${cpp_typesupport_target}")
   ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs gps_msgs tf2)
