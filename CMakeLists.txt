@@ -3,14 +3,47 @@ project(swiftnav_ros2_driver)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+################################################
+# Check the ROS2 version
+
+set(ROS2_FOUND FALSE)
+if(DEFINED ENV{ROS_DISTRO})
+  set(FOUND_ROS2_DISTRO $ENV{ROS_DISTRO})
+  set(ROS2_FOUND TRUE)
+  message("* Found ROS2 ${FOUND_ROS2_DISTRO}")
+else()
+  message("* ROS2 distro variable not set. Trying to figure it out...")
+  set(ROS2_DISTROS "ardent;crystal;dashing;eloquent;foxy;galactic;humble;rolling")
+  set(ROS2_FOUND FALSE)
+  foreach(distro ${ROS2_DISTROS})
+    if(NOT ROS2_FOUND)
+      find_path(RCLCPP_H rclcpp.hpp PATHS /opt/ros/${distro}/include/rclcpp)
+      if(RCLCPP_H)
+        message("* Found ROS2 ${distro}")
+        set(FOUND_ROS2_DISTRO ${distro})
+        set(ROS2_FOUND TRUE)
+      endif()
+    endif()
+  endforeach()
+endif()
+
+if(ROS2_FOUND)
+  if((${FOUND_ROS2_DISTRO} STREQUAL "foxy") OR (${FOUND_ROS2_DISTRO} STREQUAL "galactic") OR (${FOUND_ROS2_DISTRO} STREQUAL "humble") OR (${FOUND_ROS2_DISTRO} STREQUAL "rolling"))
+    message("* ROS2 ${FOUND_ROS2_DISTRO} is officially supported by this package.")
+  else()
+    message("*** WARNING *** ROS2 ${FOUND_ROS2_DISTRO} is not officially tested. Correct working is not guarantee.")
+  endif()
+else()
+  message("*** WARNING *** ROS2 distro is unknown. This package could not work correctly.")
+endif()
+################################################
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -44,11 +77,16 @@ add_executable(sbp-to-ros
   )
 
   rosidl_generate_interfaces(${PROJECT_NAME}
-    "msg/BaselineHeading.msg"
-    DEPENDENCIES std_msgs # Add packages that above messages depend on
+    "msg/Baseline.msg"
+    DEPENDENCIES std_msgs
   )
 
-rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+if(${FOUND_ROS2_DISTRO} STREQUAL "foxy")
+  rosidl_target_interfaces(sbp-to-ros ${PROJECT_NAME} "rosidl_typesupport_cpp")
+else()
+  rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+endif()
+
 target_link_libraries(sbp-to-ros sbp serialport "${cpp_typesupport_target}")
 target_include_directories(sbp-to-ros PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
@@ -84,15 +122,8 @@ if(BUILD_TESTING)
 
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gmock REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
-#  ament_add_gtest(${PROJECT_NAME}_test
   ament_add_gmock(${PROJECT_NAME}_test
   src/data_sources/sbp_serial_datasource.cpp
   src/data_sources/sbp_tcp_datasource.cpp

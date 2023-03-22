@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <publishers/dummy_publisher.h>
+#include <publishers/base_publisher.h>
 #include <list>
 
 class PublisherManager {

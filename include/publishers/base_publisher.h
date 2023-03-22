@@ -17,9 +17,9 @@
 /**
  * @brief Class that acts as an empty interface
  */
-class DummyPublisher {
+class BasePublisher {
  public:
-  virtual ~DummyPublisher() {}
+  virtual ~BasePublisher() {}
 };
 
-using PublisherPtr = std::shared_ptr<DummyPublisher>;
+using PublisherPtr = std::shared_ptr<BasePublisher>;

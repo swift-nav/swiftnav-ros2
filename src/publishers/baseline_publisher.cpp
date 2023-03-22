@@ -14,14 +14,14 @@
 #include <utils/utils.h>
 
 BaselinePublisher::BaselinePublisher(sbp::State* state,
-                                     const std::string& topic_name,
+                                     const std::string_view topic_name,
                                      rclcpp::Node* node,
                                      const LoggerPtr& logger,
                                      const std::string& frame,
                                      const std::shared_ptr<Config>& config)
-    : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::BaselineHeading,
-                        sbp_msg_utc_time_t, sbp_msg_baseline_ned_t>(
-          state, topic_name, node, logger, frame, config) {}
+    : SBP2ROS2Publisher<swiftnav_ros2_driver::msg::Baseline, sbp_msg_utc_time_t,
+                        sbp_msg_baseline_ned_t>(state, topic_name, node, logger,
+                                                frame, config) {}
 
 void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
                                        const sbp_msg_utc_time_t& msg) {
@@ -117,7 +117,7 @@ void BaselinePublisher::publish() {
     msg_.header.frame_id = frame_;
     publisher_->publish(msg_);
 
-    msg_ = swiftnav_ros2_driver::msg::BaselineHeading();
+    msg_ = swiftnav_ros2_driver::msg::Baseline();
     last_received_utc_time_tow_ = -1;
     last_received_baseline_ned_tow_ = -2;
   }

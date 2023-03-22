@@ -12,6 +12,8 @@
 
 #include <libsbp/sbp.h>
 #include <logging/sbp_file_logger.h>
+#include <utils/utils.h>
+#include <cstdlib>
 #include <ctime>
 #include <filesystem>
 #include <iostream>
@@ -21,6 +23,12 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
     : state_(nullptr, this), logger_(logger) {
   std::string file_name(file_path);
   time_t now = time(nullptr);
+
+  // Create dir
+  if (!FileSystem::createDir(file_path)) {
+    LOG_FATAL(logger_, "Unable to create dir: %s", file_path.c_str());
+    exit(1);
+  }
 
   struct tm local_time;
 
@@ -48,9 +56,10 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
 #else
   file_ = fopen(file_name.c_str(), "wb");
 #endif  // _WIN32
-  if (!file_)
-    LOG_ERROR(logger_, "Unable to open the file: %s", file_name.c_str());
-  else
+  if (!file_) {
+    LOG_FATAL(logger_, "Unable to open the file: %s", file_name.c_str());
+    exit(1);
+  } else
     LOG_INFO(logger_, "Logging SBP messages to %s", file_name.c_str());
 }
 

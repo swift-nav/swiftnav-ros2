@@ -35,7 +35,7 @@ swiftnav_ros2_driver:
       [
         "gpsfix",
         "navsatfix",
-        "baseline_heading",
+        "baseline",
         "timereference",
         "imu"
       ]

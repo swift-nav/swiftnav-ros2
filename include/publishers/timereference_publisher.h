@@ -18,7 +18,7 @@
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
 
-#include <publishers/dummy_publisher.h>
+#include <publishers/base_publisher.h>
 #include <publishers/sbp2ros2_publisher.h>
 
 /**
@@ -26,12 +26,12 @@
  *
  */
 class TimeReferencePublisher
-    : public DummyPublisher,
+    : public BasePublisher,
       public SBP2ROS2Publisher<sensor_msgs::msg::TimeReference,
                                sbp_msg_utc_time_t, sbp_msg_gps_time_t> {
  public:
   TimeReferencePublisher() = delete;
-  TimeReferencePublisher(sbp::State* state, const std::string& topic_name,
+  TimeReferencePublisher(sbp::State* state, const std::string_view topic_name,
                          rclcpp::Node* node, const LoggerPtr& logger,
                          const std::string& frame,
                          const std::shared_ptr<Config>& config);

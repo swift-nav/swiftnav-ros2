@@ -14,20 +14,14 @@
 #include <utils/utils.h>
 #include <climits>
 
-ImuPublisher::ImuPublisher(sbp::State* state,
-                                               const std::string& topic_name,
-                                               rclcpp::Node* node,
-                                               const LoggerPtr& logger,
-                                               const std::string& frame,
-                                               const std::shared_ptr<Config>& config)
-    : SBP2ROS2Publisher<sensor_msgs::msg::Imu,
-                        sbp_msg_utc_time_t,
-                        sbp_msg_gps_time_t,
-                        sbp_msg_gnss_time_offset_t,
-                        sbp_msg_imu_aux_t,
-                        sbp_msg_imu_raw_t
-                       >(state, topic_name, node, logger, frame, config) {}
-
+ImuPublisher::ImuPublisher(sbp::State* state, const std::string_view topic_name,
+                           rclcpp::Node* node, const LoggerPtr& logger,
+                           const std::string& frame,
+                           const std::shared_ptr<Config>& config)
+    : SBP2ROS2Publisher<sensor_msgs::msg::Imu, sbp_msg_utc_time_t,
+                        sbp_msg_gps_time_t, sbp_msg_gnss_time_offset_t,
+                        sbp_msg_imu_aux_t, sbp_msg_imu_raw_t>(
+          state, topic_name, node, logger, frame, config) {}
 
 void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
                                   const sbp_msg_utc_time_t& msg) {
@@ -214,5 +208,4 @@ void ImuPublisher::publish() {
   publisher_->publish(msg_);
 
   msg_ = sensor_msgs::msg::Imu();
-
 }

@@ -14,25 +14,16 @@
 
 #include <libsbp/cpp/state.h>
 #include <logging/issue_logger.h>
-#include <publishers/dummy_publisher.h>
+#include <publishers/base_publisher.h>
 #include <utils/config.h>
 #include <rclcpp/rclcpp.hpp>
-
-enum class Publishers {
-  Invalid,          // Id to use in params.yaml list of enabled publishers
-  GpsFix,           // 1
-  NavSatFix,        // 2
-  BaselineHeading,  // 3
-  TimeReference,    // 4
-  Imu,              // 5
-};
+#include <string>
 
 /**
  * @brief Function that creates a new publisher
  *
- * @param pub_type Type of the publisher you want to create (Publishers enum)
+ * @param pub_type Type of the publisher you want to create
  * @param state SBP state object
- * @param topic_name Name of the topic to publish to
  * @param node ROS2 node
  * @param logger Logging facility
  * @param frame frame is the frame of reference reported by the satellite
@@ -40,7 +31,7 @@ enum class Publishers {
  * relative to the vehicle, not a reference ellipsoid.
  * @return Newly created publisher
  */
-PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
-                              const std::string& topic_name, rclcpp::Node* node,
-                              const LoggerPtr& logger, const std::string& frame,
+PublisherPtr publisherFactory(const std::string& pub_type, sbp::State* state,
+                              rclcpp::Node* node, const LoggerPtr& logger,
+                              const std::string& frame,
                               const std::shared_ptr<Config>& config);

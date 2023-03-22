@@ -18,7 +18,7 @@
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
 
-#include <publishers/dummy_publisher.h>
+#include <publishers/base_publisher.h>
 #include <publishers/sbp2ros2_publisher.h>
 
 /**
@@ -26,20 +26,15 @@
  *
  */
 class ImuPublisher
-    : public DummyPublisher,
-      public SBP2ROS2Publisher<sensor_msgs::msg::Imu,
-                               sbp_msg_utc_time_t,
-                               sbp_msg_gps_time_t,
-                               sbp_msg_gnss_time_offset_t,
-                               sbp_msg_imu_aux_t,
-                               sbp_msg_imu_raw_t
-                              > {
+    : public BasePublisher,
+      public SBP2ROS2Publisher<sensor_msgs::msg::Imu, sbp_msg_utc_time_t,
+                               sbp_msg_gps_time_t, sbp_msg_gnss_time_offset_t,
+                               sbp_msg_imu_aux_t, sbp_msg_imu_raw_t> {
  public:
   ImuPublisher() = delete;
-  ImuPublisher(sbp::State* state, const std::string& topic_name,
-                         rclcpp::Node* node, const LoggerPtr& logger,
-                         const std::string& frame,
-                         const std::shared_ptr<Config>& config);
+  ImuPublisher(sbp::State* state, const std::string_view topic_name,
+               rclcpp::Node* node, const LoggerPtr& logger,
+               const std::string& frame, const std::shared_ptr<Config>& config);
 
   void handle_sbp_msg(uint16_t sender_id, const sbp_msg_utc_time_t& msg);
   void handle_sbp_msg(uint16_t sender_id, const sbp_msg_gps_time_t& msg);

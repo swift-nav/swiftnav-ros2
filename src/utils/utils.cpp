@@ -12,6 +12,7 @@
 
 #include <utils/utils.h>
 #include <algorithm>
+#include <filesystem>
 
 namespace TimeUtils {
 constexpr uint32_t LINUX_TIME_20200101 = 1577836800U;
@@ -96,3 +97,14 @@ double covarianceToEstimatedHorizonatalDirectionError(
 }
 
 }  // namespace Covariance
+
+namespace FileSystem {
+bool createDir(const std::string& dir) {
+  bool result = true;
+
+  if (!std::filesystem::exists(dir))
+    result = std::filesystem::create_directories(dir);
+
+  return result;
+}
+}  // namespace FileSystem

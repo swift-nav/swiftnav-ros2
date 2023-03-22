@@ -43,12 +43,7 @@ class Config {
   int32_t getWriteTimeout() const { return write_timeout_; }
   std::string getIP() const { return ip_; }
   int32_t getPort() const { return port_; }
-  std::vector<int64_t, std::allocator<int64_t>> getPublisherIDs() const {
-    return publisher_ids_;
-  }
-  std::vector<std::string> getPublisherTopics() const {
-    return publisher_topics_;
-  }
+  std::vector<std::string> getPublishers() const { return enabled_publishers_; }
   bool getTimeStampSourceGNSS() const { return timestamp_source_gnss_; }
   double getBaseLineDirOffsetDeg() const { return baseline_dir_offset_deg_; }
   double getBaseLineDipOffsetDeg() const { return baseline_dip_offset_deg_; }
@@ -87,10 +82,8 @@ class Config {
   int32_t write_timeout_;      /** @brief Write timeout in ms */
   std::string ip_;             /** @brief IP of the device used as input */
   int32_t port_; /** @brief socket port of the device used as input */
-  std::vector<int64_t, std::allocator<int64_t>>
-      publisher_ids_; /** @brief IDs of enabled publishers */
   std::vector<std::string>
-      publisher_topics_;       /** @brief ROS topics where to publish */
+      enabled_publishers_;     /** @brief Enabled ROS publishers */
   bool timestamp_source_gnss_; /** @brief Flag that indicates from where to take
                                   the time reference */
   double baseline_dir_offset_deg_;
