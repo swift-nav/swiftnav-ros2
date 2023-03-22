@@ -3,9 +3,12 @@
 <package format="3">
   <name>swiftnav_ros2_driver</name>
   <version>1.0.0</version>
-  <description>A ROS2 driver for Swift Navigation receivers.</description>
-  <maintainer email="dev@swift-nav.com">https://support.swiftnav.com</maintainer>
-  <license>MIT License</license>
+  <description>ROS2 driver for Swift Navigation GNSS receivers.</description>
+  <maintainer email="support@swift-nav.com">Swift Navigation</maintainer>
+  <license>MIT</license>
+  <license file="LICENSE">LGPL</license>
+  <url type="website">https://support.swiftnav.com</url>
+  <url type="repository">https://github.com/swift-nav/swiftnav-ros2</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
