@@ -28,7 +28,7 @@
 #include <publishers/publisher_factory.h>
 
 #include <utils/config.h>
-#include <swiftnav_ros2_driver/msg/baseline_heading.hpp>
+#include <swiftnav_ros2_driver/msg/baseline.hpp>
 
 
 constexpr uint32_t MAX_MSG_SIZE = 255;
