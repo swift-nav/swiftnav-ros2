@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2010-2022 Swift Navigation Inc.
- * Contact: Swift Navigation <dev@swift-nav.com>
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
  *
  * This source is subject to the license found in the file 'LICENSE' which must
  * be be distributed together with this source. All other rights reserved.
@@ -30,7 +30,7 @@
 
 #endif  // __linux__
 
-static constexpr uint32_t CONNECT_TIMEOUT = 20;  // twenty seconds
+static constexpr uint32_t CONNECT_TIMEOUT = 20;  // [s]
 static constexpr uint32_t MS_TO_US = 1000;
 static constexpr uint32_t S_TO_MS = 1000;
 
@@ -187,7 +187,7 @@ bool TCP::setNonBlocking() noexcept {
 bool TCP::connectSocket() noexcept {
   struct sockaddr_in server;
 
-  LOG_INFO(logger_, "Attempting to connecting to %s:%u",ip_.c_str(),port_);
+  LOG_INFO(logger_, "Connecting to %s:%u",ip_.c_str(),port_);
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = inet_addr(ip_.c_str());
   server.sin_port = htons(port_);

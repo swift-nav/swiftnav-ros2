@@ -72,16 +72,16 @@ class GPSFixPublisher
   bool orientation_present = false;
 
   bool vel_ned_track_valid = false;
-  double vel_ned_track = 0.0;
-  double vel_ned_err_track = 0.0;
+  double vel_ned_track_deg = 0.0;
+  double vel_ned_err_track_deg = 0.0;
 
   bool orientation_track_valid = false;
-  double orientation_track = 0.0;
-  double orientation_err_track = 0.0;
+  double orientation_track_deg = 0.0;
+  double orientation_err_track_deg = 0.0;
 
   bool last_track_valid = false;
-  double last_track = 0.0;
-  double last_err_track = 0.0;
+  double last_track_deg = 0.0;
+  double last_err_track_deg = 0.0;
 
   time_t dops_time_s;
   double gdop = 0.0;

@@ -84,7 +84,7 @@ void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
         msg_.baseline_dir_deg -= 360.0;
       }
       msg_.baseline_dir_err_deg =
-          fabs(atan2(msg_.baseline_err_h_m, msg_.baseline_length_h_m)) * 180.0 /
+          atan2(msg_.baseline_err_h_m, msg_.baseline_length_h_m) * 180.0 /
           M_PI;
 
       // Baseline Dip
@@ -93,7 +93,7 @@ void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
           dip_rad * 180.0 / M_PI + config_->getBaseLineDipOffsetDeg();  // [deg]
 
       msg_.baseline_dip_err_deg =
-          fabs(atan2(msg_.baseline_err_v_m, msg_.baseline_length_h_m)) * 180.0 /
+          atan2(msg_.baseline_err_v_m, msg_.baseline_length_h_m) * 180.0 /
           M_PI;
 
       msg_.baseline_orientation_valid = true;

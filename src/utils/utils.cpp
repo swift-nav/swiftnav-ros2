@@ -12,7 +12,6 @@
 
 #include <utils/utils.h>
 #include <algorithm>
-#include <cmath>
 
 namespace TimeUtils {
 constexpr uint32_t LINUX_TIME_20200101 = 1577836800U;
@@ -71,8 +70,8 @@ uint64_t secondsToNanoseconds(const uint64_t seconds) {
 }  // namespace TimeUtils
 
 namespace Covariance {
-double cov2ehe(const double cov_n_n, const double cov_n_e,
-               const double cov_e_e) {
+double covarianceToEstimatedHorizonatalError(
+               const double cov_n_n, const double cov_n_e, const double cov_e_e) {
   const double mx_det = cov_n_n * cov_e_e - cov_n_e * cov_n_e;
   const double mx_mean_trace = (cov_n_n + cov_e_e) / 2.0;
 
@@ -86,9 +85,14 @@ double cov2ehe(const double cov_n_n, const double cov_n_e,
   return sqrt(ehe_squared);
 }
 
-double cov2ede() {
-  //!! TODO
-  return -1.0;
+double covarianceToEstimatedHorizonatalDirectionError(
+       const double n, const double e, const double cov_n_n, const double cov_e_e ) {
+
+  const double a = sqrt( n*n + e*e );
+  const double c = sqrt( cov_n_n + cov_e_e );
+  double ede_deg = atan2( c, a ) * 180.0 / M_PI;
+
+  return ede_deg;
 }
 
 }  // namespace Covariance

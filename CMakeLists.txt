@@ -39,15 +39,12 @@ add_executable(sbp-to-ros
   src/publishers/timereference_publisher.cpp
   src/publishers/gpsfix_publisher.cpp
   src/publishers/baseline_publisher.cpp
-  src/publishers/imu_aux_publisher.cpp
-  src/publishers/imu_raw_publisher.cpp
+  src/publishers/imu_publisher.cpp
   src/publishers/publisher_factory.cpp
   )
 
   rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/BaselineHeading.msg"
-    "msg/ImuAux.msg"
-    "msg/ImuRaw.msg"
     DEPENDENCIES std_msgs # Add packages that above messages depend on
   )
 
@@ -105,8 +102,7 @@ if(BUILD_TESTING)
   src/utils/config.cpp
   src/publishers/baseline_publisher.cpp
   src/publishers/gpsfix_publisher.cpp
-  src/publishers/imu_aux_publisher.cpp
-  src/publishers/imu_raw_publisher.cpp
+  src/publishers/imu_publisher.cpp
   src/publishers/navsatfix_publisher.cpp
   src/publishers/publisher_factory.cpp
   src/publishers/timereference_publisher.cpp

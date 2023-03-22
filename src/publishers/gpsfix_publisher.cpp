@@ -122,10 +122,10 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.position_covariance_type =
         gps_msgs::msg::GPSFix::COVARIANCE_TYPE_KNOWN;
 
-    msg_.err = 0.0;  //!! TODO
-    msg_.err_horz = Covariance::cov2ehe(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
-                    2.0;                      // [m], scaled to 95% confidence
+    msg_.err_horz = Covariance::covarianceToEstimatedHorizonatalError(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
+                    2.6926;                   // [m], scaled to 95% confidence
     msg_.err_vert = sqrt(msg.cov_d_d) * 2.0;  // [m], scaled to 95% confidence
+    msg_.err = sqrt( msg_.err_horz*msg_.err_horz + msg_.err_vert*msg_.err_vert ); // [m], 95% confidence
   }
 
   last_received_pos_llh_cov_tow = msg.tow;
@@ -158,19 +158,19 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.climb = (double)msg.d / -1e3;  // [m/s], vertical
 
     msg_.err_speed =
-        Covariance::cov2ehe(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
-        2.0;  // [m/s], scaled to 95% confidence
+        Covariance::covarianceToEstimatedHorizonatalError(msg.cov_n_n, msg.cov_n_e, msg.cov_e_e) *
+        2.6926;                   // [m/s], scaled to 95% confidence
     msg_.err_climb =
         sqrt(msg.cov_d_d) * 2.0;  // [m/s], scaled to 95% confidence
 
     if (msg_.speed >= config_->getTrackUpdateMinSpeedMps()) {
-      double cog_rad = atan2((double)msg.e, (double)msg.n);
-      if (cog_rad < 0.0) {
-        cog_rad += 2.0 * M_PI;
+      vel_ned_track_deg = Conversions::radiansToDegrees(atan2((double)msg.e, (double)msg.n));
+      if (vel_ned_track_deg < 0.0) {
+        vel_ned_track_deg += 360.0;
       }
-      vel_ned_track = cog_rad * 180.0 / M_PI;  // [deg]
-      vel_ned_err_track = Covariance::cov2ede() *
-                          2.0;  //!! TODO [deg], scaled to 95% confidence
+      vel_ned_err_track_deg = Covariance::covarianceToEstimatedHorizonatalDirectionError(
+                              (double)msg.n/1e3, (double)msg.e/1e3, msg.cov_n_n, msg.cov_e_e ) *
+                              2.6926;  // [deg], scaled to 95% confidence
       vel_ned_track_valid = true;
     }
   }
@@ -194,10 +194,10 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.err_roll =
         (double)msg.roll_accuracy * 2.0;  // [deg], scaled to 95% confidence
 
-    orientation_track =
+    orientation_track_deg =
         (msg.yaw < 0) ? (double)msg.yaw / 1e3 + 360.0
                       : (double)msg.yaw / 1e3;  // [deg], in 0 to 360 range
-    orientation_err_track =
+    orientation_err_track_deg =
         (double)msg.yaw_accuracy * 2.0;  // [deg], scaled to 95% confidence
     orientation_track_valid = true;
 
@@ -242,11 +242,11 @@ void GPSFixPublisher::publish() {
     if (orientation_track_valid) {
       // Use yaw for track if ORIENT EULER message is present and INS solution
       // is valid
-      msg_.track = orientation_track;
-      msg_.err_track = orientation_err_track;
+      msg_.track = orientation_track_deg;
+      msg_.err_track = orientation_err_track_deg;
 
-      last_track = msg_.track;
-      last_err_track = msg_.err_track;
+      last_track_deg = msg_.track;
+      last_err_track_deg = msg_.err_track;
       last_track_valid = true;
 
       orientation_track_valid = false;
@@ -257,18 +257,18 @@ void GPSFixPublisher::publish() {
     } else if (vel_ned_track_valid) {
       // Use computed Course Over Ground (COG) for track if VEL NED COV message
       // is present and speed is valid
-      msg_.track = vel_ned_track;
-      msg_.err_track = vel_ned_err_track;
+      msg_.track = vel_ned_track_deg;
+      msg_.err_track = vel_ned_err_track_deg;
 
-      last_track = msg_.track;
-      last_err_track = msg_.err_track;
+      last_track_deg = msg_.track;
+      last_err_track_deg = msg_.err_track;
       last_track_valid = true;
 
       vel_ned_track_valid = false;
     } else if (last_track_valid) {
       // Use last valid track when there is no valid update
-      msg_.track = last_track;
-      msg_.err_track = last_err_track;
+      msg_.track = last_track_deg;
+      msg_.err_track = last_err_track_deg;
     }
 
     time_t current_time_s;

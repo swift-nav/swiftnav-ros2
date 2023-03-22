@@ -352,7 +352,7 @@ is not, because id 2 corresponds to BaselineHeading publisher and id 3 to GnssTi
 
 The new parameters are the 14 and the "pose_2d" topic name
 ```
-SBPRos2Driver:
+swiftnav_ros2_driver:
   ros__parameters:
     interface: 3
     sbp_file: "/workspaces/Swift/24-185316.sbp"

@@ -30,10 +30,11 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
   localtime_r(&now, &local_time);
 #endif  // _WIN32
 
-  file_name += "/";
+  file_name += "/swiftnav-";
   file_name += std::to_string(local_time.tm_year + 1900);
   file_name += std::to_string(local_time.tm_mon + 1);
   file_name += std::to_string(local_time.tm_mday);
+  file_name += "-";
   file_name += std::to_string(local_time.tm_hour);
   file_name += std::to_string(local_time.tm_min);
   file_name += std::to_string(local_time.tm_sec);
@@ -50,7 +51,7 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
   if (!file_)
     LOG_ERROR(logger_, "Unable to open the file: %s", file_name.c_str());
   else
-    LOG_INFO(logger_, "Now logging SBP messages to %s", file_name.c_str());
+    LOG_INFO(logger_, "Logging SBP messages to %s", file_name.c_str());
 }
 
 SbpFileLogger::~SbpFileLogger() {

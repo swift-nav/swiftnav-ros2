@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2010-2022 Swift Navigation Inc.
- * Contact: Swift Navigation <dev@swift-nav.com>
+ * Copyright (C) 2015-2023 Swift Navigation Inc.
+ * Contact: https://support.swiftnav.com
  *
  * This source is subject to the license found in the file 'LICENSE' which must
  * be be distributed together with this source. All other rights reserved.
@@ -29,8 +29,7 @@
 
 #include <utils/config.h>
 #include <swiftnav_ros2_driver/msg/baseline_heading.hpp>
-#include <swiftnav_ros2_driver/msg/imu_aux.hpp>
-#include <swiftnav_ros2_driver/msg/imu_raw.hpp>
+
 
 constexpr uint32_t MAX_MSG_SIZE = 255;
 constexpr uint64_t SECONDS = 1000000000ULL;
@@ -190,50 +189,4 @@ TEST_F(TestCustomPublishers, CreateBaselinePublisher) {
   testPublisher<swiftnav_ros2_driver::msg::BaselineHeading>(
       Publishers::BaselineHeading, msg, SbpMsgBaselineHeading, check);
 #endif
-}
-
-TEST_F(TestCustomPublishers, CreateImuAuxPublisher) {
-  sbp_msg_t msg;
-
-  msg.imu_aux.imu_conf = 0x11;
-  msg.imu_aux.imu_type = 2;
-  msg.imu_aux.temp = 18;
-
-  auto check = [](const sbp_msg_t& msg,
-                  const swiftnav_ros2_driver::msg::ImuAux& ros_msg) -> void {
-    ASSERT_EQ(msg.imu_aux.imu_conf, ros_msg.imu_conf);
-    ASSERT_EQ(msg.imu_aux.imu_type, ros_msg.imu_type);
-    ASSERT_EQ(msg.imu_aux.temp, ros_msg.temp);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::ImuAux>(Publishers::ImuAux, msg,
-                                                   SbpMsgImuAux, check);
-}
-
-TEST_F(TestCustomPublishers, CreateImuRawPublisher) {
-  sbp_msg_t msg;
-
-  msg.imu_raw.acc_x = 13;
-  msg.imu_raw.acc_y = 1;
-  msg.imu_raw.acc_z = -3;
-  msg.imu_raw.gyr_x = 0;
-  msg.imu_raw.gyr_y = -2;
-  msg.imu_raw.gyr_z = 22;
-  msg.imu_raw.tow = 73646;
-  msg.imu_raw.tow_f = 12;
-
-  auto check = [](const sbp_msg_t& msg,
-                  const swiftnav_ros2_driver::msg::ImuRaw& ros_msg) -> void {
-    ASSERT_EQ(msg.imu_raw.acc_x, ros_msg.acc_x);
-    ASSERT_EQ(msg.imu_raw.acc_y, ros_msg.acc_y);
-    ASSERT_EQ(msg.imu_raw.acc_z, ros_msg.acc_z);
-    ASSERT_EQ(msg.imu_raw.gyr_x, ros_msg.gyr_x);
-    ASSERT_EQ(msg.imu_raw.gyr_y, ros_msg.gyr_y);
-    ASSERT_EQ(msg.imu_raw.gyr_z, ros_msg.gyr_z);
-    ASSERT_EQ(msg.imu_raw.tow, ros_msg.tow);
-    ASSERT_EQ(msg.imu_raw.tow_f, ros_msg.tow_f);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::ImuRaw>(Publishers::ImuRaw, msg,
-                                                   SbpMsgImuRaw, check);
 }
