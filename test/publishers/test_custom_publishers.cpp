@@ -124,7 +124,7 @@ class TestCustomPublishers : public ::testing::Test {
     auto config = std::make_shared<Config>(node_ptr);
     auto pub = publisherFactory(pub_type, runner_.getState(), node.get(),
                                 logger_, frame_name_, config);
-    auto subs_call = [&msg, &test_finished, &comp](const rosT& ros_msg) {
+    auto subs_call = [&msg, &test_finished, &comp](const rosT ros_msg) {
       comp(msg, ros_msg);
       test_finished = true;
     };
@@ -178,14 +178,14 @@ TEST_F(TestCustomPublishers, CreateBaselinePublisher) {
 
   auto check =
       [](const sbp_msg_t& msg,
-         const swiftnav_ros2_driver::msg::BaselineHeading& ros_msg) -> void {
+         const swiftnav_ros2_driver::msg::BaselineHeading::SharedPtr ros_msg) -> void {
     ASSERT_EQ(msg.baseline_heading.flags, ros_msg.flags);
     ASSERT_EQ(msg.baseline_heading.heading, ros_msg.heading);
     ASSERT_EQ(msg.baseline_heading.n_sats, ros_msg.n_sats);
     ASSERT_EQ(msg.baseline_heading.tow, ros_msg.tow);
   };
 
-  testPublisher<swiftnav_ros2_driver::msg::BaselineHeading>(
+  testPublisher<swiftnav_ros2_driver::msg::BaselineHeading::SharedPtr>(
       Publishers::BaselineHeading, msg, SbpMsgBaselineHeading, check);
 #endif
 }

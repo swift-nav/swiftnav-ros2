@@ -97,48 +97,48 @@ TEST_F(TestGPSFixPublisher, sendMessage) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -211,48 +211,48 @@ TEST_F(TestGPSFixPublisher, posllhcovMessageTooOld) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -326,48 +326,48 @@ TEST_F(TestGPSFixPublisher, velCovMsgTooOld) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -440,48 +440,48 @@ TEST_F(TestGPSFixPublisher, velNedCovMsgTooOld) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -554,48 +554,48 @@ TEST_F(TestGPSFixPublisher, orientEulerMsgTooOld) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -668,48 +668,48 @@ TEST_F(TestGPSFixPublisher,dopsMsgTooOld) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -782,48 +782,48 @@ TEST_F(TestGPSFixPublisher,gpstimeMsgTooOld) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -898,48 +898,48 @@ TEST_F(TestGPSFixPublisher, obsMsgTooOld) {
   bool is_received = false;
  auto callback =
    [&is_received](
-     const gps_msgs::msg::GPSFix & msg) -> void {
+     const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
        is_received = true;
 
-      ASSERT_EQ(msg.status.satellites_used, 3);
-      ASSERT_EQ(msg.err_horz, 1);
-      ASSERT_EQ(msg.err_vert, 2);
-      ASSERT_EQ(msg.err_track, 3);
+      ASSERT_EQ(msg->status.satellites_used, 3);
+      ASSERT_EQ(msg->err_horz, 1);
+      ASSERT_EQ(msg->err_vert, 2);
+      ASSERT_EQ(msg->err_track, 3);
 
-      ASSERT_EQ(msg.latitude, 10);
-      ASSERT_EQ(msg.longitude, 20);
-      ASSERT_EQ(msg.altitude, 5);
+      ASSERT_EQ(msg->latitude, 10);
+      ASSERT_EQ(msg->longitude, 20);
+      ASSERT_EQ(msg->altitude, 5);
 
-      ASSERT_EQ(msg.track, 2);
-      ASSERT_EQ(msg.speed, 2);
-      ASSERT_EQ(msg.climb, 2);
-      ASSERT_EQ(msg.err_speed, 2);
-      ASSERT_EQ(msg.err_climb, 2);
+      ASSERT_EQ(msg->track, 2);
+      ASSERT_EQ(msg->speed, 2);
+      ASSERT_EQ(msg->climb, 2);
+      ASSERT_EQ(msg->err_speed, 2);
+      ASSERT_EQ(msg->err_climb, 2);
 
-      ASSERT_EQ(msg.pitch, 2);
-      ASSERT_EQ(msg.roll, 2);
-      ASSERT_EQ(msg.dip, 2);
-      ASSERT_EQ(msg.err_pitch, 2);
-      ASSERT_EQ(msg.err_roll, 2);
-      ASSERT_EQ(msg.err_dip, 2);
+      ASSERT_EQ(msg->pitch, 2);
+      ASSERT_EQ(msg->roll, 2);
+      ASSERT_EQ(msg->dip, 2);
+      ASSERT_EQ(msg->err_pitch, 2);
+      ASSERT_EQ(msg->err_roll, 2);
+      ASSERT_EQ(msg->err_dip, 2);
 
-      ASSERT_EQ(msg.gdop, 2);
-      ASSERT_EQ(msg.pdop, 3);
-      ASSERT_EQ(msg.hdop, 4);
-      ASSERT_EQ(msg.vdop, 5);
-      ASSERT_EQ(msg.tdop, 6);
+      ASSERT_EQ(msg->gdop, 2);
+      ASSERT_EQ(msg->pdop, 3);
+      ASSERT_EQ(msg->hdop, 4);
+      ASSERT_EQ(msg->vdop, 5);
+      ASSERT_EQ(msg->tdop, 6);
 
-      ASSERT_EQ(msg.position_covariance[0], 1);
-      ASSERT_EQ(msg.position_covariance[1], 1);
-      ASSERT_EQ(msg.position_covariance[2], -1);
-      ASSERT_EQ(msg.position_covariance[3], 1);
-      ASSERT_EQ(msg.position_covariance[4], 1);
-      ASSERT_EQ(msg.position_covariance[5], -1);
-      ASSERT_EQ(msg.position_covariance[6], -1);
-      ASSERT_EQ(msg.position_covariance[7], -1);
-      ASSERT_EQ(msg.position_covariance[8], 1);
+      ASSERT_EQ(msg->position_covariance[0], 1);
+      ASSERT_EQ(msg->position_covariance[1], 1);
+      ASSERT_EQ(msg->position_covariance[2], -1);
+      ASSERT_EQ(msg->position_covariance[3], 1);
+      ASSERT_EQ(msg->position_covariance[4], 1);
+      ASSERT_EQ(msg->position_covariance[5], -1);
+      ASSERT_EQ(msg->position_covariance[6], -1);
+      ASSERT_EQ(msg->position_covariance[7], -1);
+      ASSERT_EQ(msg->position_covariance[8], 1);
 
-      ASSERT_EQ(msg.status.satellites_visible, 1);
+      ASSERT_EQ(msg->status.satellites_visible, 1);
  };
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
@@ -1013,48 +1013,48 @@ TEST_F(TestGPSFixPublisher, noVelCogMsg) {
   bool is_received = false;
  auto callback =
    [&is_received](
-     const gps_msgs::msg::GPSFix & msg) -> void {
+     const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
        is_received = true;
 
-      ASSERT_EQ(msg.status.satellites_used, 3);
-      ASSERT_EQ(msg.err_horz, 1);
-      ASSERT_EQ(msg.err_vert, 2);
-      ASSERT_EQ(msg.err_track, 3);
+      ASSERT_EQ(msg->status.satellites_used, 3);
+      ASSERT_EQ(msg->err_horz, 1);
+      ASSERT_EQ(msg->err_vert, 2);
+      ASSERT_EQ(msg->err_track, 3);
 
-      ASSERT_EQ(msg.latitude, 10);
-      ASSERT_EQ(msg.longitude, 20);
-      ASSERT_EQ(msg.altitude, 5);
+      ASSERT_EQ(msg->latitude, 10);
+      ASSERT_EQ(msg->longitude, 20);
+      ASSERT_EQ(msg->altitude, 5);
 
-      ASSERT_EQ(msg.track, 0);
-      ASSERT_EQ(msg.speed, 0);
-      ASSERT_EQ(msg.climb, 0);
-      ASSERT_EQ(msg.err_speed, 0);
-      ASSERT_EQ(msg.err_climb, 0);
+      ASSERT_EQ(msg->track, 0);
+      ASSERT_EQ(msg->speed, 0);
+      ASSERT_EQ(msg->climb, 0);
+      ASSERT_EQ(msg->err_speed, 0);
+      ASSERT_EQ(msg->err_climb, 0);
 
-      ASSERT_EQ(msg.pitch, 2);
-      ASSERT_EQ(msg.roll, 2);
-      ASSERT_EQ(msg.dip, 2);
-      ASSERT_EQ(msg.err_pitch, 2);
-      ASSERT_EQ(msg.err_roll, 2);
-      ASSERT_EQ(msg.err_dip, 2);
+      ASSERT_EQ(msg->pitch, 2);
+      ASSERT_EQ(msg->roll, 2);
+      ASSERT_EQ(msg->dip, 2);
+      ASSERT_EQ(msg->err_pitch, 2);
+      ASSERT_EQ(msg->err_roll, 2);
+      ASSERT_EQ(msg->err_dip, 2);
 
-      ASSERT_EQ(msg.gdop, 2);
-      ASSERT_EQ(msg.pdop, 3);
-      ASSERT_EQ(msg.hdop, 4);
-      ASSERT_EQ(msg.vdop, 5);
-      ASSERT_EQ(msg.tdop, 6);
+      ASSERT_EQ(msg->gdop, 2);
+      ASSERT_EQ(msg->pdop, 3);
+      ASSERT_EQ(msg->hdop, 4);
+      ASSERT_EQ(msg->vdop, 5);
+      ASSERT_EQ(msg->tdop, 6);
 
-      ASSERT_EQ(msg.position_covariance[0], 1);
-      ASSERT_EQ(msg.position_covariance[1], 1);
-      ASSERT_EQ(msg.position_covariance[2], -1);
-      ASSERT_EQ(msg.position_covariance[3], 1);
-      ASSERT_EQ(msg.position_covariance[4], 1);
-      ASSERT_EQ(msg.position_covariance[5], -1);
-      ASSERT_EQ(msg.position_covariance[6], -1);
-      ASSERT_EQ(msg.position_covariance[7], -1);
-      ASSERT_EQ(msg.position_covariance[8], 1);
+      ASSERT_EQ(msg->position_covariance[0], 1);
+      ASSERT_EQ(msg->position_covariance[1], 1);
+      ASSERT_EQ(msg->position_covariance[2], -1);
+      ASSERT_EQ(msg->position_covariance[3], 1);
+      ASSERT_EQ(msg->position_covariance[4], 1);
+      ASSERT_EQ(msg->position_covariance[5], -1);
+      ASSERT_EQ(msg->position_covariance[6], -1);
+      ASSERT_EQ(msg->position_covariance[7], -1);
+      ASSERT_EQ(msg->position_covariance[8], 1);
 
-      ASSERT_EQ(msg.status.satellites_visible, 1);
+      ASSERT_EQ(msg->status.satellites_visible, 1);
  };
 
  auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1, callback);
@@ -1124,48 +1124,48 @@ TEST_F(TestGPSFixPublisher, noVelCovMessage) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 2);
-    ASSERT_EQ(msg.roll, 2);
-    ASSERT_EQ(msg.dip, 2);
-    ASSERT_EQ(msg.err_pitch, 2);
-    ASSERT_EQ(msg.err_roll, 2);
-    ASSERT_EQ(msg.err_dip, 2);
+    ASSERT_EQ(msg->pitch, 2);
+    ASSERT_EQ(msg->roll, 2);
+    ASSERT_EQ(msg->dip, 2);
+    ASSERT_EQ(msg->err_pitch, 2);
+    ASSERT_EQ(msg->err_roll, 2);
+    ASSERT_EQ(msg->err_dip, 2);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,
@@ -1228,48 +1228,48 @@ TEST_F(TestGPSFixPublisher, noOrientdMessage) {
   obs_sbp_msg.obs.obs[0] = obs_content;
 
   bool is_received = false;
-  auto callback = [&is_received](const gps_msgs::msg::GPSFix& msg) -> void {
+  auto callback = [&is_received](const gps_msgs::msg::GPSFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.satellites_used, 3);
-    ASSERT_EQ(msg.err_horz, 1);
-    ASSERT_EQ(msg.err_vert, 2);
-    ASSERT_EQ(msg.err_track, 3);
+    ASSERT_EQ(msg->status.satellites_used, 3);
+    ASSERT_EQ(msg->err_horz, 1);
+    ASSERT_EQ(msg->err_vert, 2);
+    ASSERT_EQ(msg->err_track, 3);
 
-    ASSERT_EQ(msg.latitude, 10);
-    ASSERT_EQ(msg.longitude, 20);
-    ASSERT_EQ(msg.altitude, 5);
+    ASSERT_EQ(msg->latitude, 10);
+    ASSERT_EQ(msg->longitude, 20);
+    ASSERT_EQ(msg->altitude, 5);
 
-    ASSERT_EQ(msg.track, 2);
-    ASSERT_EQ(msg.speed, 2);
-    ASSERT_EQ(msg.climb, 2);
-    ASSERT_EQ(msg.err_speed, 2);
-    ASSERT_EQ(msg.err_climb, 2);
+    ASSERT_EQ(msg->track, 2);
+    ASSERT_EQ(msg->speed, 2);
+    ASSERT_EQ(msg->climb, 2);
+    ASSERT_EQ(msg->err_speed, 2);
+    ASSERT_EQ(msg->err_climb, 2);
 
-    ASSERT_EQ(msg.pitch, 0);
-    ASSERT_EQ(msg.roll, 0);
-    ASSERT_EQ(msg.dip, 0);
-    ASSERT_EQ(msg.err_pitch, 0);
-    ASSERT_EQ(msg.err_roll, 0);
-    ASSERT_EQ(msg.err_dip, 0);
+    ASSERT_EQ(msg->pitch, 0);
+    ASSERT_EQ(msg->roll, 0);
+    ASSERT_EQ(msg->dip, 0);
+    ASSERT_EQ(msg->err_pitch, 0);
+    ASSERT_EQ(msg->err_roll, 0);
+    ASSERT_EQ(msg->err_dip, 0);
 
-    ASSERT_EQ(msg.gdop, 2);
-    ASSERT_EQ(msg.pdop, 3);
-    ASSERT_EQ(msg.hdop, 4);
-    ASSERT_EQ(msg.vdop, 5);
-    ASSERT_EQ(msg.tdop, 6);
+    ASSERT_EQ(msg->gdop, 2);
+    ASSERT_EQ(msg->pdop, 3);
+    ASSERT_EQ(msg->hdop, 4);
+    ASSERT_EQ(msg->vdop, 5);
+    ASSERT_EQ(msg->tdop, 6);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.status.satellites_visible, 1);
+    ASSERT_EQ(msg->status.satellites_visible, 1);
   };
 
   auto sub = node->create_subscription<gps_msgs::msg::GPSFix>(topic_name_, 1,

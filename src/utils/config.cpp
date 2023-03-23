@@ -11,6 +11,7 @@
  */
 
 #include <utils/config.h>
+#include <rclcpp/rclcpp.hpp>
 
 Config::Config(rclcpp::Node* node) {
   declareParameters(node);
@@ -30,7 +31,11 @@ void Config::declareParameters(rclcpp::Node* node) {
   node->declare_parameter<std::string>("host_ip", "");
   node->declare_parameter<int32_t>("host_port", 0);
   node->declare_parameter<bool>("timestamp_source_gnss", true);
+#if defined(FOUND_NEWER)
   node->declare_parameter("enabled_publishers", rclcpp::PARAMETER_STRING_ARRAY);
+#else
+  node->declare_parameter("enabled_publishers");
+#endif
   node->declare_parameter<double>("baseline_dir_offset_deg", 0.0);
   node->declare_parameter<double>("baseline_dip_offset_deg", 0.0);
   node->declare_parameter<double>("track_update_min_speed_mps", 0.2);

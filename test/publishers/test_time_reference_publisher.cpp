@@ -57,11 +57,11 @@ TEST_F(TestTimeReferencePublisher, sendMessage) {
  bool is_received = false;
  auto callback =
   [&is_received](
-    const sensor_msgs::msg::TimeReference & msg) -> void {
+    const sensor_msgs::msg::TimeReference::SharedPtr msg) -> void {
       is_received = true;
 
-      ASSERT_EQ(msg.time_ref.sec, 1);
-      ASSERT_FLOAT_EQ(msg.time_ref.nanosec, 2);
+      ASSERT_EQ(msg->time_ref.sec, 1);
+      ASSERT_FLOAT_EQ(msg->time_ref.nanosec, 2);
     };
  auto sub = node->create_subscription<sensor_msgs::msg::TimeReference>(topic_name_, 1, callback);
  time_reference_publisher.handle_sbp_msg(0, sbp_msg.gps_time);
