@@ -28,7 +28,7 @@
 #include <publishers/publisher_factory.h>
 
 #include <utils/config.h>
-#include <swiftnav_ros2_driver/msg/baseline_heading.hpp>
+#include <swiftnav_ros2_driver/msg/baseline.hpp>
 
 
 constexpr uint32_t MAX_MSG_SIZE = 255;
@@ -115,16 +115,16 @@ class TestCustomPublishers : public ::testing::Test {
   static void TearDownTestCase() { rclcpp::shutdown(); }
 
   template <typename rosT, typename sbpT, typename Func>
-  void testPublisher(const Publishers pub_type, const sbpT& msg,
+  void testPublisher(const std::string& pub_type, const sbpT& msg,
                      const sbp_msg_type_t msg_type, Func comp) {
     bool test_finished = false;
     bool timed_out = false;
     auto node = std::make_shared<rclcpp::Node>("TestCustomPublishersNode");
     auto node_ptr = node.get();
     auto config = std::make_shared<Config>(node_ptr);
-    auto pub = publisherFactory(pub_type, runner_.getState(), topic_name_,
-                                node.get(), logger_, frame_name_, config);
-    auto subs_call = [&msg, &test_finished, &comp](const rosT& ros_msg) {
+    auto pub = publisherFactory(pub_type, runner_.getState(), node.get(),
+                                logger_, frame_name_, config);
+    auto subs_call = [&msg, &test_finished, &comp](const rosT ros_msg) {
       comp(msg, ros_msg);
       test_finished = true;
     };
@@ -162,9 +162,8 @@ TEST_F(TestCustomPublishers, CreateInvalidPublisher) {
   auto node = std::make_shared<rclcpp::Node>("TestCustomPublishersNode");
   auto node_ptr = node.get();
   auto config = std::make_shared<Config>(node_ptr);
-  auto pub =
-      publisherFactory(static_cast<Publishers>(-1), runner_.getState(),
-                       topic_name_, node.get(), logger_, frame_name_, config);
+  auto pub = publisherFactory("invalid_one", runner_.getState(), node.get(),
+                              logger_, frame_name_, config);
   ASSERT_FALSE(pub);
 }
 
@@ -179,14 +178,14 @@ TEST_F(TestCustomPublishers, CreateBaselinePublisher) {
 
   auto check =
       [](const sbp_msg_t& msg,
-         const swiftnav_ros2_driver::msg::BaselineHeading& ros_msg) -> void {
+         const swiftnav_ros2_driver::msg::BaselineHeading::SharedPtr ros_msg) -> void {
     ASSERT_EQ(msg.baseline_heading.flags, ros_msg.flags);
     ASSERT_EQ(msg.baseline_heading.heading, ros_msg.heading);
     ASSERT_EQ(msg.baseline_heading.n_sats, ros_msg.n_sats);
     ASSERT_EQ(msg.baseline_heading.tow, ros_msg.tow);
   };
 
-  testPublisher<swiftnav_ros2_driver::msg::BaselineHeading>(
+  testPublisher<swiftnav_ros2_driver::msg::BaselineHeading::SharedPtr>(
       Publishers::BaselineHeading, msg, SbpMsgBaselineHeading, check);
 #endif
 }

@@ -31,12 +31,11 @@ swiftnav_ros2_driver:
     track_update_min_speed_mps: 0.2 # [m/s], Track and track error outputs are 'frozen' below this threshold.
 
     # Publishers
-    enabled_publishers_ids: [1, 2, 3, 4, 5]
-    enabled_publishers_topics:
+    enabled_publishers:
       [
         "gpsfix",
         "navsatfix",
-        "baseline_heading",
+        "baseline",
         "timereference",
         "imu"
       ]

@@ -18,7 +18,7 @@
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
 
-#include <publishers/dummy_publisher.h>
+#include <publishers/base_publisher.h>
 #include <publishers/sbp2ros2_publisher.h>
 
 /**
@@ -26,7 +26,7 @@
  *
  */
 class GPSFixPublisher
-    : public DummyPublisher,
+    : public BasePublisher,
       public SBP2ROS2Publisher<gps_msgs::msg::GPSFix, sbp_msg_gps_time_t,
                                sbp_msg_utc_time_t, sbp_msg_pos_llh_cov_t,
                                sbp_msg_vel_ned_cov_t, sbp_msg_orient_euler_t,
@@ -42,7 +42,7 @@ class GPSFixPublisher
    * message
    * @param node ROS 2 node object
    */
-  GPSFixPublisher(sbp::State* state, const std::string& topic_name,
+  GPSFixPublisher(sbp::State* state, const std::string_view topic_name,
                   rclcpp::Node* node, const LoggerPtr& logger,
                   const std::string& frame,
                   const std::shared_ptr<Config>& config);

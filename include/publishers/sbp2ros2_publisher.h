@@ -22,6 +22,7 @@
 #include <logging/issue_logger.h>
 
 #include <utils/config.h>
+#include <string_view>
 
 /**
  * @brief Template abstract base class for the publishers
@@ -46,7 +47,7 @@ class SBP2ROS2Publisher : private sbp::MessageHandler<SBPMsgTypes...> {
    * relative to the vehicle, not a reference ellipsoid.
    *
    */
-  SBP2ROS2Publisher(sbp::State* state, const std::string& topic_name,
+  SBP2ROS2Publisher(sbp::State* state, const std::string_view topic_name,
                     rclcpp::Node* node, const LoggerPtr& logger,
                     const std::string& frame,
                     const std::shared_ptr<Config>& config)
@@ -55,7 +56,8 @@ class SBP2ROS2Publisher : private sbp::MessageHandler<SBPMsgTypes...> {
         frame_(frame),
         logger_(logger),
         config_(config) {
-    publisher_ = node_->create_publisher<ROS2MsgType>(topic_name, 10);
+    publisher_ =
+        node_->create_publisher<ROS2MsgType>(std::string(topic_name), 10);
   }
 
  protected:

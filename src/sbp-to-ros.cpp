@@ -94,22 +94,13 @@ class SBPROS2DriverNode : public rclcpp::Node {
    */
   void createPublishers() {
     auto frame = config_->getFrame();
-    const auto ids = config_->getPublisherIDs();
-    const auto topics = config_->getPublisherTopics();
+    const auto publishers = config_->getPublishers();
 
-    if (ids.size() != topics.size()) {
-      LOG_FATAL(logger_, "Mistmached number of publishers ids and topics");
-      exit(0);
-    }
-
-    LOG_INFO(logger_, "Creating %u publishers", ids.size());
-    for (uint32_t i = 0; i < ids.size(); ++i) {
-      if (ids[i] == 0) continue;
-      LOG_INFO(logger_, "Adding publisher id: %d with topic: %s", ids[i],
-               topics[i].c_str());
-      pubs_manager_.add(publisherFactory(static_cast<Publishers>(ids[i]),
-                                         &state_, topics[i], this, logger_,
-                                         frame, config_));
+    LOG_INFO(logger_, "Creating %u publishers", publishers.size());
+    for (const auto& publisher : publishers) {
+      LOG_INFO(logger_, "Adding publisher %s", publisher.c_str());
+      pubs_manager_.add(
+          publisherFactory(publisher, &state_, this, logger_, frame, config_));
     }
   }
 

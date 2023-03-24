@@ -15,6 +15,7 @@
 #include <cmath>
 #include <cstdint>
 #include <ctime>
+#include <string>
 
 namespace TimeUtils {
 /**
@@ -73,3 +74,7 @@ inline double degreesToRadians(const double x) { return x * M_PI / 180.0; }
 inline double radiansToDegrees(const double x) { return x * 180.0 / M_PI; }
 
 }  // namespace Conversions
+
+namespace FileSystem {
+bool createDir(const std::string& dir);
+}  // namespace FileSystem

@@ -18,7 +18,7 @@
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
 
-#include <publishers/dummy_publisher.h>
+#include <publishers/base_publisher.h>
 #include <publishers/sbp2ros2_publisher.h>
 
 /**
@@ -26,7 +26,7 @@
  *
  */
 class NavSatFixPublisher
-    : public DummyPublisher,
+    : public BasePublisher,
       public SBP2ROS2Publisher<sensor_msgs::msg::NavSatFix,
                                sbp_msg_measurement_state_t, sbp_msg_utc_time_t,
                                sbp_msg_pos_llh_cov_t> {
@@ -41,7 +41,7 @@ class NavSatFixPublisher
    * sensor_msgs::msg::NavSatFix message
    * @param node ROS 2 node object
    */
-  NavSatFixPublisher(sbp::State* state, const std::string& topic_name,
+  NavSatFixPublisher(sbp::State* state, const std::string_view topic_name,
                      rclcpp::Node* node, const LoggerPtr& logger,
                      const std::string& frame,
                      const std::shared_ptr<Config>& config);

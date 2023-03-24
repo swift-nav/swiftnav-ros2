@@ -13,21 +13,21 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <swiftnav_ros2_driver/msg/baseline_heading.hpp>
+#include <swiftnav_ros2_driver/msg/baseline.hpp>
 
 #include <libsbp/cpp/message_handler.h>
 #include <libsbp/cpp/state.h>
 
-#include <publishers/dummy_publisher.h>
+#include <publishers/base_publisher.h>
 #include <publishers/sbp2ros2_publisher.h>
 
 class BaselinePublisher
-    : public DummyPublisher,
-      public SBP2ROS2Publisher<swiftnav_ros2_driver::msg::BaselineHeading,
+    : public BasePublisher,
+      public SBP2ROS2Publisher<swiftnav_ros2_driver::msg::Baseline,
                                sbp_msg_utc_time_t, sbp_msg_baseline_ned_t> {
  public:
   BaselinePublisher() = delete;
-  BaselinePublisher(sbp::State* state, const std::string& topic_name,
+  BaselinePublisher(sbp::State* state, const std::string_view topic_name,
                     rclcpp::Node* node, const LoggerPtr& logger,
                     const std::string& frame,
                     const std::shared_ptr<Config>& config);

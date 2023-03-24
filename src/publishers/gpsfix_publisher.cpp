@@ -14,7 +14,7 @@
 #include <utils/utils.h>
 
 GPSFixPublisher::GPSFixPublisher(sbp::State* state,
-                                 const std::string& topic_name,
+                                 const std::string_view topic_name,
                                  rclcpp::Node* node, const LoggerPtr& logger,
                                  const std::string& frame,
                                  const std::shared_ptr<Config>& config)

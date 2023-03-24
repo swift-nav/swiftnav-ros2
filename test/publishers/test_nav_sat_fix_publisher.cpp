@@ -77,27 +77,27 @@ TEST_F(TestNavSatFixPublisher, sendMessage) {
  bool is_received = false;
  auto callback =
   [&is_received](
-    const sensor_msgs::msg::NavSatFix & msg) -> void {
+    const sensor_msgs::msg::NavSatFix::SharedPtr msg) -> void {
       is_received = true;
 
-      ASSERT_EQ(msg.status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GPS);
+      ASSERT_EQ(msg->status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GPS);
 
-      ASSERT_EQ(msg.latitude, 3);
-      ASSERT_EQ(msg.longitude, 4);
-      ASSERT_EQ(msg.altitude, 10);
+      ASSERT_EQ(msg->latitude, 3);
+      ASSERT_EQ(msg->longitude, 4);
+      ASSERT_EQ(msg->altitude, 10);
 
-      ASSERT_EQ(msg.position_covariance[0], 1);
-      ASSERT_EQ(msg.position_covariance[1], 1);
-      ASSERT_EQ(msg.position_covariance[2], -1);
-      ASSERT_EQ(msg.position_covariance[3], 1);
-      ASSERT_EQ(msg.position_covariance[4], 1);
-      ASSERT_EQ(msg.position_covariance[5], -1);
-      ASSERT_EQ(msg.position_covariance[6], -1);
-      ASSERT_EQ(msg.position_covariance[7], -1);
-      ASSERT_EQ(msg.position_covariance[8], 1);
+      ASSERT_EQ(msg->position_covariance[0], 1);
+      ASSERT_EQ(msg->position_covariance[1], 1);
+      ASSERT_EQ(msg->position_covariance[2], -1);
+      ASSERT_EQ(msg->position_covariance[3], 1);
+      ASSERT_EQ(msg->position_covariance[4], 1);
+      ASSERT_EQ(msg->position_covariance[5], -1);
+      ASSERT_EQ(msg->position_covariance[6], -1);
+      ASSERT_EQ(msg->position_covariance[7], -1);
+      ASSERT_EQ(msg->position_covariance[8], 1);
 
-      ASSERT_EQ(msg.position_covariance_type, sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
-      ASSERT_EQ(msg.status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
+      ASSERT_EQ(msg->position_covariance_type, sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
+      ASSERT_EQ(msg->status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
 
   };
  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(topic_name_, 1, callback);
@@ -146,27 +146,27 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GPS_StatusService) {
  bool is_received = false;
  auto callback =
   [&is_received](
-    const sensor_msgs::msg::NavSatFix & msg) -> void {
+    const sensor_msgs::msg::NavSatFix::SharedPtr msg) -> void {
       is_received = true;
 
-      ASSERT_EQ(msg.status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GPS);
+      ASSERT_EQ(msg->status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GPS);
 
-      ASSERT_EQ(msg.latitude, 3);
-      ASSERT_EQ(msg.longitude, 4);
-      ASSERT_EQ(msg.altitude, 10);
+      ASSERT_EQ(msg->latitude, 3);
+      ASSERT_EQ(msg->longitude, 4);
+      ASSERT_EQ(msg->altitude, 10);
 
-      ASSERT_EQ(msg.position_covariance[0], 1);
-      ASSERT_EQ(msg.position_covariance[1], 1);
-      ASSERT_EQ(msg.position_covariance[2], -1);
-      ASSERT_EQ(msg.position_covariance[3], 1);
-      ASSERT_EQ(msg.position_covariance[4], 1);
-      ASSERT_EQ(msg.position_covariance[5], -1);
-      ASSERT_EQ(msg.position_covariance[6], -1);
-      ASSERT_EQ(msg.position_covariance[7], -1);
-      ASSERT_EQ(msg.position_covariance[8], 1);
+      ASSERT_EQ(msg->position_covariance[0], 1);
+      ASSERT_EQ(msg->position_covariance[1], 1);
+      ASSERT_EQ(msg->position_covariance[2], -1);
+      ASSERT_EQ(msg->position_covariance[3], 1);
+      ASSERT_EQ(msg->position_covariance[4], 1);
+      ASSERT_EQ(msg->position_covariance[5], -1);
+      ASSERT_EQ(msg->position_covariance[6], -1);
+      ASSERT_EQ(msg->position_covariance[7], -1);
+      ASSERT_EQ(msg->position_covariance[8], 1);
 
-      ASSERT_EQ(msg.position_covariance_type, sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
-      ASSERT_EQ(msg.status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
+      ASSERT_EQ(msg->position_covariance_type, sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
+      ASSERT_EQ(msg->status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
 
   };
  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(topic_name_, 1, callback);
@@ -222,27 +222,27 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GLONAS_StatusService) {
  bool is_received = false;
  auto callback =
   [&is_received](
-    const sensor_msgs::msg::NavSatFix & msg) -> void {
+    const sensor_msgs::msg::NavSatFix::SharedPtr msg) -> void {
       is_received = true;
 
-      ASSERT_EQ(msg.status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS);
+      ASSERT_EQ(msg->status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GLONASS);
 
-      ASSERT_EQ(msg.latitude, 3);
-      ASSERT_EQ(msg.longitude, 4);
-      ASSERT_EQ(msg.altitude, 10);
+      ASSERT_EQ(msg->latitude, 3);
+      ASSERT_EQ(msg->longitude, 4);
+      ASSERT_EQ(msg->altitude, 10);
 
-      ASSERT_EQ(msg.position_covariance[0], 1);
-      ASSERT_EQ(msg.position_covariance[1], 1);
-      ASSERT_EQ(msg.position_covariance[2], -1);
-      ASSERT_EQ(msg.position_covariance[3], 1);
-      ASSERT_EQ(msg.position_covariance[4], 1);
-      ASSERT_EQ(msg.position_covariance[5], -1);
-      ASSERT_EQ(msg.position_covariance[6], -1);
-      ASSERT_EQ(msg.position_covariance[7], -1);
-      ASSERT_EQ(msg.position_covariance[8], 1);
+      ASSERT_EQ(msg->position_covariance[0], 1);
+      ASSERT_EQ(msg->position_covariance[1], 1);
+      ASSERT_EQ(msg->position_covariance[2], -1);
+      ASSERT_EQ(msg->position_covariance[3], 1);
+      ASSERT_EQ(msg->position_covariance[4], 1);
+      ASSERT_EQ(msg->position_covariance[5], -1);
+      ASSERT_EQ(msg->position_covariance[6], -1);
+      ASSERT_EQ(msg->position_covariance[7], -1);
+      ASSERT_EQ(msg->position_covariance[8], 1);
 
-      ASSERT_EQ(msg.position_covariance_type, sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
-      ASSERT_EQ(msg.status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
+      ASSERT_EQ(msg->position_covariance_type, sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
+      ASSERT_EQ(msg->status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
 
   };
  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(topic_name_, 1, callback);
@@ -295,29 +295,29 @@ TEST_F(TestNavSatFixPublisher, SERVICE_GALILEO_StatusService) {
 
   bool is_received = false;
   auto callback =
-      [&is_received](const sensor_msgs::msg::NavSatFix &msg) -> void {
+      [&is_received](const sensor_msgs::msg::NavSatFix::SharedPtr msg) -> void {
     is_received = true;
 
-    ASSERT_EQ(msg.status.service,
+    ASSERT_EQ(msg->status.service,
               sensor_msgs::msg::NavSatStatus::SERVICE_GALILEO);
 
-    ASSERT_EQ(msg.latitude, 3);
-    ASSERT_EQ(msg.longitude, 4);
-    ASSERT_EQ(msg.altitude, 10);
+    ASSERT_EQ(msg->latitude, 3);
+    ASSERT_EQ(msg->longitude, 4);
+    ASSERT_EQ(msg->altitude, 10);
 
-    ASSERT_EQ(msg.position_covariance[0], 1);
-    ASSERT_EQ(msg.position_covariance[1], 1);
-    ASSERT_EQ(msg.position_covariance[2], -1);
-    ASSERT_EQ(msg.position_covariance[3], 1);
-    ASSERT_EQ(msg.position_covariance[4], 1);
-    ASSERT_EQ(msg.position_covariance[5], -1);
-    ASSERT_EQ(msg.position_covariance[6], -1);
-    ASSERT_EQ(msg.position_covariance[7], -1);
-    ASSERT_EQ(msg.position_covariance[8], 1);
+    ASSERT_EQ(msg->position_covariance[0], 1);
+    ASSERT_EQ(msg->position_covariance[1], 1);
+    ASSERT_EQ(msg->position_covariance[2], -1);
+    ASSERT_EQ(msg->position_covariance[3], 1);
+    ASSERT_EQ(msg->position_covariance[4], 1);
+    ASSERT_EQ(msg->position_covariance[5], -1);
+    ASSERT_EQ(msg->position_covariance[6], -1);
+    ASSERT_EQ(msg->position_covariance[7], -1);
+    ASSERT_EQ(msg->position_covariance[8], 1);
 
-    ASSERT_EQ(msg.position_covariance_type,
+    ASSERT_EQ(msg->position_covariance_type,
               sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
-    ASSERT_EQ(msg.status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
+    ASSERT_EQ(msg->status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
   };
   auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(
       topic_name_, 1, callback);
@@ -371,29 +371,29 @@ TEST_F(TestNavSatFixPublisher, SERVICE_COMPASS_StatusService) {
 
  bool is_received = false;
  auto callback =
-     [&is_received](const sensor_msgs::msg::NavSatFix &msg) -> void {
+     [&is_received](const sensor_msgs::msg::NavSatFix::SharedPtr msg) -> void {
    is_received = true;
 
-   ASSERT_EQ(msg.status.service,
+   ASSERT_EQ(msg->status.service,
              sensor_msgs::msg::NavSatStatus::SERVICE_COMPASS);
 
-   ASSERT_EQ(msg.latitude, 3);
-   ASSERT_EQ(msg.longitude, 4);
-   ASSERT_EQ(msg.altitude, 10);
+   ASSERT_EQ(msg->latitude, 3);
+   ASSERT_EQ(msg->longitude, 4);
+   ASSERT_EQ(msg->altitude, 10);
 
-   ASSERT_EQ(msg.position_covariance[0], 1);
-   ASSERT_EQ(msg.position_covariance[1], 1);
-   ASSERT_EQ(msg.position_covariance[2], -1);
-   ASSERT_EQ(msg.position_covariance[3], 1);
-   ASSERT_EQ(msg.position_covariance[4], 1);
-   ASSERT_EQ(msg.position_covariance[5], -1);
-   ASSERT_EQ(msg.position_covariance[6], -1);
-   ASSERT_EQ(msg.position_covariance[7], -1);
-   ASSERT_EQ(msg.position_covariance[8], 1);
+   ASSERT_EQ(msg->position_covariance[0], 1);
+   ASSERT_EQ(msg->position_covariance[1], 1);
+   ASSERT_EQ(msg->position_covariance[2], -1);
+   ASSERT_EQ(msg->position_covariance[3], 1);
+   ASSERT_EQ(msg->position_covariance[4], 1);
+   ASSERT_EQ(msg->position_covariance[5], -1);
+   ASSERT_EQ(msg->position_covariance[6], -1);
+   ASSERT_EQ(msg->position_covariance[7], -1);
+   ASSERT_EQ(msg->position_covariance[8], 1);
 
-   ASSERT_EQ(msg.position_covariance_type,
+   ASSERT_EQ(msg->position_covariance_type,
              sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN);
-   ASSERT_EQ(msg.status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
+   ASSERT_EQ(msg->status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
  };
  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(topic_name_,
                                                                    1, callback);
@@ -446,7 +446,7 @@ TEST_F(TestNavSatFixPublisher, timeDiff) {
 
   bool is_received = false;
   auto callback =
-      [&is_received](const sensor_msgs::msg::NavSatFix & /*msg*/) -> void {
+      [&is_received](const sensor_msgs::msg::NavSatFix::SharedPtr /*msg*/) -> void {
     is_received = true;
   };
   auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(

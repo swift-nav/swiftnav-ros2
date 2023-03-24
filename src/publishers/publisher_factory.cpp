@@ -14,46 +14,76 @@
 
 #include <publishers/baseline_publisher.h>
 #include <publishers/gpsfix_publisher.h>
+#include <publishers/imu_publisher.h>
 #include <publishers/navsatfix_publisher.h>
 #include <publishers/timereference_publisher.h>
-#include <publishers/imu_publisher.h>
+#include <string_view>
 
+enum class Publishers {
+  Invalid,
+  GpsFix,         // 1
+  NavSatFix,      // 2
+  Baseline,       // 3
+  TimeReference,  // 4
+  Imu,            // 5
+};
 
-PublisherPtr publisherFactory(const Publishers pub_type, sbp::State* state,
-                              const std::string& topic_name, rclcpp::Node* node,
-                              const LoggerPtr& logger, const std::string& frame,
+struct PublisherMap {
+  Publishers id;
+  std::string_view name;
+};
+
+static const PublisherMap publishers[] = {
+    {Publishers::GpsFix, "gpsfix"},
+    {Publishers::NavSatFix, "navsatfix"},
+    {Publishers::Baseline, "baseline"},
+    {Publishers::TimeReference, "timereference"},
+    {Publishers::Imu, "imu"},
+};
+
+PublisherPtr publisherFactory(const std::string& pub_type, sbp::State* state,
+                              rclcpp::Node* node, const LoggerPtr& logger,
+                              const std::string& frame,
                               const std::shared_ptr<Config>& config) {
   PublisherPtr pub;
+  Publishers pub_id = Publishers::Invalid;
+  std::string_view topic;
 
-  switch (pub_type) {
-    case Publishers::BaselineHeading:
-      pub = std::make_shared<BaselinePublisher>(state, topic_name, node, logger,
+  for (const auto& publisher : publishers) {
+    if (publisher.name == pub_type) {
+      pub_id = publisher.id;
+      topic = publisher.name;
+    }
+  }
+
+  switch (pub_id) {
+    case Publishers::Baseline:
+      pub = std::make_shared<BaselinePublisher>(state, topic, node, logger,
                                                 frame, config);
       break;
 
     case Publishers::GpsFix:
-      pub = std::make_shared<GPSFixPublisher>(state, topic_name, node, logger,
-                                              frame, config);
+      pub = std::make_shared<GPSFixPublisher>(state, topic, node, logger, frame,
+                                              config);
       break;
 
     case Publishers::NavSatFix:
-      pub = std::make_shared<NavSatFixPublisher>(state, topic_name, node,
-                                                 logger, frame, config);
+      pub = std::make_shared<NavSatFixPublisher>(state, topic, node, logger,
+                                                 frame, config);
       break;
 
     case Publishers::TimeReference:
-      pub = std::make_shared<TimeReferencePublisher>(state, topic_name, node,
-                                                     logger, frame, config);
+      pub = std::make_shared<TimeReferencePublisher>(state, topic, node, logger,
+                                                     frame, config);
       break;
 
     case Publishers::Imu:
-      pub = std::make_shared<ImuPublisher>(state, topic_name, node,
-                                           logger, frame, config);
+      pub = std::make_shared<ImuPublisher>(state, topic, node, logger, frame,
+                                           config);
       break;
 
     default:
-      LOG_ERROR(logger, "Publisher id: %d isn't valid",
-                static_cast<int>(pub_type));
+      LOG_ERROR(logger, "Publisher %s: isn't valid", pub_type.c_str());
       break;
   }
 

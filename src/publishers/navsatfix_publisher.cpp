@@ -64,7 +64,7 @@ typedef enum {
 } gnss_signal_code_t;
 
 NavSatFixPublisher::NavSatFixPublisher(sbp::State* state,
-                                       const std::string& topic_name,
+                                       const std::string_view topic_name,
                                        rclcpp::Node* node,
                                        const LoggerPtr& logger,
                                        const std::string& frame,

@@ -14,7 +14,7 @@
 #include <utils/utils.h>
 
 TimeReferencePublisher::TimeReferencePublisher(
-    sbp::State* state, const std::string& topic_name, rclcpp::Node* node,
+    sbp::State* state, const std::string_view topic_name, rclcpp::Node* node,
     const LoggerPtr& logger, const std::string& frame,
     const std::shared_ptr<Config>& config)
     : SBP2ROS2Publisher<sensor_msgs::msg::TimeReference, sbp_msg_utc_time_t,
