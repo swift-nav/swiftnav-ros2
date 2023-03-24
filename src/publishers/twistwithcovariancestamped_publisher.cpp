@@ -58,9 +58,9 @@ void TwistWithCovarianceStampedPublisher::handle_sbp_msg(uint16_t sender_id,
   if (SBP_VEL_NED_VELOCITY_MODE_INVALID !=
       SBP_VEL_NED_VELOCITY_MODE_GET(msg.flags)) {
 
-    msg_.twist.twist.linear.x = static_cast<double>(msg.e) / 1e3; // [m/s]
-    msg_.twist.twist.linear.y = static_cast<double>(msg.n) / 1e3; // [m/s]
-    msg_.twist.twist.linear.z = static_cast<double>(msg.d) / 1e3; // [m/s]
+    msg_.twist.twist.linear.x = static_cast<double>(msg.e) / 1e3;  // [m/s]
+    msg_.twist.twist.linear.y = static_cast<double>(msg.n) / 1e3;  // [m/s]
+    msg_.twist.twist.linear.z = -static_cast<double>(msg.d) / 1e3; // [m/s]
 
     msg_.twist.covariance[0] = msg.cov_e_e;
     msg_.twist.covariance[1] = msg.cov_n_e;
@@ -71,10 +71,13 @@ void TwistWithCovarianceStampedPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.twist.covariance[12] = -msg.cov_e_d;
     msg_.twist.covariance[13] = -msg.cov_n_d;
     msg_.twist.covariance[14] = msg.cov_d_d;
-
-    // Angular velocities are not valid
-    msg_.twist.covariance[21] = -1;
   }
+  else {
+    msg_.twist.covariance[0] = -1;
+  }
+
+  // Angular velocities are not provided
+  msg_.twist.covariance[21] = -1;
 
   last_received_vel_ned_cov_tow_ = msg.tow;
 
