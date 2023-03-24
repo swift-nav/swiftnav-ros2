@@ -40,6 +40,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(gps_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
@@ -62,6 +63,7 @@ add_executable(sbp-to-ros
   src/logging/sbp_to_ros2_logger.cpp
   src/logging/sbp_file_logger.cpp
   src/publishers/navsatfix_publisher.cpp
+  src/publishers/twistwithcovariancestamped_publisher.cpp
   src/publishers/timereference_publisher.cpp
   src/publishers/gpsfix_publisher.cpp
   src/publishers/baseline_publisher.cpp
@@ -84,7 +86,7 @@ target_link_libraries(sbp-to-ros sbp serialport "${cpp_typesupport_target}")
 target_include_directories(sbp-to-ros PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_compile_features(sbp-to-ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs nav_msgs gps_msgs tf2)
+ament_target_dependencies(sbp-to-ros rclcpp sensor_msgs geometry_msgs nav_msgs gps_msgs tf2)
 ament_export_dependencies(rosidl_default_runtime)
 
 install(TARGETS
@@ -106,6 +108,7 @@ if(BUILD_TESTING)
   find_package(rclcpp REQUIRED)
   find_package(std_msgs REQUIRED)
   find_package(sensor_msgs REQUIRED)
+  find_package(geometry_msgs REQUIRED)
   find_package(nav_msgs REQUIRED)
   find_package(gps_msgs REQUIRED)
   find_package(rosidl_default_generators REQUIRED)
@@ -128,6 +131,7 @@ if(BUILD_TESTING)
   src/publishers/gpsfix_publisher.cpp
   src/publishers/imu_publisher.cpp
   src/publishers/navsatfix_publisher.cpp
+  src/publishers/twistwithcovariancestamped_publisher.cpp
   src/publishers/publisher_factory.cpp
   src/publishers/timereference_publisher.cpp
   test/mocked_logger.cpp
@@ -152,7 +156,7 @@ if(BUILD_TESTING)
 
   target_compile_features(${PROJECT_NAME}_test PRIVATE c_std_99 cxx_std_17)  # Require C99 and C++17
   target_link_libraries(${PROJECT_NAME}_test sbp serialport "${cpp_typesupport_target}")
-  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs nav_msgs gps_msgs tf2)
+  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs geometry_msgs nav_msgs gps_msgs tf2)
   ament_export_dependencies(rosidl_default_runtime)
 endif()
 

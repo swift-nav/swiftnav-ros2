@@ -16,16 +16,18 @@
 #include <publishers/gpsfix_publisher.h>
 #include <publishers/imu_publisher.h>
 #include <publishers/navsatfix_publisher.h>
+#include <publishers/twistwithcovariancestamped_publisher.h>
 #include <publishers/timereference_publisher.h>
 #include <string_view>
 
 enum class Publishers {
   Invalid,
-  GpsFix,         // 1
-  NavSatFix,      // 2
-  Baseline,       // 3
-  TimeReference,  // 4
-  Imu,            // 5
+  GpsFix,                     // 1
+  NavSatFix,                  // 2
+  TwistWithCovarianceStamped, // 3
+  Baseline,                   // 4
+  TimeReference,              // 5
+  Imu,                        // 6
 };
 
 struct PublisherMap {
@@ -36,6 +38,7 @@ struct PublisherMap {
 static const PublisherMap publishers[] = {
     {Publishers::GpsFix, "gpsfix"},
     {Publishers::NavSatFix, "navsatfix"},
+    {Publishers::TwistWithCovarianceStamped, "twistwithcovariancestamped"},
     {Publishers::Baseline, "baseline"},
     {Publishers::TimeReference, "timereference"},
     {Publishers::Imu, "imu"},
@@ -69,6 +72,11 @@ PublisherPtr publisherFactory(const std::string& pub_type, sbp::State* state,
 
     case Publishers::NavSatFix:
       pub = std::make_shared<NavSatFixPublisher>(state, topic, node, logger,
+                                                 frame, config);
+      break;
+
+    case Publishers::TwistWithCovarianceStamped:
+      pub = std::make_shared<TwistWithCovarianceStampedPublisher>(state, topic, node, logger,
                                                  frame, config);
       break;
 
