@@ -59,7 +59,7 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
  
 `geometry_msgs/msg/TwistWithCovarianceStamped`
 
-Only linear velocity is provided.
+*Note: Angular velocity is not provided.*
 
 ### SBP Messages Used
 - `UTC TIME` (ID: 259) - UTC time of reported velocity.
@@ -75,7 +75,9 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
 |`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
-|`linear.x`<br>`linear.y`<br>`linear.z`<br>`covariance`|`VEL NED COV`|Zeros when velocity is invalid. `covariance[0]` is set to -1 when velocity is invalid. `covariance[21]` is always -1.|
+|`linear.x`<br>`linear.y`<br>`linear.z`|`VEL NED COV`|Zeros when velocity is invalid.|
+|`angular.x`<br>`angular.y`<br>`angular.z`|--|Not populated. Always zero.|
+|`covariance`|`VEL NED COV`|`covariance[0]` is set to -1 when linear velocity is invalid. `covariance[21]` is always -1.|
 
  
 ## Baseline
@@ -102,7 +104,35 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 |`source`|--|Text from `frame_name` in the config `params.yaml` file|
 
  
- ## Imu
+## Imu
+
+`sensor_msgs/msg/Imu`
+
+*Note: Orientation is not provided.*
+
+### SBP Messages Used
+- `UTC TIME` (ID: 259) - UTC time.
+- `GPS TIME` (ID: 258) - GPS time.
+- `GNSS TIME OFFSET` (ID: 65287) - Offset of the IMU local time with respect to GNSS time.
+- `IMU AUX` (ID: 2305) - Auxiliary IMU data
+- `IMU RAW` (ID: 2304) - Raw IMU data
+
+### Topic Publication
+Topic is published upon receiving `IMU RAW` SBP message.
+Time stamp depends on `timestamp_source_gnss` setting in the configuration file:  
+- True: The topic timestamp contains the UTC time of the measurement computed from `UTC TIME`, `GPS TIME`, `GNSS TIME OFFSET` and `IMU RAW` SBP messages depending on original IMU time stamping source. If the UTC time is not available the current platform time is reported.
+- False: The topic timestamp contains the current platform time.
+
+### Topic Fields
+| ROS2 Message Field | SBP Message Data Source | Notes |
+| :--- | :---: | :--- |
+|`header.stamp`|`UTC TIME`<br>`GPS TIME`<br>`GNSS TIME OFFSET`|See Topic Publication for time stamping details|
+|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`orientation`<br>`orientation_covariance`|--|Always zero. `orientation_covariance[0]` is always -1.|
+|`angular_velocity`|`IMU RAW`<br>`IMU AUX`|Zeros when invalid.|
+|`angular_velocity_covariance`|--|Not populated. `angular_velocity_covariance[0]` is set to -1 when angular velocity is not valid or when the time stamping source has changed |
+|`linear_acceleration`|`IMU RAW`<br>`IMU AUX`|Zeros when invalid.|
+|`linear_acceleration_covariance`|--|Not populated. `linear_acceleration_covariance[0]` is set to -1 when linear acceleration is not valid or when the time stamping source has changed |
 
 
 # Building the ROS2 driver
