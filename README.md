@@ -7,6 +7,8 @@ ROS2 Driver for Swift Navigation's GNSS/INS Receivers and Starling Positioning E
 - [Building Driver](#building-the-ros2-driver)
 - [Building Driver Using Docker](#building-the-ros2-driver-using-docker)
 - [Driver Configuration](#ros2-driver-configuration)
+- [GNSS Receiver Configuration](#gnss-receiver-configuration)
+- [Technical Support](#technical-support)
 
 # Features
 - Designed for ROS2 Humble but also works with Foxy. 
@@ -83,6 +85,11 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 
 
 # Building the ROS2 driver
+
+### Dependencies:
+- libsbp v4.11.0
+- libserialport
+
 
 ## Step 1 (Install ROS 2 Humble):
  Follow [instructions to install Ros2 Humble](https://docs.ros.org/en/humble/Installation.html)
@@ -245,4 +252,9 @@ Usually 7 or 8
 | R | RTS/CTS flow control |
 | D | DTR/DSR flow control |
 
+# GNSS Receiver Configuration
+TBD
 
+
+# Technical Support
+TBD
