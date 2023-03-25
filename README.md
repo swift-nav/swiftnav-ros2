@@ -1,12 +1,12 @@
 # **swiftnav-ros2**
-ROS2 Driver for Swift Navigation's GNSS/INS Receivers and Starling Positioning Engine.
+ROS2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning Engine software.
 
 # **Table of Contents**
 - [Features](#features)
-- [Published ROS Topics](#published-ros2-topics)
-- [Building Driver](#building-the-ros2-driver)
-- [Building Driver Using Docker](#building-the-ros2-driver-using-docker)
-- [Driver Configuration](#ros2-driver-configuration)
+- [ROS Topics](#ros-topics)
+- [Building Driver](#building-driver)
+- [Building Driver Using Docker](#building-driver-using-docker)
+- [Driver Configuration](#driver-configuration)
 - [GNSS Receiver Configuration](#gnss-receiver-configuration)
 - [Technical Support](#technical-support)
 
@@ -20,8 +20,8 @@ ROS2 Driver for Swift Navigation's GNSS/INS Receivers and Starling Positioning E
 - Configurable time stamps.
 - Written in C++.
 
-# Published ROS2 Topics
-The driver parses Swift binary (SBP) messages and publishes the following ROS topics:
+# ROS Topics
+The driver receives Swift binary (SBP) messages and publishes the following ROS topics:
  - [`GpsFix`](#gpsfix)
  - [`NavSatFix`](#navsatfix)
  - [`TwistWithCovarianceStamped`](#twistwithcovariancestamped)
@@ -30,7 +30,8 @@ The driver parses Swift binary (SBP) messages and publishes the following ROS to
  - [`Imu`](#imu)
 
 ## GpsFix
- 
+TBD
+
 ## NavSatFix
  
 `sensor_msgs/msg/NavSatFix`
@@ -41,7 +42,7 @@ The driver parses Swift binary (SBP) messages and publishes the following ROS to
 - `MEASUREMENT STATE` (ID: 97) - GNSS constellations data.
 
 ### Topic Publication
-Topic publication depends on `timestamp_source_gnss` setting in the configuration file:  
+Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
 - True: the topic is published upon receiving SBP `UTC TIME` and `POS LLH COV` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
 - False: the topic is published upon receiving SBP `POS LLH COV` message. The topic timestamp contains the current platform time.
 
@@ -66,7 +67,7 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 - `VEL NED COV` (ID: 530) - GNSS velocity data with covariance.
 
 ### Topic Publication
-Topic publication depends on `timestamp_source_gnss` setting in the configuration file:  
+Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
 - True: the topic is published upon receiving SBP `UTC TIME` and `VEL NED COV` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
 - False: the topic is published upon receiving SBP `VEL NED COV` message. The topic timestamp contains the current platform time.
 
@@ -81,7 +82,8 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 
  
 ## Baseline
- 
+TBD
+
 ## TimeReference
  
 `sensor_msgs/msg/TimeReference`
@@ -91,7 +93,7 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 - `GPS TIME` (ID: 258) - GPS time of reported position.
 
 ### Topic Publication
-Topic publication depends on `timestamp_source_gnss` setting in the configuration file:  
+Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
 - True: the topic is published upon receiving SBP `UTC TIME` and `GPS TIME` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
 - False: the topic is published upon receiving SBP `GPS TIME` message. The topic timestamp contains the current platform time.
 
@@ -102,7 +104,6 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 |`header.frame_id`|--|Not used|
 |`time_ref`|`GPS TIME`|GPS time in seconds since 1980-01-06. `sec` value is set to -1 if the GPS time is not available.|
 |`source`|--|Text from `frame_name` in the config `params.yaml` file|
-
  
 ## Imu
 
@@ -119,7 +120,7 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
 
 ### Topic Publication
 Topic is published upon receiving `IMU RAW` SBP message.
-Time stamp depends on `timestamp_source_gnss` setting in the configuration file:  
+Time stamp depends on `timestamp_source_gnss` setting flag in the configuration file:  
 - True: The topic timestamp contains the UTC time of the measurement computed from `UTC TIME`, `GPS TIME`, `GNSS TIME OFFSET` and `IMU RAW` SBP messages depending on original IMU time stamping source. If the UTC time is not available the current platform time is reported.
 - False: The topic timestamp contains the current platform time.
 
@@ -135,11 +136,11 @@ Time stamp depends on `timestamp_source_gnss` setting in the configuration file:
 |`linear_acceleration_covariance`|--|Not populated. `linear_acceleration_covariance[0]` is set to -1 when linear acceleration is not valid or when the time stamping source has changed |
 
 
-# Building the ROS2 driver
+# Building Driver
 
 ### Dependencies:
-- libsbp v4.11.0
-- libserialport
+- `libsbp` - Swift Binary Protocol library
+- `libserialport` - Serial Port communication library
 
 
 ## Step 1 (Install ROS 2 Humble):
@@ -209,7 +210,7 @@ Time stamp depends on `timestamp_source_gnss` setting in the configuration file:
     ros2 topic echo /angular_rate
   ```
 
-# Building the ROS2 driver using docker
+# Building Driver Using Docker
 
 ## Step 1 (clone and build docker image)
   - Clone the repo, build Docker image, run docker image.
@@ -246,8 +247,8 @@ Time stamp depends on `timestamp_source_gnss` setting in the configuration file:
     vi install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
   ```
 
-# ROS2 driver configuration
-The driver offers the following configuration options:
+# Driver Configuration
+The driver configuration is stored in `/config/params.yaml` file and  provides the following configuration options:
 
 | Parameter | Accepted values | Description |
 | :--- | :--- | :--- |
