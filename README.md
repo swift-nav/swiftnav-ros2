@@ -33,7 +33,7 @@ The driver parses Swift binary (SBP) messages and publishes the following ROS to
  
 ## NavSatFix
  
-sensor_msgs/msg/NavSatFix
+`sensor_msgs/msg/NavSatFix`
 
 ### SBP Messages Used
 - `UTC TIME` (ID: 259) - UTC time of reported position.
@@ -57,11 +57,32 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
  
  ## TwistWithCovarianceStamped
  
- ## Baseline
+`geometry_msgs/msg/TwistWithCovarianceStamped`
+
+Only linear velocity is provided.
+
+### SBP Messages Used
+- `UTC TIME` (ID: 259) - UTC time of reported velocity.
+- `VEL NED COV` (ID: 530) - GNSS velocity data with covariance.
+
+### Topic Publication
+Topic publication depends on `timestamp_source_gnss` setting in the configuration file:  
+- True: the topic is published upon receiving SBP `UTC TIME` and `VEL NED COV` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
+- False: the topic is published upon receiving SBP `VEL NED COV` message. The topic timestamp contains the current platform time.
+
+### Topic Fields
+| ROS2 Message Field | SBP Message Data Source | Notes |
+| :--- | :---: | :--- |
+|`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
+|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`linear.x`<br>`linear.y`<br>`linear.z`<br>`covariance`|`VEL NED COV`|Zeros when velocity is invalid. `covariance[0]` is set to -1 when velocity is invalid. `covariance[21]` is always -1.|
+
  
- ## TimeReference
+## Baseline
  
- sensor_msgs/msg/TimeReference
+## TimeReference
+ 
+`sensor_msgs/msg/TimeReference`
 
 ### SBP Messages Used
 - `UTC TIME` (ID: 259) - UTC time of reported position.
