@@ -1,21 +1,31 @@
 # **swiftnav-ros2**
 ROS2 Driver for Swift Navigation's GNSS/INS Receivers and Starling Positioning Engine.
 
-# **Table of contents**
-- [Building the ROS2 driver](#building-the-ros2-driver)
-- [Building the ROS2 driver using docker](#building-the-ros2-driver-using-docker)
-- [ROS2 driver configuration](#ros2-driver-configuration)
+# **Table of Contents**
+- [Features](#features)
+- [Published ROS Topics](#published-ros2-topics)
+- [Building Driver](#building-the-ros2-driver)
+- [Building Driver Using Docker](#building-the-ros2-driver-using-docker)
+- [Driver Configuration](#ros2-driver-configuration)
 
+# Features
+- Designed for ROS2 Humble but also works with Foxy. 
+- Developed and tested on Ubuntu 22.04 (ROS2 Humble) and Ubuntu 20.04 (ROS2 Foxy) platforms.
+- Supports Swift Navigation receivers and Starling Positioning Engine in Swift Binary Protocol (SBP).
+- Ethernet, Serial and File inputs.
+- SBP data logging.
+- Publishes ROS2 standard and Swift Navigation proprietary topics.
+- Configurable time stamps.
+- Written in C++.
 
-# Supported ROS Topics
-
-The driver parses Swift binary SBP messages and publishes the following ROS topics:
- - GpsFix
- - NavSatFix
- - TwistWithCovarianceStamped
- - Baseline (proprietary topic)
- - TimeReference
- - Imu
+# Published ROS2 Topics
+The driver parses Swift binary (SBP) messages and publishes the following ROS topics:
+ - [`GpsFix`](#gpsfix)
+ - [`NavSatFix`](#navsatfix)
+ - [`TwistWithCovarianceStamped`](#twistwithcovariancestamped)
+ - [`Baseline` (proprietary)](#baseline)
+ - [`TimeReference`](#timereference)
+ - [`Imu`](#imu)
 
 ## GpsFix
  
@@ -48,6 +58,26 @@ Topic publication depends on `timestamp_source_gnss` setting in the configuratio
  ## Baseline
  
  ## TimeReference
+ 
+ sensor_msgs/msg/TimeReference
+
+### SBP Messages Used
+- `UTC TIME` (ID: 259) - UTC time of reported position.
+- `GPS TIME` (ID: 258) - GPS time of reported position.
+
+### Topic Publication
+Topic publication depends on `timestamp_source_gnss` setting in the configuration file:  
+- True: the topic is published upon receiving SBP `UTC TIME` and `GPS TIME` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
+- False: the topic is published upon receiving SBP `GPS TIME` message. The topic timestamp contains the current platform time.
+
+### Topic Fields
+| ROS2 Message Field | SBP Message Data Source | Notes |
+| :--- | :---: | :--- |
+|`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
+|`header.frame_id`|--|Not used|
+|`time_ref`|`GPS TIME`|GPS time in seconds since 1980-01-06. `sec` value is set to -1 if the GPS time is not available.|
+|`source`|--|Text from `frame_name` in the config `params.yaml` file|
+
  
  ## Imu
 
