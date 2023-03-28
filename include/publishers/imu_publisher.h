@@ -63,6 +63,7 @@ class ImuPublisher
   bool gps_time_offset_valid_{false};
   double gps_time_offset_s_{0.0};
 
+  uint32_t last_gps_week_{0U};
   uint32_t last_imu_raw_tow_ms_{0U};
 
   double acc_res_mps2_{0.0};

@@ -148,9 +148,10 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
           uint32_t imu_raw_tow_ms = SBP_IMU_RAW_TIME_SINCE_REFERENCE_EPOCH_IN_MILLISECONDS_GET(msg.tow);
 
           // Check for TOW rollover before the next GPS TIME message arrives
-          if ( imu_raw_tow_ms < last_imu_raw_tow_ms_ ) {
+          if ( (gps_week_ == last_gps_week_) && (imu_raw_tow_ms < last_imu_raw_tow_ms_) ) {
             gps_week_++;
           }
+          last_gps_week_ = gps_week_;
           last_imu_raw_tow_ms_ = imu_raw_tow_ms;
 
           timestamp_s =
