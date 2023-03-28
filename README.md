@@ -43,8 +43,8 @@ TBD
 
 ### Topic Publication
 Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
-- True: the topic is published upon receiving SBP `UTC TIME` and `POS LLH COV` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
-- False: the topic is published upon receiving SBP `POS LLH COV` message. The topic timestamp contains the current platform time.
+- `True`: the topic is published upon receiving SBP `UTC TIME` and `POS LLH COV` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
+- `False`: the topic is published upon receiving SBP `POS LLH COV` message. The topic timestamp contains the current platform time.
 
 ### Topic Fields
 | ROS2 Message Field | SBP Message Data Source | Notes |
@@ -60,42 +60,71 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
  
 `geometry_msgs/msg/TwistWithCovarianceStamped`
 
-*Note: Angular velocity is not provided.*
-
 ### SBP Messages Used
 - `UTC TIME` (ID: 259) - UTC time of reported velocity.
 - `VEL NED COV` (ID: 530) - GNSS velocity data with covariance.
 
 ### Topic Publication
 Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
-- True: the topic is published upon receiving SBP `UTC TIME` and `VEL NED COV` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
-- False: the topic is published upon receiving SBP `VEL NED COV` message. The topic timestamp contains the current platform time.
+- `True`: the topic is published upon receiving SBP `UTC TIME` and `VEL NED COV` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
+- `False`: the topic is published upon receiving SBP `VEL NED COV` message. The topic timestamp contains the current platform time.
 
 ### Topic Fields
 | ROS2 Message Field | SBP Message Data Source | Notes |
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
 |`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
-|`linear.x`<br>`linear.y`<br>`linear.z`|`VEL NED COV`|Zeros when velocity is invalid.|
+|`linear.x`<br>`linear.y`<br>`linear.z`|`VEL NED COV`|Conversion from NED frame:<br>`x` = `east`<br>`y` = `north`<br>`z` = `-down`<br>Zeros when velocity is invalid.|
 |`angular.x`<br>`angular.y`<br>`angular.z`|--|Not populated. Always zero.|
-|`covariance`|`VEL NED COV`|`covariance[0]` is set to -1 when linear velocity is invalid. `covariance[21]` is always -1.|
+|`covariance`|`VEL NED COV`|If velocity is valid, linear velocity covariance is full matrix. `covariance[0]` is set to -1 when linear velocity is invalid. `covariance[21]` is always -1.|
 
  
 ## Baseline
-TBD
+
+*Proprietary message*
+
+`swiftnav-ros2/msg/Baseline`
+
+### SBP Messages Used
+- `UTC TIME` (ID: 259) - UTC time of reported position.
+- `BASELINE NED` (ID: 524) - RTK baseline NED vector.
+
+### Topic Publication
+Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
+- `True`: the topic is published upon receiving SBP `UTC TIME` and `BASELINE NED` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
+- `False`: the topic is published upon receiving SBP `BASELINE NED` message. The topic timestamp contains the current platform time.
+
+### Topic Fields
+| ROS2 Message Field | SBP Message Data Source | Notes |
+| :--- | :---: | :--- |
+|`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
+|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`mode`|`BASELINE NED`|Solution mode:<br>`0` - Invalid<br>`3` - Float RTK<br>`4` - Fixed RTK|
+|`satellites_used`|`BASELINE NED`|Number of satellites used in the solution|
+|`baseline_n_m`<br>`baseline_e_m`<br>`baseline_d_m`|`BASELINE NED`|Baseline NED vectors in [m]. Zeros when invalid. Vectors origin is at the base location.|
+|`baseline_err_h_m`|`BASELINE NED`|Estimated (95%) horizontal error of baseline in [m]. Zero when invalid.|
+|`baseline_err_v_m`|`BASELINE NED`|Estimated (95%) vertical error of baseline in [m]. Zero when invalid.|
+|`baseline_length_m`|`BASELINE NED`|Computed 3D baseline length. Zero when invalid.|
+|`baseline_length_h_m`|`BASELINE NED`|Computed horizontal baseline length. Zero when invalid.|
+|`baseline_orientation_valid`|`BASELINE NED`|`True` when baseline orientation (dir and dip) is valid. `False` when invalid.|
+|`baseline_dir_deg`|`BASELINE NED`|Computed horizontal angle (bearing/heading) from base to rover in [degrees]. Valid only in RTK fixed mode. Range [0..360). Zero when invalid.|
+|`baseline_dir_err_deg`|`BASELINE NED`|Estimated (95%) error of `baseline_dir_deg` in [degrees]. Range [0..180]. Zero when invalid.|
+|`baseline_dip_deg`|`BASELINE NED`|Computed vertical angle from base to rover in [degrees]. Valid only in RTK fixed mode. Range [-90..90]. Zero when invalid.|
+|`baseline_dip_err_deg`|`BASELINE NED`|Estimated (95%) error of `baseline_dip_deg` in [degrees]. Range [0..90]. Zero when invalid.|
+
 
 ## TimeReference
  
 `sensor_msgs/msg/TimeReference`
 
 ### SBP Messages Used
-- `UTC TIME` (ID: 259) - UTC time of reported position.
-- `GPS TIME` (ID: 258) - GPS time of reported position.
+- `UTC TIME` (ID: 259) - UTC time.
+- `GPS TIME` (ID: 258) - GPS time.
 
 ### Topic Publication
 Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
-- True: the topic is published upon receiving SBP `UTC TIME` and `GPS TIME` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
-- False: the topic is published upon receiving SBP `GPS TIME` message. The topic timestamp contains the current platform time.
+- `True`: the topic is published upon receiving SBP `UTC TIME` and `GPS TIME` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
+- `False`: the topic is published upon receiving SBP `GPS TIME` message. The topic timestamp contains the current platform time.
 
 ### Topic Fields
 | ROS2 Message Field | SBP Message Data Source | Notes |
@@ -109,30 +138,28 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 
 `sensor_msgs/msg/Imu`
 
-*Note: Orientation is not provided.*
-
 ### SBP Messages Used
-- `UTC TIME` (ID: 259) - UTC time.
-- `GPS TIME` (ID: 258) - GPS time.
-- `GNSS TIME OFFSET` (ID: 65287) - Offset of the IMU local time with respect to GNSS time.
+- `UTC TIME` (ID: 259) - UTC time
+- `GPS TIME` (ID: 258) - GPS time
+- `GNSS TIME OFFSET` (ID: 65287) - Offset of the IMU local time with respect to GNSS time
 - `IMU AUX` (ID: 2305) - Auxiliary IMU data
 - `IMU RAW` (ID: 2304) - Raw IMU data
 
 ### Topic Publication
 Topic is published upon receiving `IMU RAW` SBP message.
 Time stamp depends on `timestamp_source_gnss` setting flag in the configuration file:  
-- True: The topic timestamp contains the UTC time of the measurement computed from `UTC TIME`, `GPS TIME`, `GNSS TIME OFFSET` and `IMU RAW` SBP messages depending on original IMU time stamping source. If the UTC time is not available the current platform time is reported.
-- False: The topic timestamp contains the current platform time.
+- `True`: The topic timestamp contains the UTC time of the measurement computed from `UTC TIME`, `GPS TIME`, `GNSS TIME OFFSET` and `IMU RAW` SBP messages depending on original IMU time stamping source. If the UTC time is not available the current platform time is reported.
+- `False`: The topic timestamp contains the current platform time.
 
 ### Topic Fields
 | ROS2 Message Field | SBP Message Data Source | Notes |
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`<br>`GPS TIME`<br>`GNSS TIME OFFSET`|See Topic Publication for time stamping details|
 |`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
-|`orientation`<br>`orientation_covariance`|--|Always zero. `orientation_covariance[0]` is always -1.|
-|`angular_velocity`|`IMU RAW`<br>`IMU AUX`|Zeros when invalid.|
-|`angular_velocity_covariance`|--|Not populated. `angular_velocity_covariance[0]` is set to -1 when angular velocity is not valid or when the time stamping source has changed |
-|`linear_acceleration`|`IMU RAW`<br>`IMU AUX`|Zeros when invalid.|
+|`orientation`<br>`orientation_covariance`|--|Not populated. Always zero. `orientation_covariance[0]` is always -1.|
+|`angular_velocity`|`IMU RAW`<br>`IMU AUX`|Reported in sensor frame. Zeros when invalid.|
+|`angular_velocity_covariance`|--|Not populated. `angular_velocity_covariance[0]` is set to -1 when angular velocity is not valid or when the time stamping source has changed|
+|`linear_acceleration`|`IMU RAW`<br>`IMU AUX`|Reported in sensor frame. Zeros when invalid.|
 |`linear_acceleration_covariance`|--|Not populated. `linear_acceleration_covariance[0]` is set to -1 when linear acceleration is not valid or when the time stamping source has changed |
 
 
