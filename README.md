@@ -30,16 +30,59 @@ The driver receives Swift binary (SBP) messages and publishes the following ROS 
  - [`Imu`](#imu)
 
 ## GpsFix
-TBD
+
+`gps_msgs/msg/GPSFix`
+
+### SBP Messages Used
+- `UTC TIME` (ID: 259, *required/optional*) - UTC time of reported position. Required when `timestamp_source_gnss` is `True`.
+- `GPS TIME` (ID: 258, *required*) - GPS time of reported position.
+- `POS LLH COV` (ID: 529, *required*) - GNSS position with covariance.
+- `VEL NED COV` (ID: 530, *required*) - GNSS velocity with covariance.
+- `ORIENT EULER` (ID: 545, *optional*) - GNSS/INS orientation with estimated errors.
+- `DOPS` (ID: 520, *optional*) - GNSS DOP (Dilution Of Precision) data.
+
+### Topic Publication
+Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
+- `True`: The topic is published upon receiving SBP `UTC TIME`, `GPS TIME`, `POS LLH COV`, `VEL NED COV` and, if present, `ORIENT EULER` messages with the same TOW. The topic timestamp contains the UTC time reported by the GNSS receiver. If the UTC time is not available the current platform time is reported.
+- `False`: The topic is published upon receiving SBP `GPS TIME`, `POS LLH COV`, `VEL NED COV` and, if present, `ORIENT EULER` messages with the same TOW. The topic timestamp contains the current platform time.
+
+### Topic Fields
+| ROS2 Message Field | SBP Message Data Source | Notes |
+| :--- | :---: | :--- |
+|`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
+|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`status.satellites_used`|`POS LLH COV`||
+|`status.satellite_used_prn[]`|--|Not populated|
+|`status.satellites_visible`<br>`status.satellite_visible_prn[]`<br>`status.satellite_visible_z[]`<br>`status.satellite_visible_azimuth[]`<br>`status.satellite_visible_snr[]`|--|Not populated|
+|`status.status`|`POS LLH COV`|Dead Reckoning (DR) position is reported as `STATUS_FIX` (0)|
+|`status.motion_source`|`VEL NED COV`||
+|`status.orientation_source`|`POS LLH COV`||
+|`status.position_source`|`POS LLH COV`||
+|`latitude`<br>`longitude`<br>`altitude`<br>|`POS LLH COV`|Zeros when the fix is invalid. If position is valid altitude is always present (i.e. never NaN).|
+|`track`|`VEL NED COV`<br>or<br>`ORIENT EULER`|If message is present and data valid, reports `yaw` from `ORIENT EULER`. If `yaw` is not valid reports computed Course Over Ground from `VEL NED COV` message. `VEL NED COV` updates `track` only if horizontal speed is above `track_update_min_speed_mps` set in the settings file. When the track becomes invalid the last valid track is reported.  |
+|`speed`|`POS LLH COV`|Computed horizontal (2D) speed|
+|`climb`|`POS LLH COV`||
+|`pitch`<br>`roll`|`ORIENT EULER`||
+|`dip`|--|Not populated|
+|`time`|`GPS TIME`|GPS time in seconds since 1980-01-06 |
+|`gdop`<br>`pdop`<br>`hdop`<br>`vdop`<br>`tdop`|`DOPS`||
+|`err`<br>`err_horz`<br>`err_vert`|`POS LLH COV`||
+|`err_track`|`VEL NED COV`<br>or<br>`ORIENT EULER`||
+|`err_speed`<br>`err_climb`|`VEL NED COV`||
+|`err_time`|--|Not populated|
+|`err_pitch`<br>`err_roll`|`ORIENT EULER`||
+|`err_dip`|--|Not populated|
+|`position_covariance`<br>`position_covariance_type`|`POS LLH COV`|Covariance, if valid, is always `TYPE_KNOWN` (full matrix).|
+
 
 ## NavSatFix
  
 `sensor_msgs/msg/NavSatFix`
 
 ### SBP Messages Used
-- `UTC TIME` (ID: 259) - UTC time of reported position.
-- `POS LLH COV` (ID: 529) - GNSS position data with covariance.
-- `MEASUREMENT STATE` (ID: 97) - GNSS constellations data.
+- `UTC TIME` (ID: 259, *required/optional*) - UTC time of reported position. Required when `timestamp_source_gnss` is `True`.
+- `POS LLH COV` (ID: 529, *required*) - GNSS position data with covariance.
+- `MEASUREMENT STATE` (ID: 97, *optional*) - GNSS constellations data.
 
 ### Topic Publication
 Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
@@ -61,8 +104,8 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 `geometry_msgs/msg/TwistWithCovarianceStamped`
 
 ### SBP Messages Used
-- `UTC TIME` (ID: 259) - UTC time of reported velocity.
-- `VEL NED COV` (ID: 530) - GNSS velocity data with covariance.
+- `UTC TIME` (ID: 259, *required/optional*) - UTC time of reported velocity. Required when `timestamp_source_gnss` is `True`.
+- `VEL NED COV` (ID: 530, *required*) - GNSS velocity data with covariance.
 
 ### Topic Publication
 Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
@@ -81,13 +124,11 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
  
 ## Baseline
 
-*Proprietary message*
-
-`swiftnav-ros2/msg/Baseline`
+`swiftnav-ros2/msg/Baseline`   *Proprietary message*
 
 ### SBP Messages Used
-- `UTC TIME` (ID: 259) - UTC time of reported position.
-- `BASELINE NED` (ID: 524) - RTK baseline NED vector.
+- `UTC TIME` (ID: 259, *required/optional*) - UTC time of reported baseline. Required when `timestamp_source_gnss` is `True`.
+- `BASELINE NED` (ID: 524, *required*) - RTK baseline NED vector.
 
 ### Topic Publication
 Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
@@ -118,8 +159,8 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 `sensor_msgs/msg/TimeReference`
 
 ### SBP Messages Used
-- `UTC TIME` (ID: 259) - UTC time.
-- `GPS TIME` (ID: 258) - GPS time.
+- `UTC TIME` (ID: 259, *required/optional*) - UTC time. Required when `timestamp_source_gnss` is `True`.
+- `GPS TIME` (ID: 258, *required*) - GPS time.
 
 ### Topic Publication
 Topic publication depends on `timestamp_source_gnss` setting flag in the configuration file:  
@@ -134,16 +175,17 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 |`time_ref`|`GPS TIME`|GPS time in seconds since 1980-01-06. `sec` value is set to -1 if the GPS time is not available.|
 |`source`|--|Text from `frame_name` in the config `params.yaml` file|
  
+ 
 ## Imu
 
 `sensor_msgs/msg/Imu`
 
 ### SBP Messages Used
-- `UTC TIME` (ID: 259) - UTC time
-- `GPS TIME` (ID: 258) - GPS time
-- `GNSS TIME OFFSET` (ID: 65287) - Offset of the IMU local time with respect to GNSS time
-- `IMU AUX` (ID: 2305) - Auxiliary IMU data
-- `IMU RAW` (ID: 2304) - Raw IMU data
+- `UTC TIME` (ID: 259, *required/optional*) - UTC time. Required when `timestamp_source_gnss` is `True`.
+- `GPS TIME` (ID: 258, *required*) - GPS time
+- `GNSS TIME OFFSET` (ID: 65287, *required/optional*) - Offset of the IMU local time with respect to GNSS time. Required when the original IMU time source is a local time.
+- `IMU AUX` (ID: 2305, *required*) - Auxiliary IMU data
+- `IMU RAW` (ID: 2304, *required*) - Raw IMU data
 
 ### Topic Publication
 Topic is published upon receiving `IMU RAW` SBP message.
