@@ -319,30 +319,26 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
   ```
 
 # Driver Configuration
-The driver configuration is stored in `/config/params.yaml` file and  provides the following configuration options:
+The driver configuration is stored in `/config/params.yaml` file and provides the following configuration options:
 
-| Parameter | Accepted values | Description |
+| Parameter | Accepted Values | Description |
 | :--- | :--- | :--- |
-| interface | See [Interface values table](#interface-values-table) | Interface from which the driver will communicate with the device |
-| sbp_file | Example: /logs/sbp_example_file.sbp | Path to the SBP file (Only used if interface is 1)|
-| device_name | Example: COM1 (Windows), /dev/ttyS0 (Linux) | A valid serial device name for the OS (Only used if interface is 2)|
-| connection_str | Example: "115200&#124;N&#124;8&#124;1&#124;N" (See [Connection string description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication (Only used if interface is 2)|
-| host_ip | Example: 192.168.1.45 | A valid IP address (Only used if interface is 3)|
-| host_port | Example: 8082 | A valid TCP port value (Only used if interface is 3)|
-| timeout | Example: 10000 | A timeout for reading operations in milliseconds (used for interfaces 2 and 3) |
-| navsatfix | True: Publish, False: Don't publish | Flag to enable/disable the publication of the navsatfix topic (std_msgs::NavSatFix)|
-| timereference | True: Publish, False: Don't publish | Flag to enable/disable the publication of the timereference topic (std_msgs::TimeReference)|
-| log_sbp_messages | True: Log messages, False: Don't Log messages | Dump all the SBP received messages into an SBP file |
-| log_sbp_filepath | Example: /logs/sbp_files/ | Path (without file name) in which the sbp file for log should be created |
+| `interface` | `1`, `2` or `3` | SwiftNav GNSS receiver communication interface<br>`1` - File<br>`2` - Serial port<br>`3` - TCP Client |
+| `sbp_file` | E.g.: `/logs/sbp_example_file.sbp` | SBP filename to play back. Absolute path is required. Only used if `interface` is 1. |
+| `device_name` | E.g.: `COM1` (Windows), `/dev/ttyS0` (Linux) | Serial device name. Only used if interface is 2. |
+| `connection_str` | E.g.: `115200&#124;N&#124;8&#124;1&#124;N` (See [Connection string description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
+| `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if interface is 3. |
+| `host_port`| E.g.: `55556` | TCP port used. Only used if interface is 3. |
+| `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for interfaces 2 and 3. |
+| `frame_name`|text|ROS topics frame name |
+| `timestamp_source_gnss`|`True`or `False`|Topic Publication Time Stamp Source. `True`: use GNSS receiver reported time, `False`: use current platfrom time. |
+| `baseline_dir_offset_deg`| [-180..180] | RTK Baseline direction offset in [deg] |
+| `baseline_dip_offset_deg`| [-90..90] | RTK Baseline dip offset in [deg] |
+| `track_update_min_speed_mps`| E.g.: `0.2`| Mininal horizontal speed for Track updates from SBP message `VEL NED COV`. Track and track error outputs are 'frozen' below this threshold. |
+| `enabled_publishers[]`|`gpsfix`<br>`navsatfix`<br>`twistwithcovariancestamped`<br>`baseline`<br>`timereference`<br>`imu`| List of enabled publishers. Comment out the line to disable publisher.
+| log_sbp_messages | `True`or `False` | Enable/Disable SBP raw data logging. |
+| log_sbp_filepath | E.g.: `/logs/sbp_files/` | Absolute path (without file name) for SBP logging. |
 
-
-### Interface values table
-| Value | Description |
-| :--- | :--- |
-| 0 | Invalid |
-| 1 | Data from file |
-| 2 | Serial port |
-| 3 | TCP |
 
 ## Connection string description
 The connection string for the serial interface has the form:
@@ -374,6 +370,7 @@ Usually 7 or 8
 | X | Xon/Xoff flow control |
 | R | RTS/CTS flow control |
 | D | DTR/DSR flow control |
+
 
 # GNSS Receiver Configuration
 TBD
