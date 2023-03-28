@@ -1,5 +1,5 @@
 # **swiftnav-ros2**
-ROS2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning Engine software.
+ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning Engine software.
 
 # **Table of Contents**
 - [Features](#features)
@@ -11,12 +11,12 @@ ROS2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning E
 - [Technical Support](#technical-support)
 
 # Features
-- Designed for ROS2 Humble but also works with Foxy. 
-- Developed and tested on Ubuntu 22.04 (ROS2 Humble) and Ubuntu 20.04 (ROS2 Foxy) platforms.
+- Designed for ROS 2 Humble but also works with ROS 2 Foxy. 
+- Developed and tested on Ubuntu 22.04 (ROS 2 Humble) and Ubuntu 20.04 (ROS 2 Foxy) platforms.
 - Supports Swift Navigation receivers and Starling Positioning Engine in Swift Binary Protocol (SBP).
 - Ethernet, Serial and File inputs.
 - SBP data logging.
-- Publishes ROS2 standard and Swift Navigation proprietary topics.
+- Publishes ROS 2 standard and Swift Navigation proprietary topics.
 - Configurable time stamps.
 - Written in C++.
 
@@ -213,32 +213,34 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 
 
 ## Step 1 (Install ROS 2 Humble):
- Follow [instructions to install Ros2 Humble](https://docs.ros.org/en/humble/Installation.html)
+ Follow [instructions to install ROS 2 Humble](https://docs.ros.org/en/humble/Installation.html)
 
 ## Step 2 (Install libspb):
-  - In any directory you wish, clone libsp v4.4.0, init the repo and install it.
+  - In any directory you wish, clone libsp v4.11.0, init the repo, make the lib and install it
     ```
       git clone https://github.com/swift-nav/libsbp.git
       cd libsbp
-      git checkout v4.4.0
+      git checkout v4.11.0
       cd c
-      git submodule init
+      git submodule update --init --recursive
       mkdir build
       cd build
       cmake DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ 
       make
       sudo make install
     ```
-## Step 3 (download driver code)
-  - Navigate to workspace directory (ie: ~/workspace)
+    
+## Step 3 (Download Driver Code)
+  - Navigate to workspace directory (e.g.: ~/workspace)
     ```
      cd ~/workspace
      mkdir src
      cd src
      git clone https://github.com/swift-nav/swiftnav-ros2.git
+    ```
 
-## Step 4 (install dependencies)
-  - Navigate to workspace directory (ie: ~/workspace)
+## Step 4 (Install Dependencies)
+  - Navigate to workspace directory (e.g.: ~/workspace)
   ```
     cd ~/workspace
     source /opt/ros/humble/setup.bash
@@ -247,41 +249,41 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
     rosdep install --from-paths src --ignore-src -r -y
   ```
 
-## Step 5 (edit configuration)
-  - Edit configurationo file. See [ROS2 driver configuration](#ros2-driver-configuration)
+## Step 5 (Edit Configuration)
+  - Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for details.
   ```
-    vi config/params.yaml
+    nano config/params.yaml
   ```
 
-## Step 6 (build)
-  - Navigate to workspace directory (ie: ~/workspace)
+## Step 6 (Build)
+  - Navigate to workspace directory (e.g.: ~/workspace)
   ```
     cd ~/workspace
     source /opt/ros/humble/setup.bash
     colcon build
   ```
 
-## Step 7 (launching)
-  - Source installed Swift driver and launch driver.
+## Step 7 (Launching)
+  - Source installed driver and launch it
   ```
     source install/setup.bash
     ros2 launch swiftnav_ros2_driver sbpros2_driver.py
   ```
 
-## Step 8 (change configuration & viewing topics)
-  - Changing the configuration files can be done from the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
+## Step 8 (Changing Configuration and Viewing Topics)
+  - Changing the configuration file can be done in the driver source, but the driver will need to be rebuilt. Alternatively, the configuration file can be changed in the installed directory.
   ```
-    vi install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
+    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
   ```
-  - Swift specific SBP messages are not part of the ROS2 standard library, thus the following command must be run in any terminal that is used for intergacing with this driver. (ie: echoing the angular_rate message in a new terminal)
+  - Swift specific SBP messages are not a part of the ROS 2 standard library, therefore the following command must be run in any terminal that is used for interfacing with this driver (e.g.: echoing the `baseline` message in a new terminal)
   ```
     source install/setup.bash
-    ros2 topic echo /angular_rate
+    ros2 topic echo /baseline
   ```
 
 # Building Driver Using Docker
 
-## Step 1 (clone and build docker image)
+## Step 1 (Clone and Build Docker Image)
   - Clone the repo, build Docker image, run docker image.
   ```
     git clone https://github.com/swift-nav/swiftnav-ros2.git
@@ -290,30 +292,30 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
     docker run -it -v :/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash
   ```
 
-## Step 2 (edit configuration)
-  - Edit configurationo file. See [ROS2 driver configuration](#ros2-driver-configuration)
+## Step 2 (Edit Configuration)
+  - Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for details.
   ```
-    vi config/params.yaml
+    nano config/params.yaml
   ```
 
-## Step 3 (build)
-  - Build driver inside docker image.
+## Step 3 (Build)
+  - Build driver inside docker image
   ```
     cd /mnt/workspace/
     colcon build
   ```
 
-## Step 4 (launching)
+## Step 4 (Launching)
   - Launching the driver inside the docker image may require access to serial device or tcp ports inside the docker.
   ```
     source install/setup.bash
     ros2 launch swiftnav_ros2_driver sbpros2_driver.py
   ```
 
-## Step 6 (change configuration)
-  - Changing the configuration files can be done from the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
+## Step 6 (Changing Configuration)
+  - Changing the configuration files can be done in the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
   ```
-    vi install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
+    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
   ```
 
 # Driver Configuration
