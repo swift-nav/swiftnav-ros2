@@ -145,13 +145,17 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
     switch ( SBP_IMU_RAW_TIME_STATUS_GET(msg.tow) ) {
       case SBP_IMU_RAW_TIME_STATUS_REFERENCE_EPOCH_IS_START_OF_CURRENT_GPS_WEEK:
         if (gps_week_valid_ && utc_offset_valid_) {
-          //!! TODO need to handle tow rollover here, before new week arrives
+          uint32_t imu_raw_tow_ms = SBP_IMU_RAW_TIME_SINCE_REFERENCE_EPOCH_IN_MILLISECONDS_GET(msg.tow);
+
+          // Check for TOW rollover before the next GPS TIME message arrives
+          if ( imu_raw_tow_ms < last_imu_raw_tow_ms_ ) {
+            gps_week_++;
+          }
+          last_imu_raw_tow_ms_ = imu_raw_tow_ms;
+
           timestamp_s =
               static_cast<double>(gps_week_ * 604800u) +
-              static_cast<double>(
-                  SBP_IMU_RAW_TIME_SINCE_REFERENCE_EPOCH_IN_MILLISECONDS_GET(
-                      msg.tow)) /
-                  1e3 +
+              static_cast<double>(imu_raw_tow_ms) / 1e3 +
               static_cast<double>(msg.tow_f) / 1e3 / 256.0 + utc_offset_s_;
         }
         break;
