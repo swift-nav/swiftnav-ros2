@@ -73,11 +73,11 @@ void TwistWithCovarianceStampedPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.twist.covariance[14] = msg.cov_d_d;
   }
   else {
-    msg_.twist.covariance[0] = -1;
+    msg_.twist.covariance[0] = -1.0; // Twist is invalid
   }
 
-  // Angular velocities are not provided
-  msg_.twist.covariance[21] = -1;
+  // Angular velocity is not provided
+  msg_.twist.covariance[21] = -1.0;
 
   last_received_vel_ned_cov_tow_ = msg.tow;
 

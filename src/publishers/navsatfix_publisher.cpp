@@ -220,6 +220,9 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.position_covariance_type =
         sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
   }
+  else {
+    msg_.position_covariance[0] = -1.0; // Position is invalid
+  }
 
   last_received_pos_llh_cov_tow = msg.tow;
 

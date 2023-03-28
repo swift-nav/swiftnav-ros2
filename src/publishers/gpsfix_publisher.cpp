@@ -127,6 +127,9 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.err_vert = sqrt(msg.cov_d_d) * 2.0;  // [m], scaled to 95% confidence
     msg_.err = sqrt( msg_.err_horz*msg_.err_horz + msg_.err_vert*msg_.err_vert ); // [m], 95% confidence
   }
+  else {
+    msg_.position_covariance[0] = -1.0; // Position is invalid
+  }
 
   last_received_pos_llh_cov_tow = msg.tow;
 
