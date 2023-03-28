@@ -136,6 +136,7 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
                                   const sbp_msg_imu_raw_t& msg) {
+  uint32_t imu_raw_tow_ms;
   double timestamp_s = 0.0;
 
   (void)sender_id;
@@ -145,7 +146,7 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
     switch ( SBP_IMU_RAW_TIME_STATUS_GET(msg.tow) ) {
       case SBP_IMU_RAW_TIME_STATUS_REFERENCE_EPOCH_IS_START_OF_CURRENT_GPS_WEEK:
         if (gps_week_valid_ && utc_offset_valid_) {
-          uint32_t imu_raw_tow_ms = SBP_IMU_RAW_TIME_SINCE_REFERENCE_EPOCH_IN_MILLISECONDS_GET(msg.tow);
+          imu_raw_tow_ms = SBP_IMU_RAW_TIME_SINCE_REFERENCE_EPOCH_IN_MILLISECONDS_GET(msg.tow);
 
           // Check for TOW rollover before the next GPS TIME message arrives
           if ( (gps_week_ == last_gps_week_) && (imu_raw_tow_ms < last_imu_raw_tow_ms_) ) {
@@ -158,18 +159,18 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
               static_cast<double>(gps_week_ * 604800u) +
               static_cast<double>(imu_raw_tow_ms) / 1e3 +
               static_cast<double>(msg.tow_f) / 1e3 / 256.0 + utc_offset_s_;
+          stamp_source_ = STAMP_SOURCE_GNSS;
         }
         break;
 
       case SBP_IMU_RAW_TIME_STATUS_REFERENCE_EPOCH_IS_TIME_OF_SYSTEM_STARTUP:
         if (gps_time_offset_valid_ && utc_offset_valid_) {
+          imu_raw_tow_ms = SBP_IMU_RAW_TIME_SINCE_REFERENCE_EPOCH_IN_MILLISECONDS_GET(msg.tow);
           timestamp_s =
               gps_time_offset_s_ +
-              static_cast<double>(
-                  SBP_IMU_RAW_TIME_SINCE_REFERENCE_EPOCH_IN_MILLISECONDS_GET(
-                      msg.tow)) /
-                  1e3 +
+              static_cast<double>(imu_raw_tow_ms) / 1e3 +
               static_cast<double>(msg.tow_f) / 1e3 / 256.0 + utc_offset_s_;
+          stamp_source_ = STAMP_SOURCE_GNSS;
         }
         break;
 
@@ -206,7 +207,15 @@ void ImuPublisher::publish() {
     // Use current platform time if time from the GNSS receiver is not
     // available or if a local time source is selected
     msg_.header.stamp = node_->now();
+    stamp_source_ = STAMP_SOURCE_PLATFORM;
   }
+
+  if ( stamp_source_ != last_stamp_source_ ) {
+    // Time stamp source has changed - invalidate measurements
+    msg_.linear_acceleration_covariance[0] = -1.0;
+    msg_.angular_velocity_covariance[0] = -1.0;
+  }
+  last_stamp_source_ = stamp_source_;
 
   msg_.header.frame_id = frame_;
 

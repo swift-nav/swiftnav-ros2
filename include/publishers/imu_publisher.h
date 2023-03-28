@@ -66,6 +66,10 @@ class ImuPublisher
   uint32_t last_gps_week_{0U};
   uint32_t last_imu_raw_tow_ms_{0U};
 
+  enum stamp_source { STAMP_SOURCE_DEFAULT, STAMP_SOURCE_PLATFORM, STAMP_SOURCE_GNSS };
+  uint32_t stamp_source_{STAMP_SOURCE_DEFAULT};
+  uint32_t last_stamp_source_{STAMP_SOURCE_DEFAULT};
+
   double acc_res_mps2_{0.0};
   double gyro_res_rad_{0.0};
 };
