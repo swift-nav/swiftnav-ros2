@@ -23,7 +23,7 @@ TimeReferencePublisher::TimeReferencePublisher(
 
 void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
                                             const sbp_msg_utc_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
@@ -48,7 +48,7 @@ void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
 
 void TimeReferencePublisher::handle_sbp_msg(uint16_t sender_id,
                                             const sbp_msg_gps_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (SBP_GPS_TIME_TIME_SOURCE_NONE !=
       SBP_GPS_TIME_TIME_SOURCE_GET(msg.flags)) {

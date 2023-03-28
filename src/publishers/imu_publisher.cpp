@@ -25,7 +25,7 @@ ImuPublisher::ImuPublisher(sbp::State* state, const std::string_view topic_name,
 
 void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
                                   const sbp_msg_utc_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
@@ -49,7 +49,7 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
                                   const sbp_msg_gps_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (config_->getTimeStampSourceGNSS()) {
     if (SBP_GPS_TIME_TIME_SOURCE_NONE !=
@@ -79,7 +79,7 @@ void ImuPublisher::compute_utc_offset( void ) {
 
 void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
                                   const sbp_msg_gnss_time_offset_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   gps_time_offset_s_ = static_cast<double>(msg.weeks) * 604800.0 +
                        static_cast<double>(msg.milliseconds) / 1e3 +
@@ -124,7 +124,7 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
                                       0.0,
                                       0.0};
 
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   acc_res_mps2_ =
       list_acc_res_mps2[SBP_IMU_AUX_ACCELEROMETER_RANGE_GET(msg.imu_conf)];
@@ -139,7 +139,7 @@ void ImuPublisher::handle_sbp_msg(uint16_t sender_id,
   uint32_t imu_raw_tow_ms;
   double timestamp_s = 0.0;
 
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if ( config_->getTimeStampSourceGNSS() ) {
 
