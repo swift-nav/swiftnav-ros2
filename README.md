@@ -14,7 +14,8 @@ ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning 
 - Designed for ROS 2 Humble but also works with ROS 2 Foxy. 
 - Developed and tested on Ubuntu 22.04 (ROS 2 Humble) and Ubuntu 20.04 (ROS 2 Foxy) platforms.
 - Supports Swift Navigation receivers and Starling Positioning Engine in Swift Binary Protocol (SBP).
-- Ethernet, Serial and File inputs.
+- TCP Client and Serial communication interfaces.
+- SBP file playback.
 - SBP data logging.
 - Publishes ROS 2 standard and Swift Navigation proprietary topics.
 - Configurable time stamps.
@@ -373,8 +374,34 @@ Usually 7 or 8
 
 
 # GNSS Receiver Configuration
-TBD
 
+The ROS 2 driver works with Swift Navigation receivers and Starling Position Engine software using data in SBP protocol. Refer to the receiver-specific setup guide to configure your receiver:
+
+- [Piksi Multi](https://support.swiftnav.com/support/solutions/folders/44001200455)
+- [Duro](https://support.swiftnav.com/support/solutions/folders/44001200456)
+- [PGM EVK](https://support.swiftnav.com/support/solutions/articles/44002129828-pgm-evaluation-kit)
+- [Starling Positioning Engine](https://support.swiftnav.com/support/solutions/folders/44001223202)
+
+It's recommended to dedicate one output port for ROS and output on that port only messages required by the driver. This will minimize the latency and jitter of the incoming messages, and decrease CPU load. 
+
+The driver uses the following SBP messages:
+
+| Message Name | Message ID (decimal) | Description |
+| :--- | :---: | :--- |
+| `MEASUREMENT STATE` | 97 | Satellite tracking data |
+| `GPS TIME` | 258 | GPS time |
+| `UTC TIME` | 259 | UTC time |
+| `DOPS` | 520 | Dillution Of Precision |
+| `BASELINE NED` | 524 | Baseline vectors in NED frame |
+| `POS LLH COV` | 529 | Position (latitude, longitude, altitude) with covariance |
+| `VEL NED COV` | 530 | Velocity vectors in NED frame with covariance |
+| `ORIENT EULER` | 545 | Orientation (roll, pitch, yaw) |
+| `IMU RAW` | 2304 | Raw IMU data |
+| `IMU AUX` | 2305 | IMU temperature and senor ranges |
+| `GNSS TIME OFFSET` | 65287 | Offset of the local time with respect to GNSS time |
+
+Download [Swift Binary Protocol Specification](https://support.swiftnav.com/support/solutions/articles/44001850782-swift-binary-protocol)
 
 # Technical Support
-TBD
+
+Support requests can be made by filling the Support Request Form on the [Swift Navigation Support page](https://support.swiftnav.com/) (Support Request Form button is at the bottom of the page). A simple login is required to confirm your email address.
