@@ -3,8 +3,8 @@
 <package format="3">
   <name>swiftnav_ros2_driver</name>
   <version>1.0.0</version>
-  <description>ROS2 driver for Swift Navigation GNSS receivers.</description>
-  <maintainer email="support@swift-nav.com">Swift Navigation</maintainer>
+  <description>ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning Engine software.</description>
+  <maintainer email="support@swiftnav.com">Swift Navigation</maintainer>
   <license>MIT</license>
   <license file="LICENSE">LGPL</license>
   <url type="website">https://support.swiftnav.com</url>
