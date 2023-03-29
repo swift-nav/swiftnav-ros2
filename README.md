@@ -367,7 +367,7 @@ Download [Swift Binary Protocol Specification](https://support.swiftnav.com/supp
 
 ### Piksi Multi / Duro Configuration Example
 
-![alt text for screen readers](docs/images/reopen_in_container.png)
+![Piksi Multi Configuration Example](docs/images/piksi-multi-configuration.png)
 
 ### Starling Configuration Example
   ```
