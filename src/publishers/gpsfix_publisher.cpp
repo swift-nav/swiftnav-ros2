@@ -26,7 +26,7 @@ GPSFixPublisher::GPSFixPublisher(sbp::State* state,
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_gps_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (SBP_GPS_TIME_TIME_SOURCE_NONE !=
       SBP_GPS_TIME_TIME_SOURCE_GET(msg.flags)) {
@@ -41,7 +41,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_utc_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (config_->getTimeStampSourceGNSS()) {
     // Use GNSS receiver reported time to stamp the data
@@ -66,7 +66,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_pos_llh_cov_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   switch (SBP_POS_LLH_FIX_MODE_GET(msg.flags)) {
     case SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION:
@@ -127,6 +127,9 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.err_vert = sqrt(msg.cov_d_d) * 2.0;  // [m], scaled to 95% confidence
     msg_.err = sqrt( msg_.err_horz*msg_.err_horz + msg_.err_vert*msg_.err_vert ); // [m], 95% confidence
   }
+  else {
+    msg_.position_covariance[0] = -1.0; // Position is invalid
+  }
 
   last_received_pos_llh_cov_tow = msg.tow;
 
@@ -135,7 +138,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_vel_ned_cov_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (SBP_VEL_NED_VELOCITY_MODE_INVALID !=
       SBP_VEL_NED_VELOCITY_MODE_GET(msg.flags)) {
@@ -182,7 +185,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_orient_euler_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (SBP_ORIENT_EULER_INS_NAVIGATION_MODE_INVALID !=
       SBP_ORIENT_EULER_INS_NAVIGATION_MODE_GET(msg.flags)) {
@@ -211,7 +214,7 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                      const sbp_msg_dops_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (SBP_DOPS_FIX_MODE_INVALID != SBP_DOPS_FIX_MODE_GET(msg.flags)) {
     gdop = (double)msg.gdop / 1e2;

@@ -28,7 +28,7 @@ TwistWithCovarianceStampedPublisher::TwistWithCovarianceStampedPublisher(sbp::St
 
 void TwistWithCovarianceStampedPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_utc_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
@@ -53,7 +53,7 @@ void TwistWithCovarianceStampedPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void TwistWithCovarianceStampedPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_vel_ned_cov_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (SBP_VEL_NED_VELOCITY_MODE_INVALID !=
       SBP_VEL_NED_VELOCITY_MODE_GET(msg.flags)) {
@@ -73,11 +73,11 @@ void TwistWithCovarianceStampedPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.twist.covariance[14] = msg.cov_d_d;
   }
   else {
-    msg_.twist.covariance[0] = -1;
+    msg_.twist.covariance[0] = -1.0; // Twist is invalid
   }
 
-  // Angular velocities are not provided
-  msg_.twist.covariance[21] = -1;
+  // Angular velocity is not provided
+  msg_.twist.covariance[21] = -1.0;
 
   last_received_vel_ned_cov_tow_ = msg.tow;
 

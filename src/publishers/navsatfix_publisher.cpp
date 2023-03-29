@@ -78,7 +78,7 @@ void NavSatFixPublisher::handle_sbp_msg(
     uint16_t sender_id, const sbp_msg_measurement_state_t& msg) {
   sbp_measurement_state_t state;
 
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   status_service = 0;
 
@@ -151,7 +151,7 @@ void NavSatFixPublisher::handle_sbp_msg(
 
 void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_utc_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
@@ -176,7 +176,7 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
 void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
                                         const sbp_msg_pos_llh_cov_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   switch (SBP_POS_LLH_FIX_MODE_GET(msg.flags)) {
     case SBP_POS_LLH_FIX_MODE_SINGLE_POINT_POSITION:
@@ -219,6 +219,9 @@ void NavSatFixPublisher::handle_sbp_msg(uint16_t sender_id,
     msg_.position_covariance[8] = msg.cov_d_d;   // [m]
     msg_.position_covariance_type =
         sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_KNOWN;
+  }
+  else {
+    msg_.position_covariance[0] = -1.0; // Position is invalid
   }
 
   last_received_pos_llh_cov_tow = msg.tow;

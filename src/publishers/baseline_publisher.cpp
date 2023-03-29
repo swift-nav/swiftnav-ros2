@@ -25,7 +25,7 @@ BaselinePublisher::BaselinePublisher(sbp::State* state,
 
 void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
                                        const sbp_msg_utc_time_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   if (config_->getTimeStampSourceGNSS()) {
     if (SBP_UTC_TIME_TIME_SOURCE_NONE !=
@@ -50,7 +50,7 @@ void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
 
 void BaselinePublisher::handle_sbp_msg(uint16_t sender_id,
                                        const sbp_msg_baseline_ned_t& msg) {
-  (void)sender_id;
+  if (0 == sender_id) return; // Ignore base station data
 
   msg_.mode = SBP_BASELINE_NED_FIX_MODE_GET(msg.flags);
 
