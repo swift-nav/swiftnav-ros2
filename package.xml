@@ -6,7 +6,7 @@
   <description>ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning Engine software.</description>
   <maintainer email="support@swiftnav.com">Swift Navigation</maintainer>
   <license>MIT</license>
-  <license file="LICENSE">LGPL</license>
+  <license file="LICENSE">MIT License File</license>
   <url type="website">https://support.swiftnav.com</url>
   <url type="repository">https://github.com/swift-nav/swiftnav-ros2</url>
 
