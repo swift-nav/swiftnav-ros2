@@ -5,7 +5,6 @@ ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning 
 - [Features](#features)
 - [ROS Topics](#ros-topics)
 - [Building Driver](#building-driver)
-- [Building Driver Using Docker](#building-driver-using-docker)
 - [Driver Configuration](#driver-configuration)
 - [GNSS Receiver Configuration](#gnss-receiver-configuration)
 - [Technical Support](#technical-support)
@@ -282,42 +281,6 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
     ros2 topic echo /baseline
   ```
 
-# Building Driver Using Docker
-
-## Step 1 (Clone and Build Docker Image)
-  - Clone the repo, build Docker image, run docker image.
-  ```
-    git clone https://github.com/swift-nav/swiftnav-ros2.git
-    cd swiftnav-ros2
-    docker build -t swiftnav-ros2 .
-    docker run -it -v :/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash
-  ```
-
-## Step 2 (Edit Configuration)
-  - Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for details.
-  ```
-    nano config/params.yaml
-  ```
-
-## Step 3 (Build)
-  - Build driver inside docker image
-  ```
-    cd /mnt/workspace/
-    colcon build
-  ```
-
-## Step 4 (Launching)
-  - Launching the driver inside the docker image may require access to serial device or tcp ports inside the docker.
-  ```
-    source install/setup.bash
-    ros2 launch swiftnav_ros2_driver sbpros2_driver.py
-  ```
-
-## Step 6 (Changing Configuration)
-  - Changing the configuration files can be done in the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
-  ```
-    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
-  ```
 
 # Driver Configuration
 The driver configuration is stored in `/config/params.yaml` file and provides the following configuration options:
@@ -401,6 +364,22 @@ The driver uses the following SBP messages:
 | `GNSS TIME OFFSET` | 65287 | Offset of the local time with respect to GNSS time |
 
 Download [Swift Binary Protocol Specification](https://support.swiftnav.com/support/solutions/articles/44001850782-swift-binary-protocol)
+
+### Piksi Multi / Duro Configuration Example
+
+TBD
+
+### Starling Configuration Example
+  ```
+    outputs:
+      - name: sbp-ros2
+        protocol: sbp
+        type: tcp-server
+        port: 55556
+        max-conns: 4
+        sbp:
+          enabled-messages: [ 97,258,259,520,524,529,530,545,2304,2305,65287 ]
+  ```
 
 # Technical Support
 
