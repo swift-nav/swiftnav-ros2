@@ -290,7 +290,7 @@ The driver configuration is stored in `/config/params.yaml` file and provides th
 | `interface` | `1`, `2` or `3` | SwiftNav GNSS receiver communication interface<br>`1` - File<br>`2` - Serial port<br>`3` - TCP Client |
 | `sbp_file` | E.g.: `/logs/sbp_example_file.sbp` | SBP filename to play back. Absolute path is required. Only used if `interface` is 1. |
 | `device_name` | E.g.: `COM1` (Windows), `/dev/ttyS0` (Linux) | Serial device name. Only used if interface is 2. |
-| `connection_str` | E.g.: `115200&#124;N&#124;8&#124;1&#124;N` (See [Connection string description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
+| `connection_str` | E.g.: `115200\|N\|8\|1\|N` (See [Connection String Description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
 | `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if interface is 3. |
 | `host_port`| E.g.: `55556` | TCP port used. Only used if interface is 3. |
 | `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for interfaces 2 and 3. |
@@ -304,36 +304,35 @@ The driver configuration is stored in `/config/params.yaml` file and provides th
 | log_sbp_filepath | E.g.: `/logs/sbp_files/` | Absolute path (without file name) for SBP logging. |
 
 
-## Connection string description
+## Connection String Description
 The connection string for the serial interface has the form:
-BAUD RATE&#124;PARITY&#124;DATA BITS&#124;STOP BITS&#124;FLOW CONTROL
+`BAUD RATE`&#124;`PARITY`&#124;`DATA BITS`&#124;`STOP BITS`&#124;`FLOW CONTROL`
 
-### Available baud rates
-1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800. 921600.
-Please remember that this baud rates are subject of your hardware and OS capabilities.
+### Baud Rates
+`1200`, `2400`, `4800`, `9600`, `19200`, `38400`, `57600`, `115200`, `230400`, `460800`, `921600`.
 
-### Parities table
+### Parity
 | Value | Description |
 |:--- | :--- |
-| N | No parity |
-| E | Even parity |
-| O | Odd parity |
-| M | Mark parity (Not available in some linux distributions) |
-| S | Space parity (Not available in some linux distributions) |
+| `N` | No parity |
+| `E` | Even parity |
+| `O` | Odd parity |
+| `M` | Mark parity (Not available in some Linux distributions) |
+| `S` | Space parity (Not available in some Linux distributions) |
 
-### Data bits
-Usually 7 or 8
+### Data Bits
+`7` or `8`
 
 ### Stop Bits
-1 or 2
+`1` or `2`
 
-### Flow control table
+### Flow Control
 | Value | Description |
 |:--- | :--- |
-| N | No flow control |
-| X | Xon/Xoff flow control |
-| R | RTS/CTS flow control |
-| D | DTR/DSR flow control |
+| `N` | No flow control |
+| `X` | Xon/Xoff flow control |
+| `R` | RTS/CTS flow control |
+| `D` | DTR/DSR flow control |
 
 
 # GNSS Receiver Configuration
@@ -365,11 +364,15 @@ The driver uses the following SBP messages:
 
 Download [Swift Binary Protocol Specification](https://support.swiftnav.com/support/solutions/articles/44001850782-swift-binary-protocol)
 
+
 ### Piksi Multi / Duro Configuration Example
 
+Piksi Multi and Duro configuration can be set using Swift Console program on Settings tab:
 ![Piksi Multi Configuration Example](docs/images/piksi-multi-configuration.png)
 
 ### Starling Configuration Example
+  
+Starling configuration is set in the yaml config file:
   ```
     outputs:
       - name: sbp-ros2
@@ -380,6 +383,7 @@ Download [Swift Binary Protocol Specification](https://support.swiftnav.com/supp
         sbp:
           enabled-messages: [ 97,258,259,520,524,529,530,545,2304,2305,65287 ]
   ```
+
 
 # Technical Support
 
