@@ -267,7 +267,7 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
   - Source installed driver and launch it
   ```
     source install/setup.bash
-    ros2 launch swiftnav_ros2_driver sbpros2_driver.py
+    ros2 launch swiftnav_ros2_driver start.py
   ```
 
 ## Step 8 (Changing Configuration and Viewing Topics)
@@ -367,12 +367,16 @@ Download [Swift Binary Protocol Specification](https://support.swiftnav.com/supp
 
 ### Piksi Multi / Duro Configuration Example
 
-Piksi Multi and Duro configuration can be set using Swift Console program on Settings tab:
+Piksi Multi and Duro configuration can be changed using Swift Console program. TCP Server 1 settings example:
+
 ![Piksi Multi Configuration Example](docs/images/piksi-multi-configuration.png)
+
+*Note: Click SAVE TO DEVICE button to memorize settings over the power cycle.*
+
 
 ### Starling Configuration Example
   
-Starling configuration is set in the yaml config file:
+Starling configuration is saved in the yaml configuration file. TCP server output example:
   ```
     outputs:
       - name: sbp-ros2
