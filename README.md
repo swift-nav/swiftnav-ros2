@@ -252,7 +252,7 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 ## Step 5 (Edit Configuration)
   - Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for details.
   ```
-    nano config/params.yaml
+    nano config/settings.yaml
   ```
 
 ## Step 6 (Build)
@@ -283,7 +283,7 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 
 
 # Driver Configuration
-The driver configuration is stored in `/config/params.yaml` file and provides the following configuration options:
+The driver configuration is stored in the `/config/settings.yaml` file. The following settings are available:
 
 | Parameter | Accepted Values | Description |
 | :--- | :--- | :--- |
@@ -330,9 +330,9 @@ The connection string for the serial interface has the form:
 | Value | Description |
 |:--- | :--- |
 | `N` | No flow control |
-| `X` | Xon/Xoff flow control |
-| `R` | RTS/CTS flow control |
-| `D` | DTR/DSR flow control |
+| `X` | Xon/Xoff |
+| `R` | RTS/CTS |
+| `D` | DTR/DSR |
 
 
 # GNSS Receiver Configuration
