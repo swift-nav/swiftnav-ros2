@@ -21,6 +21,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cstring>
+
 
 #define GET_SOCKET_ERROR() (errno)
 #else
@@ -189,7 +191,7 @@ bool TCP::connectSocket() noexcept {
 
   LOG_INFO(logger_, "Connecting to %s:%u",ip_.c_str(),port_);
   server.sin_family = AF_INET;
-  server.sin_addr.s_addr = inet_addr(ip_.c_str());
+  server.sin_addr.s_addr = inet_addr( 0 == strcmp(ip_.c_str(),"localhost") ? "127.0.0.1" : ip_.c_str() );
   server.sin_port = htons(port_);
   const int result =
       connect(socket_id_, reinterpret_cast<sockaddr*>(&server), sizeof(server));
