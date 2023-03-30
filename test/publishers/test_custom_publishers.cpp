@@ -168,24 +168,4 @@ TEST_F(TestCustomPublishers, CreateInvalidPublisher) {
 }
 
 TEST_F(TestCustomPublishers, CreateBaselinePublisher) {
-#if 0 // TODO !!
-  sbp_msg_t msg;
-
-  msg.baseline_heading.flags = 0x0D;
-  msg.baseline_heading.heading = 1780;
-  msg.baseline_heading.n_sats = 3;
-  msg.baseline_heading.tow = 3254;
-
-  auto check =
-      [](const sbp_msg_t& msg,
-         const swiftnav_ros2_driver::msg::BaselineHeading::SharedPtr ros_msg) -> void {
-    ASSERT_EQ(msg.baseline_heading.flags, ros_msg.flags);
-    ASSERT_EQ(msg.baseline_heading.heading, ros_msg.heading);
-    ASSERT_EQ(msg.baseline_heading.n_sats, ros_msg.n_sats);
-    ASSERT_EQ(msg.baseline_heading.tow, ros_msg.tow);
-  };
-
-  testPublisher<swiftnav_ros2_driver::msg::BaselineHeading::SharedPtr>(
-      Publishers::BaselineHeading, msg, SbpMsgBaselineHeading, check);
-#endif
 }
