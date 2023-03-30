@@ -270,10 +270,13 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
     ros2 launch swiftnav_ros2_driver start.py
   ```
 
+![Driver Launch Example](docs/images/launch-example.png)
+
+
 ## Step 8 (Changing Configuration and Viewing Topics)
   - Changing the configuration file can be done in the driver source, but the driver will need to be rebuilt. Alternatively, the configuration file can be changed in the installed directory.
   ```
-    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
+    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/settings.yaml
   ```
   - Swift specific SBP messages are not a part of the ROS 2 standard library, therefore the following command must be run in any terminal that is used for interfacing with this driver (e.g.: echoing the `baseline` message in a new terminal)
   ```
