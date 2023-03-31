@@ -60,7 +60,7 @@ class Config {
   void declareParameters(rclcpp::Node* node);
 
   /**
-   * @brief Loads the declared parameters from the params.yaml file
+   * @brief Loads the declared parameters from the settings.yaml file
    *
    * @param node ROS 2 node
    */

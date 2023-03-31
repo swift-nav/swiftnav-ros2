@@ -19,7 +19,6 @@
 
 using ::testing::Return;
 
-// TODO: Make the devices name right
 #if defined(_WIN32)
 constexpr char VALID_PORT[] = "COM1";
 constexpr char INVALID_PORT[] = "COM28";
