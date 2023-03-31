@@ -21,6 +21,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <string>
 #include <cstring>
 
 
@@ -186,12 +187,41 @@ bool TCP::setNonBlocking() noexcept {
 #endif
 }
 
+std::string ipFromAddress(const std::string& addr) {
+  if (addr.empty())
+    return {};
+
+  addrinfo hints;
+  addrinfo* result = nullptr;
+  addrinfo* ptr;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_protocol = IPPROTO_TCP;
+  if (getaddrinfo(addr.c_str(), nullptr, &hints, &result) == 0)
+  {
+    sockaddr_in* sockaddr_ipv4;
+
+    for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
+      if (ptr->ai_family == AF_INET) {
+        char Addr[30];
+
+        sockaddr_ipv4 = reinterpret_cast<sockaddr_in*>(ptr->ai_addr);
+        return std::string(inet_ntop(AF_INET, &sockaddr_ipv4->sin_addr, Addr, sizeof(Addr)));
+      }
+    }
+  }
+    
+  return {};
+}
+
 bool TCP::connectSocket() noexcept {
   struct sockaddr_in server;
 
   LOG_INFO(logger_, "Connecting to %s:%u",ip_.c_str(),port_);
   server.sin_family = AF_INET;
-  server.sin_addr.s_addr = inet_addr( 0 == strcmp(ip_.c_str(),"localhost") ? "127.0.0.1" : ip_.c_str() );
+  server.sin_addr.s_addr = inet_addr( ipFromAddress(ip_).c_str() );
   server.sin_port = htons(port_);
   const int result =
       connect(socket_id_, reinterpret_cast<sockaddr*>(&server), sizeof(server));
