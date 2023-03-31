@@ -5,7 +5,6 @@ ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning 
 - [Features](#features)
 - [ROS Topics](#ros-topics)
 - [Building Driver](#building-driver)
-- [Building Driver Using Docker](#building-driver-using-docker)
 - [Driver Configuration](#driver-configuration)
 - [GNSS Receiver Configuration](#gnss-receiver-configuration)
 - [Technical Support](#technical-support)
@@ -253,7 +252,7 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 ## Step 5 (Edit Configuration)
   - Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for details.
   ```
-    nano config/params.yaml
+    nano config/settings.yaml
   ```
 
 ## Step 6 (Build)
@@ -268,13 +267,16 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
   - Source installed driver and launch it
   ```
     source install/setup.bash
-    ros2 launch swiftnav_ros2_driver sbpros2_driver.py
+    ros2 launch swiftnav_ros2_driver start.py
   ```
+
+![Driver Launch Example](docs/images/launch-example.png)
+
 
 ## Step 8 (Changing Configuration and Viewing Topics)
   - Changing the configuration file can be done in the driver source, but the driver will need to be rebuilt. Alternatively, the configuration file can be changed in the installed directory.
   ```
-    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
+    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/settings.yaml
   ```
   - Swift specific SBP messages are not a part of the ROS 2 standard library, therefore the following command must be run in any terminal that is used for interfacing with this driver (e.g.: echoing the `baseline` message in a new terminal)
   ```
@@ -282,52 +284,16 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
     ros2 topic echo /baseline
   ```
 
-# Building Driver Using Docker
-
-## Step 1 (Clone and Build Docker Image)
-  - Clone the repo, build Docker image, run docker image.
-  ```
-    git clone https://github.com/swift-nav/swiftnav-ros2.git
-    cd swiftnav-ros2
-    docker build -t swiftnav-ros2 .
-    docker run -it -v :/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash
-  ```
-
-## Step 2 (Edit Configuration)
-  - Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for details.
-  ```
-    nano config/params.yaml
-  ```
-
-## Step 3 (Build)
-  - Build driver inside docker image
-  ```
-    cd /mnt/workspace/
-    colcon build
-  ```
-
-## Step 4 (Launching)
-  - Launching the driver inside the docker image may require access to serial device or tcp ports inside the docker.
-  ```
-    source install/setup.bash
-    ros2 launch swiftnav_ros2_driver sbpros2_driver.py
-  ```
-
-## Step 6 (Changing Configuration)
-  - Changing the configuration files can be done in the driver source, but the driver will need to be rebuilt. Alternatively the configuration file can be changed in the installed folder.
-  ```
-    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/params.yaml
-  ```
 
 # Driver Configuration
-The driver configuration is stored in `/config/params.yaml` file and provides the following configuration options:
+The driver configuration is stored in the `/config/settings.yaml` file. The following settings are available:
 
 | Parameter | Accepted Values | Description |
 | :--- | :--- | :--- |
 | `interface` | `1`, `2` or `3` | SwiftNav GNSS receiver communication interface<br>`1` - File<br>`2` - Serial port<br>`3` - TCP Client |
 | `sbp_file` | E.g.: `/logs/sbp_example_file.sbp` | SBP filename to play back. Absolute path is required. Only used if `interface` is 1. |
 | `device_name` | E.g.: `COM1` (Windows), `/dev/ttyS0` (Linux) | Serial device name. Only used if interface is 2. |
-| `connection_str` | E.g.: `115200&#124;N&#124;8&#124;1&#124;N` (See [Connection string description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
+| `connection_str` | E.g.: `115200\|N\|8\|1\|N` (See [Connection String Description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
 | `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if interface is 3. |
 | `host_port`| E.g.: `55556` | TCP port used. Only used if interface is 3. |
 | `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for interfaces 2 and 3. |
@@ -341,36 +307,35 @@ The driver configuration is stored in `/config/params.yaml` file and provides th
 | log_sbp_filepath | E.g.: `/logs/sbp_files/` | Absolute path (without file name) for SBP logging. |
 
 
-## Connection string description
+## Connection String Description
 The connection string for the serial interface has the form:
-BAUD RATE&#124;PARITY&#124;DATA BITS&#124;STOP BITS&#124;FLOW CONTROL
+`BAUD RATE`&#124;`PARITY`&#124;`DATA BITS`&#124;`STOP BITS`&#124;`FLOW CONTROL`
 
-### Available baud rates
-1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800. 921600.
-Please remember that this baud rates are subject of your hardware and OS capabilities.
+### Baud Rates
+`1200`, `2400`, `4800`, `9600`, `19200`, `38400`, `57600`, `115200`, `230400`, `460800`, `921600`.
 
-### Parities table
+### Parity
 | Value | Description |
 |:--- | :--- |
-| N | No parity |
-| E | Even parity |
-| O | Odd parity |
-| M | Mark parity (Not available in some linux distributions) |
-| S | Space parity (Not available in some linux distributions) |
+| `N` | No parity |
+| `E` | Even parity |
+| `O` | Odd parity |
+| `M` | Mark parity (Not available in some Linux distributions) |
+| `S` | Space parity (Not available in some Linux distributions) |
 
-### Data bits
-Usually 7 or 8
+### Data Bits
+`7` or `8`
 
 ### Stop Bits
-1 or 2
+`1` or `2`
 
-### Flow control table
+### Flow Control
 | Value | Description |
 |:--- | :--- |
-| N | No flow control |
-| X | Xon/Xoff flow control |
-| R | RTS/CTS flow control |
-| D | DTR/DSR flow control |
+| `N` | No flow control |
+| `X` | Xon/Xoff |
+| `R` | RTS/CTS |
+| `D` | DTR/DSR |
 
 
 # GNSS Receiver Configuration
@@ -401,6 +366,31 @@ The driver uses the following SBP messages:
 | `GNSS TIME OFFSET` | 65287 | Offset of the local time with respect to GNSS time |
 
 Download [Swift Binary Protocol Specification](https://support.swiftnav.com/support/solutions/articles/44001850782-swift-binary-protocol)
+
+
+### Piksi Multi / Duro Configuration Example
+
+Piksi Multi and Duro configuration can be changed using Swift Console program. TCP Server 1 settings example:
+
+![Piksi Multi Configuration Example](docs/images/piksi-multi-configuration.png)
+
+*Note: Click SAVE TO DEVICE button to memorize settings over the power cycle.*
+
+
+### Starling Configuration Example
+  
+Starling configuration is saved in the yaml configuration file. TCP server output example:
+  ```
+    outputs:
+      - name: sbp-ros2
+        protocol: sbp
+        type: tcp-server
+        port: 55556
+        max-conns: 4
+        sbp:
+          enabled-messages: [ 97,258,259,520,524,529,530,545,2304,2305,65287 ]
+  ```
+
 
 # Technical Support
 
