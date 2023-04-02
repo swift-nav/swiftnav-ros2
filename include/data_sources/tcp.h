@@ -55,6 +55,11 @@ class TCP {
   virtual bool open() noexcept;
 
   /**
+   * @brief Closes the connection
+   */
+  virtual void close() noexcept;
+
+  /**
    * @brief Read bytes from the TCP connection
    *
    * @param buffer Buffer where to put the read bytes

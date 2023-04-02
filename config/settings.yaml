@@ -27,7 +27,7 @@ swiftnav_ros2_driver:
     baseline_dir_offset_deg: 0.0    # [deg], range [-180 to 180]
     baseline_dip_offset_deg: 0.0    # [deg], range [-90 to 90]
 
-    # Mininal Speed For Track Updates From SBP Message VEL NED COV
+    # Mininal Speed For Track Updates From SBP Message VEL NED COV (GPSFix Topic)
     track_update_min_speed_mps: 0.2 # [m/s], Track and track error outputs are 'frozen' below this threshold.
 
     # Publishers

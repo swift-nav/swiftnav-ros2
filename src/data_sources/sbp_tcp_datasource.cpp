@@ -42,6 +42,7 @@ s32 SbpTCPDataSource::read(u8* buffer, u32 buffer_length) {
 
   // Attempt to reconnect on error
   if (-1 == read_bytes){
+      tcp_->close();
       tcp_->open();
   }
   return read_bytes;

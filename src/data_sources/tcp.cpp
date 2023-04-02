@@ -60,9 +60,14 @@ bool TCP::open() noexcept {
   }
 }
 
+void TCP::close() noexcept { 
+  closeSocket(); 
+}
+
 int32_t TCP::read(uint8_t* buffer, const uint32_t buffer_size) {
   struct timeval timeout {
-    0, read_timeout_ * 1000
+    (read_timeout_ / S_TO_MS),
+    (read_timeout_ % S_TO_MS) * MS_TO_US
   };
 
   fd_set read_set;
@@ -70,30 +75,28 @@ int32_t TCP::read(uint8_t* buffer, const uint32_t buffer_size) {
   FD_SET(socket_id_, &read_set);
 
   int result = select(socket_id_ + 1, &read_set, nullptr, nullptr, &timeout);
-  if (result == -1) {
-    LOG_ERROR(logger_, "Error: %u waiting for incoming data",
+  if (-1 == result) {
+    LOG_ERROR(logger_, "Waiting for data error (%u)",
               GET_SOCKET_ERROR());
     return -1;
-  } else if (result == 0) {
-    LOG_WARN(logger_, "Timeout waiting for incoming data from socket");
+  } else if (0 == result) {
+    LOG_ERROR(logger_, "Receiving data timeout");
     return -1;
   }
 
   result = recv(socket_id_, buffer, buffer_size, 0);
-  if (result > 0) {
+  if (result >= 0) {
     return result;
-  } else if (result == 0) {
-    LOG_WARN(logger_, "Connection closed by peer");
-    return -1;
   } else {
-    LOG_ERROR(logger_, "Error (%u) while reading", GET_SOCKET_ERROR());
+    LOG_ERROR(logger_, "Receiving data error (%u)", GET_SOCKET_ERROR());
     return result;
   }
 }
 
 int32_t TCP::write(const uint8_t* buffer, const uint32_t buffer_size) {
   struct timeval timeout {
-    (write_timeout_ / S_TO_MS), (write_timeout_ % S_TO_MS) * MS_TO_US
+    (write_timeout_ / S_TO_MS),
+    (write_timeout_ % S_TO_MS) * MS_TO_US
   };
 
   fd_set write_set;
@@ -143,7 +146,7 @@ void TCP::deinitSockets() noexcept {
 
 void TCP::closeSocket() noexcept {
 #if defined(__linux__)
-  if (socket_id_ != -1) close(socket_id_);
+  if (socket_id_ != -1) ::close(socket_id_);
   socket_id_ = -1;
 #else
   if (socket_id_ != INVALID_SOCKET) closesocket(socket_id_);
