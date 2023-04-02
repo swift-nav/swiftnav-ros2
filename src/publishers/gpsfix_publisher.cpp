@@ -189,8 +189,8 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
 
   if (SBP_ORIENT_EULER_INS_NAVIGATION_MODE_INVALID !=
       SBP_ORIENT_EULER_INS_NAVIGATION_MODE_GET(msg.flags)) {
-    msg_.pitch = (double)msg.pitch / 1e3;  // [deg]
-    msg_.roll = (double)msg.roll / 1e3;    // [deg]
+    msg_.pitch = (double)msg.pitch / 1e6;  // [deg]
+    msg_.roll = (double)msg.roll / 1e6;    // [deg]
 
     msg_.err_pitch =
         (double)msg.pitch_accuracy * 2.0;  // [deg], scaled to 95% confidence
@@ -198,8 +198,8 @@ void GPSFixPublisher::handle_sbp_msg(uint16_t sender_id,
         (double)msg.roll_accuracy * 2.0;  // [deg], scaled to 95% confidence
 
     orientation_track_deg =
-        (msg.yaw < 0) ? (double)msg.yaw / 1e3 + 360.0
-                      : (double)msg.yaw / 1e3;  // [deg], in 0 to 360 range
+        (msg.yaw < 0) ? (double)msg.yaw / 1e6 + 360.0
+                      : (double)msg.yaw / 1e6;  // [deg], in 0 to 360 range
     orientation_err_track_deg =
         (double)msg.yaw_accuracy * 2.0;  // [deg], scaled to 95% confidence
     orientation_track_valid = true;
