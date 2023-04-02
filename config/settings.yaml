@@ -2,20 +2,20 @@ swiftnav_ros2_driver:
   ros__parameters:
 
     # SwiftNav GNSS Receiver Interface
-    interface: 3 # 1: File, 2: Serial, 3: TCP Client
+    interface: 1 # 1: TCP Client, 2: Serial, 3: File
 
-    # File (interface: 1)
-    sbp_file: "/workspaces/Swift/24-185316.sbp"
+    # TCP Client (interface: 1)
+    host_ip: "192.168.0.222"
+    host_port: 55556
+    read_timeout: 2000  # [ms]
+    write_timeout: 2000 # [ms]
 
     # Serial (interface: 2)
     device_name: "/dev/ttyUSB0"
     connection_str: "115200|N|8|1|N"
 
-    # TCP Client (interface: 3)
-    host_ip: "192.168.0.222"
-    host_port: 55556
-    read_timeout: 2000  # [ms]
-    write_timeout: 2000 # [ms]
+    # File (interface: 3)
+    sbp_file: "/workspaces/Swift/24-185316.sbp"
 
     # ROS2 Frame Name
     frame_name: "swiftnav-gnss"
@@ -27,7 +27,7 @@ swiftnav_ros2_driver:
     baseline_dir_offset_deg: 0.0    # [deg], range [-180 to 180]
     baseline_dip_offset_deg: 0.0    # [deg], range [-90 to 90]
 
-    # Mininal Speed For Track Updates From SBP Message VEL NED
+    # Mininal Speed For Track Updates From SBP Message VEL NED COV
     track_update_min_speed_mps: 0.2 # [m/s], Track and track error outputs are 'frozen' below this threshold.
 
     # Publishers
