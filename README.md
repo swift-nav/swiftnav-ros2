@@ -5,6 +5,7 @@ ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning 
 - [Features](#features)
 - [ROS Topics](#ros-topics)
 - [Building Driver](#building-driver)
+- [Launching Driver](#launching-driver)
 - [Driver Configuration](#driver-configuration)
 - [GNSS Receiver Configuration](#gnss-receiver-configuration)
 - [Technical Support](#technical-support)
@@ -263,8 +264,10 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
     colcon build
   ```
 
-## Step 7 (Launching)
-  - Source installed driver and launch it
+# Launching Driver
+
+## Launching
+  Source installed driver and launch it
   ```
     source install/setup.bash
     ros2 launch swiftnav_ros2_driver start.py
@@ -273,15 +276,17 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 ![Driver Launch Example](docs/images/launch-example.png)
 
 
-## Step 8 (Changing Configuration and Viewing Topics)
-  - Changing the configuration file can be done in the driver source, but the driver will need to be rebuilt. Alternatively, the configuration file can be changed in the installed directory.
-  ```
-    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/settings.yaml
-  ```
-  - Swift specific SBP messages are not a part of the ROS 2 standard library, therefore the following command must be run in any terminal that is used for interfacing with this driver (e.g.: echoing the `baseline` message in a new terminal)
+## Viewing Topics
+  Swift specific SBP messages are not a part of the ROS 2 standard library, therefore the following command must be run in any terminal that is used for interfacing with this driver (e.g.: echoing the `baseline` message in a new terminal)
   ```
     source install/setup.bash
     ros2 topic echo /baseline
+  ```
+
+## Changing Configuration
+  Changing the configuration file can be done in the driver source, but the driver will need to be rebuilt. Alternatively, the configuration file can be changed in the installed directory.
+  ```
+    nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/settings.yaml
   ```
 
 
@@ -290,7 +295,7 @@ The driver configuration is stored in the `/config/settings.yaml` file. The foll
 
 | Parameter | Accepted Values | Description |
 | :--- | :--- | :--- |
-| `interface` | `1`, `2` or `3` | SwiftNav GNSS receiver communication interface<br>`1` - File<br>`2` - Serial port<br>`3` - TCP Client |
+| `interface` | `1`, `2` or `3` | SwiftNav GNSS receiver communication interface<br>`1` - TCP Client<br>`2` - Serial port<br>`3` - File |
 | `sbp_file` | E.g.: `/logs/sbp_example_file.sbp` | SBP filename to play back. Absolute path is required. Only used if `interface` is 1. |
 | `device_name` | E.g.: `COM1` (Windows), `/dev/ttyS0` (Linux) | Serial device name. Only used if interface is 2. |
 | `connection_str` | E.g.: `115200\|N\|8\|1\|N` (See [Connection String Description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
