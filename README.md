@@ -11,15 +11,15 @@ ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning 
 - [Technical Support](#technical-support)
 
 # Features
-- Designed for ROS 2 Humble but also works with ROS 2 Foxy. 
-- Developed and tested on Ubuntu 22.04 (ROS 2 Humble) and Ubuntu 20.04 (ROS 2 Foxy) platforms.
-- Supports Swift Navigation receivers and Starling Positioning Engine in Swift Binary Protocol (SBP).
-- TCP Client and Serial communication interfaces.
-- SBP file playback.
-- SBP data logging.
-- Publishes ROS 2 standard and Swift Navigation proprietary topics.
-- Configurable time stamps.
-- Written in C++.
+- Designed for ROS 2 Humble but also works with ROS 2 Foxy
+- Developed and tested on Ubuntu 22.04 (ROS 2 Humble) and Ubuntu 20.04 (ROS 2 Foxy) platforms
+- Supports Swift Navigation receivers and Starling Positioning Engine in Swift Binary Protocol (SBP)
+- TCP Client and Serial communication interfaces
+- SBP file playback
+- SBP data logging
+- Publishes ROS 2 standard and Swift Navigation proprietary topics
+- Configurable time stamps
+- Written in C++
 
 # ROS Topics
 The driver receives Swift binary (SBP) messages and publishes the following ROS topics:
@@ -365,7 +365,7 @@ The driver uses the following SBP messages:
 | `BASELINE NED` | 524 | Baseline vectors in NED frame |
 | `POS LLH COV` | 529 | Position (latitude, longitude, altitude) with covariance |
 | `VEL NED COV` | 530 | Velocity vectors in NED frame with covariance |
-| `ORIENT EULER` | 545 | Orientation (roll, pitch, yaw) |
+| `ORIENT EULER` | 545 | Orientation (roll, pitch, yaw)<br>*Note: message is available only in products with inertial fusion enabled* |
 | `IMU RAW` | 2304 | Raw IMU data |
 | `IMU AUX` | 2305 | IMU temperature and senor ranges |
 | `GNSS TIME OFFSET` | 65287 | Offset of the local time with respect to GNSS time |
