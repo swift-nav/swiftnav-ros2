@@ -16,8 +16,11 @@ SbpFileDataSource::SbpFileDataSource(const std::string &file_path,
                                      const LoggerPtr &logger)
     : logger_(logger) {
   file_stream_ = std::ifstream(file_path, std::ios::binary | std::ios_base::in);
-  if (!file_stream_.is_open())
-    LOG_FATAL(logger_, "File: %s  couldn't be open", file_path.c_str());
+  if (file_stream_.is_open())
+    LOG_INFO(logger_,  "Input file: %s", file_path.c_str());
+  else {
+    LOG_FATAL(logger_, "Cannot open file: %s", file_path.c_str());
+  }
 }
 
 SbpFileDataSource::~SbpFileDataSource() { file_stream_.close(); }
@@ -37,6 +40,7 @@ s32 SbpFileDataSource::read(u8 *buffer, u32 buffer_length) {
   file_stream_.read(reinterpret_cast<char *>(buffer), buffer_length);
   auto end_index = file_stream_.tellg();
   if (end_index == -1 || file_stream_.fail()) {
+    LOG_INFO(logger_, "End of input file");
     return -1;
   }
 

@@ -15,7 +15,7 @@ swiftnav_ros2_driver:
     connection_str: "115200|N|8|1|N"
 
     # File (interface: 3)
-    sbp_file: "/workspaces/Swift/24-185316.sbp"
+    sbp_file: "/home/swiftnav/ros2logs/sample-drive.sbp"
 
     # ROS2 Frame Name
     frame_name: "swiftnav-gnss"
