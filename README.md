@@ -26,7 +26,7 @@ The driver receives Swift binary (SBP) messages and publishes the following ROS 
  - [`GpsFix`](#gpsfix)
  - [`NavSatFix`](#navsatfix)
  - [`TwistWithCovarianceStamped`](#twistwithcovariancestamped)
- - [`Baseline` (proprietary)](#baseline)
+ - [`Baseline` *(proprietary)*](#baseline)
  - [`TimeReference`](#timereference)
  - [`Imu`](#imu)
 
@@ -217,31 +217,34 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
  Follow [instructions to install ROS 2 Humble](https://docs.ros.org/en/humble/Installation.html)
 
 ## Step 2 (Install libspb):
-  - In any directory you wish, clone libsp v4.11.0, init the repo, make the lib and install it
-    ```
-      git clone https://github.com/swift-nav/libsbp.git
-      cd libsbp
-      git checkout v4.11.0
-      cd c
-      git submodule update --init --recursive
-      mkdir build
-      cd build
-      cmake DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ 
-      make
-      sudo make install
-    ```
+  In any directory you wish, clone libsp v4.11.0, init the repo, make the lib and install it
     
+  ```
+    git clone https://github.com/swift-nav/libsbp.git
+    cd libsbp
+    git checkout v4.11.0
+    cd c
+    git submodule update --init --recursive
+    mkdir build
+    cd build
+    cmake DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ 
+    make
+    sudo make install
+  ```
+
 ## Step 3 (Download Driver Code)
-  - Navigate to workspace directory (e.g.: ~/workspace)
-    ```
-     cd ~/workspace
-     mkdir src
-     cd src
-     git clone https://github.com/swift-nav/swiftnav-ros2.git
-    ```
+  Navigate to workspace directory (e.g.: `~/workspace`) and download driver source files
+    
+  ```
+    cd ~/workspace
+    mkdir src
+    cd src
+    git clone https://github.com/swift-nav/swiftnav-ros2.git
+  ```
 
 ## Step 4 (Install Dependencies)
-  - Navigate to workspace directory (e.g.: ~/workspace)
+  Initialize environment and install dependencies
+  
   ```
     cd ~/workspace
     source /opt/ros/humble/setup.bash
@@ -251,13 +254,15 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
   ```
 
 ## Step 5 (Edit Configuration)
-  - Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for details.
+  Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for setting details.
+  
   ```
     nano config/settings.yaml
   ```
 
 ## Step 6 (Build)
-  - Navigate to workspace directory (e.g.: ~/workspace)
+  Initialize environment and build the driver
+  
   ```
     cd ~/workspace
     source /opt/ros/humble/setup.bash
@@ -267,7 +272,8 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 # Launching Driver
 
 ## Launching
-  Source installed driver and launch it
+  Source installed driver and start it
+  
   ```
     source install/setup.bash
     ros2 launch swiftnav_ros2_driver start.py
@@ -278,38 +284,40 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 
 ## Viewing Topics
   Swift specific SBP messages are not a part of the ROS 2 standard library, therefore the following command must be run in any terminal that is used for interfacing with this driver (e.g.: echoing the `baseline` message in a new terminal)
+  
   ```
     source install/setup.bash
     ros2 topic echo /baseline
   ```
 
 ## Changing Configuration
-  Changing the configuration file can be done in the driver source, but the driver will need to be rebuilt. Alternatively, the configuration file can be changed in the installed directory.
+  Changing the configuration file can be done in the driver source (`config/settings.yaml`), but the driver will need to be rebuilt. Alternatively, the configuration file can be changed in the installed directory:
+  
   ```
     nano install/swiftnav_ros2_driver/share/swiftnav_ros2_driver/config/settings.yaml
   ```
 
 
 # Driver Configuration
-The driver configuration is stored in the `/config/settings.yaml` file. The following settings are available:
+The driver configuration is stored in the `config/settings.yaml` file. The following settings are available:
 
 | Parameter | Accepted Values | Description |
 | :--- | :--- | :--- |
-| `interface` | `1`, `2` or `3` | SwiftNav GNSS receiver communication interface<br>`1` - TCP Client<br>`2` - Serial port<br>`3` - File |
-| `sbp_file` | E.g.: `/logs/sbp_example_file.sbp` | SBP filename to play back. Absolute path is required. Only used if `interface` is 1. |
-| `device_name` | E.g.: `COM1` (Windows), `/dev/ttyS0` (Linux) | Serial device name. Only used if interface is 2. |
+| `interface` | `1`, `2`, `3` | SwiftNav GNSS receiver communication interface:<br>`1` - TCP Client<br>`2` - Serial port<br>`3` - File |
+| `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if interface is 1. |
+| `host_port`| E.g.: `55556` | TCP port used. Only used if interface is 1. |
+| `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for interfaces 1 and 2. |
+| `device_name` | E.g.: `/dev/ttyS0` (Linux), `COM1` (Windows) | Serial device name. Only used if interface is 2. |
 | `connection_str` | E.g.: `115200\|N\|8\|1\|N` (See [Connection String Description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
-| `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if interface is 3. |
-| `host_port`| E.g.: `55556` | TCP port used. Only used if interface is 3. |
-| `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for interfaces 2 and 3. |
+| `sbp_file` | E.g.: `/logs/sbp-file.sbp` | SBP filename to play back. Absolute path is required. Only used if `interface` is 3. Playback is done at file reading rate, not a real-time. |
 | `frame_name`|text|ROS topics frame name |
-| `timestamp_source_gnss`|`True`or `False`|Topic Publication Time Stamp Source. `True`: use GNSS receiver reported time, `False`: use current platfrom time. |
-| `baseline_dir_offset_deg`| [-180..180] | RTK Baseline direction offset in [deg] |
-| `baseline_dip_offset_deg`| [-90..90] | RTK Baseline dip offset in [deg] |
-| `track_update_min_speed_mps`| E.g.: `0.2`| Mininal horizontal speed for Track updates from SBP message `VEL NED COV`. Track and track error outputs are 'frozen' below this threshold. |
-| `enabled_publishers[]`|`gpsfix`<br>`navsatfix`<br>`twistwithcovariancestamped`<br>`baseline`<br>`timereference`<br>`imu`| List of enabled publishers. Comment out the line to disable publisher.
-| log_sbp_messages | `True`or `False` | Enable/Disable SBP raw data logging. |
-| log_sbp_filepath | E.g.: `/logs/sbp_files/` | Absolute path (without file name) for SBP logging. |
+| `timestamp_source_gnss`|`True`, `False`|Topic publication header time stamp source. `True`: use GNSS receiver reported time, `False`: use current platfrom time. |
+| `baseline_dir_offset_deg`| -180.0 .. 180.0 | RTK Baseline direction offset in [deg]. Floating point value is required. |
+| `baseline_dip_offset_deg`| -90.0 .. 90.0 | RTK Baseline dip offset in [deg]. Floating point value is required. |
+| `track_update_min_speed_mps`| E.g.: `1.0`| Mininal horizontal speed for Track updates from SBP message `VEL NED COV`. Track and track error outputs are 'frozen' below this threshold. Floating point value is required. |
+| `enabled_publishers[]`|`gpsfix`<br>`navsatfix`<br>`twistwithcovariancestamped`<br>`baseline`<br>`timereference`<br>`imu`| List of enabled publishers. Delete (comment out) the line to disable publisher.
+| log_sbp_messages | `True`, `False` | Enable/Disable SBP raw data recording. |
+| log_sbp_filepath | E.g.: `/logs/sbp-files/` | Absolute path (without file name) for SBP logging. |
 
 
 ## Connection String Description
@@ -325,8 +333,8 @@ The connection string for the serial interface has the form:
 | `N` | No parity |
 | `E` | Even parity |
 | `O` | Odd parity |
-| `M` | Mark parity (Not available in some Linux distributions) |
-| `S` | Space parity (Not available in some Linux distributions) |
+| `M` | Mark parity *(Not available in some Linux distributions)* |
+| `S` | Space parity *(Not available in some Linux distributions)* |
 
 ### Data Bits
 `7` or `8`
@@ -345,7 +353,7 @@ The connection string for the serial interface has the form:
 
 # GNSS Receiver Configuration
 
-The ROS 2 driver works with Swift Navigation receivers and Starling Position Engine software using data in SBP protocol. Refer to the receiver-specific setup guide to configure your receiver:
+The ROS 2 driver works with Swift Navigation receivers and Starling Position Engine software using data in SBP protocol. Refer to the receiver-specific manual to configure your receiver:
 
 - [Piksi Multi](https://support.swiftnav.com/support/solutions/folders/44001200455)
 - [Duro](https://support.swiftnav.com/support/solutions/folders/44001200456)
@@ -375,7 +383,7 @@ Download [Swift Binary Protocol Specification](https://support.swiftnav.com/supp
 
 ### Piksi Multi / Duro Configuration Example
 
-Piksi Multi and Duro configuration can be changed using Swift Console program. TCP Server 1 settings example:
+Piksi Multi and Duro configuration can be changed using Swift Console program. `TCP Server 1` settings example:
 
 ![Piksi Multi Configuration Example](docs/images/piksi-multi-configuration.png)
 
@@ -384,8 +392,9 @@ Piksi Multi and Duro configuration can be changed using Swift Console program. T
 
 ### Starling Configuration Example
   
-Starling configuration is saved in the yaml configuration file. TCP server output example:
+Starling configuration is saved in the yaml configuration file. `TCP server` output example:
   ```
+  ...
     outputs:
       - name: sbp-ros2
         protocol: sbp
@@ -394,6 +403,7 @@ Starling configuration is saved in the yaml configuration file. TCP server outpu
         max-conns: 4
         sbp:
           enabled-messages: [ 97,258,259,520,524,529,530,545,2304,2305,65287 ]
+  ...
   ```
 
 
