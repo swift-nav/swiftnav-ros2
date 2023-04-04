@@ -208,6 +208,8 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 
 # Building Driver
 
+[Click here if building driver in docker](docs/build-in-docker.md)
+
 ### Dependencies:
 - `libsbp` - Swift Binary Protocol library
 - `libserialport` - Serial Port communication library
