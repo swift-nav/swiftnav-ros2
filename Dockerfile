@@ -31,9 +31,9 @@ RUN chown -R dockerdev:dockerdev $HOME/
 USER dockerdev
 
 WORKDIR $HOME/
-RUN git clone https://github.com/swift-nav/libsbp.git && cd libsbp && git checkout v4.4.0
+RUN git clone https://github.com/swift-nav/libsbp.git && cd libsbp && git checkout v4.11.0
 WORKDIR $HOME/libsbp/c
-RUN git submodule update --init
+RUN git submodule update --init --recursive
 RUN mkdir build &&  \
     cd build && \
     cmake DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ && \
