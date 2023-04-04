@@ -18,17 +18,19 @@ ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning 
 - SBP file playback
 - SBP data logging
 - Publishes ROS 2 standard and Swift Navigation proprietary topics
-- Configurable time stamps
+- Configurable time stamping
 - Written in C++
 
 # ROS Topics
-The driver receives Swift binary (SBP) messages and publishes the following ROS topics:
+The driver receives Swift binary (SBP) messages (see [GNSS Receiver Configuration](#gnss-receiver-configuration) for setting up the receiver) and publishes the following ROS topics:
  - [`GpsFix`](#gpsfix)
  - [`NavSatFix`](#navsatfix)
  - [`TwistWithCovarianceStamped`](#twistwithcovariancestamped)
  - [`Baseline` *(proprietary)*](#baseline)
  - [`TimeReference`](#timereference)
  - [`Imu`](#imu)
+
+Topic publication details are described below.
 
 ## GpsFix
 
@@ -51,7 +53,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 | ROS2 Message Field | SBP Message Data Source | Notes |
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
-|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`header.frame_id`|--|Text from `frame_name` field in the `settings.yaml` configuration file |
 |`status.satellites_used`|`POS LLH COV`||
 |`status.satellite_used_prn[]`|--|Not populated|
 |`status.satellites_visible`<br>`status.satellite_visible_prn[]`<br>`status.satellite_visible_z[]`<br>`status.satellite_visible_azimuth[]`<br>`status.satellite_visible_snr[]`|--|Not populated|
@@ -60,7 +62,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 |`status.orientation_source`|`POS LLH COV`||
 |`status.position_source`|`POS LLH COV`||
 |`latitude`<br>`longitude`<br>`altitude`<br>|`POS LLH COV`|Zeros when the fix is invalid. If position is valid altitude is always present (i.e. never NaN).|
-|`track`|`VEL NED COV`<br>or<br>`ORIENT EULER`|If message is present and data valid, reports `yaw` from `ORIENT EULER`. If `yaw` is not valid reports computed Course Over Ground from `VEL NED COV` message. `VEL NED COV` updates `track` only if horizontal speed is above `track_update_min_speed_mps` set in the settings file. When the track becomes invalid the last valid track is reported.  |
+|`track`|`VEL NED COV`<br>or<br>`ORIENT EULER`|If `ORIENT EULER` message is present and `yaw` data valid, reports `yaw`. If `yaw` is invalid reports computed Course Over Ground from `VEL NED COV` message. `VEL NED COV` updates `track` only if horizontal speed is above the `track_update_min_speed_mps` setting in the settings file. When the track becomes invalid the last valid track is reported. |
 |`speed`|`POS LLH COV`|Computed horizontal (2D) speed|
 |`climb`|`POS LLH COV`||
 |`pitch`<br>`roll`|`ORIENT EULER`||
@@ -94,7 +96,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 | ROS2 Message Field | SBP Message Data Source | Notes |
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
-|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`header.frame_id`|--|Text from `frame_name` field in the `settings.yaml` configuration file |
 |`status.status`|`POS LLH COV`|Dead Reckoning (DR) position is reported as `STATUS_FIX` (0)|
 |`status.service`|`MEASUREMENT STATE`|GNSS constellations from the last `MEASUREMENT STATE` message. Reports zero when message is not present.|
 |`latitude`<br>`longitude`<br>`altitude`<br>`position_covariance`<br>`position_covariance_type`|`POS LLH COV`|Zeros when the fix is invalid. If position is valid altitude is always present (i.e. never NaN). Covariance, if valid, is always `TYPE_KNOWN` (full matrix).|
@@ -117,7 +119,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 | ROS2 Message Field | SBP Message Data Source | Notes |
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
-|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`header.frame_id`|--|Text from `frame_name` field in the `settings.yaml` configuration file |
 |`linear.x`<br>`linear.y`<br>`linear.z`|`VEL NED COV`|Conversion from NED frame:<br>`x` = `east`<br>`y` = `north`<br>`z` = `-down`<br>Zeros when velocity is invalid.|
 |`angular.x`<br>`angular.y`<br>`angular.z`|--|Not populated. Always zero.|
 |`covariance`|`VEL NED COV`|If velocity is valid, linear velocity covariance is full matrix. `covariance[0]` is set to -1 when linear velocity is invalid. `covariance[21]` is always -1.|
@@ -140,7 +142,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 | ROS2 Message Field | SBP Message Data Source | Notes |
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
-|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`header.frame_id`|--|Text from `frame_name` field in the `settings.yaml` configuration file |
 |`mode`|`BASELINE NED`|Solution mode:<br>`0` - Invalid<br>`3` - Float RTK<br>`4` - Fixed RTK|
 |`satellites_used`|`BASELINE NED`|Number of satellites used in the solution|
 |`baseline_n_m`<br>`baseline_e_m`<br>`baseline_d_m`|`BASELINE NED`|Baseline NED vectors in [m]. Zeros when invalid. Vectors origin is at the base location.|
@@ -149,7 +151,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 |`baseline_length_m`|`BASELINE NED`|Computed 3D baseline length. Zero when invalid.|
 |`baseline_length_h_m`|`BASELINE NED`|Computed horizontal baseline length. Zero when invalid.|
 |`baseline_orientation_valid`|`BASELINE NED`|`True` when baseline orientation (dir and dip) is valid. `False` when invalid.|
-|`baseline_dir_deg`|`BASELINE NED`|Computed horizontal angle (bearing/heading) from base to rover in [degrees]. Valid only in RTK fixed mode. Range [0..360). Zero when invalid.|
+|`baseline_dir_deg`|`BASELINE NED`|Computed horizontal angle (bearing/heading) from base to rover in [degrees]. Valid only in RTK fixed mode. Range [0..360) from true north. Zero when invalid.|
 |`baseline_dir_err_deg`|`BASELINE NED`|Estimated (95%) error of `baseline_dir_deg` in [degrees]. Range [0..180]. Zero when invalid.|
 |`baseline_dip_deg`|`BASELINE NED`|Computed vertical angle from base to rover in [degrees]. Valid only in RTK fixed mode. Range [-90..90]. Zero when invalid.|
 |`baseline_dip_err_deg`|`BASELINE NED`|Estimated (95%) error of `baseline_dip_deg` in [degrees]. Range [0..90]. Zero when invalid.|
@@ -174,7 +176,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 |`header.stamp`|`UTC TIME`|See Topic Publication for time stamping details|
 |`header.frame_id`|--|Not used|
 |`time_ref`|`GPS TIME`|GPS time in seconds since 1980-01-06. `sec` value is set to -1 if the GPS time is not available.|
-|`source`|--|Text from `frame_name` in the config `params.yaml` file|
+|`source`|--|Text from `frame_name` field in the `settings.yaml` configuration file |
  
  
 ## Imu
@@ -198,7 +200,7 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 | ROS2 Message Field | SBP Message Data Source | Notes |
 | :--- | :---: | :--- |
 |`header.stamp`|`UTC TIME`<br>`GPS TIME`<br>`GNSS TIME OFFSET`|See Topic Publication for time stamping details|
-|`header.frame_id`|--|Text from `frame_name` in the config `params.yaml` file|
+|`header.frame_id`|--|Text from `frame_name` field in the `settings.yaml` configuration file |
 |`orientation`<br>`orientation_covariance`|--|Not populated. Always zero. `orientation_covariance[0]` is always -1.|
 |`angular_velocity`|`IMU RAW`<br>`IMU AUX`|Reported in sensor frame. Zeros when invalid.|
 |`angular_velocity_covariance`|--|Not populated. `angular_velocity_covariance[0]` is set to -1 when angular velocity is not valid or when the time stamping source has changed|
@@ -208,7 +210,7 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
 
 # Building Driver
 
-[Click here if building driver in docker](docs/build-in-docker.md)
+[Click here if building driver in a docker](docs/build-in-docker.md)
 
 ### Dependencies:
 - `libsbp` - Swift Binary Protocol library
