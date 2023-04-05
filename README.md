@@ -261,7 +261,7 @@ Time stamp depends on `timestamp_source_gnss` setting flag in the configuration 
   Edit configuration file as required. See [ROS 2 driver configuration](#driver-configuration) for setting details.
   
   ```
-    nano config/settings.yaml
+    nano ~/workspace/src/swiftnav-ros2/config/settings.yaml
   ```
 
 ## Step 6 (Build)
