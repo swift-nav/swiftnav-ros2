@@ -68,7 +68,7 @@ Topic publication depends on `timestamp_source_gnss` setting flag in the configu
 |`pitch`<br>`roll`|`ORIENT EULER`||
 |`dip`|--|Not populated|
 |`time`|`GPS TIME`|GPS time in seconds since 1980-01-06 |
-|`gdop`<br>`pdop`<br>`hdop`<br>`vdop`<br>`tdop`|`DOPS`||
+|`gdop`<br>`pdop`<br>`hdop`<br>`vdop`<br>`tdop`|`DOPS`|DOPs are published if the most recent SBP `DOPS` message is not older than 2 seconds.|
 |`err`<br>`err_horz`<br>`err_vert`|`POS LLH COV`||
 |`err_track`|`VEL NED COV`<br>or<br>`ORIENT EULER`||
 |`err_speed`<br>`err_climb`|`VEL NED COV`||
@@ -308,20 +308,20 @@ The driver configuration is stored in the `config/settings.yaml` file. The follo
 | Parameter | Accepted Values | Description |
 | :--- | :--- | :--- |
 | `interface` | `1`, `2`, `3` | SwiftNav GNSS receiver communication interface:<br>`1` - TCP Client<br>`2` - Serial port<br>`3` - File (playback) |
-| `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if interface is 1. |
-| `host_port`| E.g.: `55556` | TCP port used. Only used if interface is 1. |
-| `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for interfaces 1 and 2. |
-| `device_name` | E.g.: `/dev/ttyS0` (Linux), `COM1` (Windows) | Serial device name. Only used if interface is 2. |
-| `connection_str` | E.g.: `115200\|N\|8\|1\|N` (See [Connection String Description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
-| `sbp_file` | E.g.: `/logs/sbp-file.sbp` | SBP file name for playback. Absolute path is required. Only used if `interface` is 3. Playback is done at file reading rate, not a real-time. |
-| `frame_name`|text|ROS topics frame name |
+| `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if `interface` is `1`. |
+| `host_port`| E.g.: `55556` | TCP port used. Only used if `interface` is `1`. |
+| `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for `interface` `1` and `2`. |
+| `device_name` | E.g.: `/dev/ttyS0` (Linux), `COM1` (Windows) | Serial device name. Only used if `interface` is `2`. |
+| `connection_str` | E.g.: `115200\|N\|8\|1\|N` (See [Connection String Description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if `interface` is `2`. |
+| `sbp_file` | E.g.: `/logs/sbp-file.sbp` | SBP file name for playback. Absolute path is required. Only used if `interface` is `3`. Playback is done at file reading rate, not a real-time. |
+| `frame_name`|string|ROS topics frame name |
 | `timestamp_source_gnss`|`True`, `False`|Topic publication header time stamp source. `True`: use GNSS receiver reported time, `False`: use current platfrom time. |
 | `baseline_dir_offset_deg`| -180.0 .. 180.0 | RTK Baseline direction offset in [deg]. Floating point value is required. |
 | `baseline_dip_offset_deg`| -90.0 .. 90.0 | RTK Baseline dip offset in [deg]. Floating point value is required. |
-| `track_update_min_speed_mps`| E.g.: `1.0`| Mininal horizontal speed for Track updates from SBP message `VEL NED COV`. Track and track error outputs are 'frozen' below this threshold. Floating point value is required. |
+| `track_update_min_speed_mps`| E.g.: `1.0`| Mininal horizontal speed for `track` updates from SBP message `VEL NED COV` in [m/s]. `track` and `err_track` outputs are 'frozen' below this threshold. Floating point value is required. |
 | `enabled_publishers[]`|`gpsfix`<br>`navsatfix`<br>`twistwithcovariancestamped`<br>`baseline`<br>`timereference`<br>`imu`| List of enabled publishers. Delete (comment out) the line to disable publisher.
-| log_sbp_messages | `True`, `False` | Enable/Disable SBP raw data recording. |
-| log_sbp_filepath | E.g.: `/logs/sbp-files/` | Absolute path (without file name) for SBP logging. |
+| log_sbp_messages | `True`, `False` | Enable/disable SBP raw data recording. |
+| log_sbp_filepath | E.g.: `/logs/sbp-files/` | Absolute path (without a file name) for SBP log file location. File name is created automatically with the current date and time, e.g.: `swiftnav-20230402-180720.sbp`. |
 
 
 ## Connection String Description
