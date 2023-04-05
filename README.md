@@ -307,13 +307,13 @@ The driver configuration is stored in the `config/settings.yaml` file. The follo
 
 | Parameter | Accepted Values | Description |
 | :--- | :--- | :--- |
-| `interface` | `1`, `2`, `3` | SwiftNav GNSS receiver communication interface:<br>`1` - TCP Client<br>`2` - Serial port<br>`3` - File |
+| `interface` | `1`, `2`, `3` | SwiftNav GNSS receiver communication interface:<br>`1` - TCP Client<br>`2` - Serial port<br>`3` - File (playback) |
 | `host_ip`| E.g.: `192.168.0.222` | IP address of the GNSS receiver. Only used if interface is 1. |
 | `host_port`| E.g.: `55556` | TCP port used. Only used if interface is 1. |
 | `read_timeout`<br>`write_timeout` | E.g.: `10000` | A timeout for read/write operations in milliseconds. Used for interfaces 1 and 2. |
 | `device_name` | E.g.: `/dev/ttyS0` (Linux), `COM1` (Windows) | Serial device name. Only used if interface is 2. |
 | `connection_str` | E.g.: `115200\|N\|8\|1\|N` (See [Connection String Description](#connection-string-description)) | A connection string that describes the parameters needed for the serial communication. Only used if interface is 2. |
-| `sbp_file` | E.g.: `/logs/sbp-file.sbp` | SBP filename to play back. Absolute path is required. Only used if `interface` is 3. Playback is done at file reading rate, not a real-time. |
+| `sbp_file` | E.g.: `/logs/sbp-file.sbp` | SBP file name for playback. Absolute path is required. Only used if `interface` is 3. Playback is done at file reading rate, not a real-time. |
 | `frame_name`|text|ROS topics frame name |
 | `timestamp_source_gnss`|`True`, `False`|Topic publication header time stamp source. `True`: use GNSS receiver reported time, `False`: use current platfrom time. |
 | `baseline_dir_offset_deg`| -180.0 .. 180.0 | RTK Baseline direction offset in [deg]. Floating point value is required. |
