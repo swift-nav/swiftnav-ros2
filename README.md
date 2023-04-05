@@ -321,7 +321,7 @@ The driver configuration is stored in the `config/settings.yaml` file. The follo
 | `track_update_min_speed_mps`| E.g.: `1.0`| Mininal horizontal speed for `track` updates from SBP message `VEL NED COV` in [m/s]. `track` and `err_track` outputs are 'frozen' below this threshold. Floating point value is required. |
 | `enabled_publishers[]`|`gpsfix`<br>`navsatfix`<br>`twistwithcovariancestamped`<br>`baseline`<br>`timereference`<br>`imu`| List of enabled publishers. Delete (comment out) the line to disable publisher.
 | log_sbp_messages | `True`, `False` | Enable/disable SBP raw data recording. |
-| log_sbp_filepath | E.g.: `/logs/sbp-files/` | Absolute path (without a file name) for SBP log file location. File name is created automatically with the current date and time, e.g.: `swiftnav-20230402-180720.sbp`. |
+| log_sbp_filepath | E.g.: `/logs/sbp-files/` | Absolute path (without a file name) for SBP log file location. File name is created automatically with the current date and time, e.g.: `swiftnav-20230404-160720.sbp`. |
 
 
 ## Connection String Description
