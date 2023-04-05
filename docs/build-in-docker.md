@@ -6,7 +6,7 @@
     git clone https://github.com/swift-nav/swiftnav-ros2.git
     cd swiftnav-ros2
     docker build -t swiftnav-ros2 .
-    docker run -it -v :/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash
+    docker run -it -v <path to swiftnav-ros2 directory>:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash
   ```
 
 ## Step 2 (edit configuration)
