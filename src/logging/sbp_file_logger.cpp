@@ -39,7 +39,7 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
   localtime_r(&now, &local_time);
 #endif  // _WIN32
 
-  std::sprintf(fname, "/swiftnav-%d%02d%02d-%02d%02d%02d.sbp",
+  std::snprintf(fname, "/swiftnav-%d%02d%02d-%02d%02d%02d.sbp",
                local_time.tm_year + 1900,
                local_time.tm_mon + 1,
                local_time.tm_mday,
