@@ -25,7 +25,7 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
     : state_(nullptr, this), logger_(logger) {
   std::string file_name(file_path);
   time_t now = time(nullptr);
-  char fname[FNAME_MAX_LEN] = "";
+  std::array<char, FNAME_MAX_LEN> fname = "";
 
   // Create dir
   if (!FileSystem::createDir(file_path)) {
