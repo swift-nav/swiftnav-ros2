@@ -18,12 +18,14 @@
 #include <filesystem>
 #include <iostream>
 
+constexpr uint8_t FNAME_MAX_LEN = 50;
+
 SbpFileLogger::SbpFileLogger(const std::string& file_path,
                              const LoggerPtr& logger)
     : state_(nullptr, this), logger_(logger) {
   std::string file_name(file_path);
   time_t now = time(nullptr);
-  char fname[50] = "";
+  std::array<char, FNAME_MAX_LEN> fname = "";
 
   // Create dir
   if (!FileSystem::createDir(file_path)) {
@@ -39,7 +41,8 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
   localtime_r(&now, &local_time);
 #endif  // _WIN32
 
-  std::sprintf(fname, "/swiftnav-%d%02d%02d-%02d%02d%02d.sbp",
+  std::snprintf(fname, FNAME_MAX_LEN,
+               "/swiftnav-%d%02d%02d-%02d%02d%02d.sbp",
                local_time.tm_year + 1900,
                local_time.tm_mon + 1,
                local_time.tm_mday,
