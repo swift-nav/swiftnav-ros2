@@ -25,7 +25,7 @@ jobs:
           docker run --rm -v $PWD:/mnt/workspace/src/swiftnav-ros2 swiftnav-ros2:latest /bin/bash ./code_coverage.sh $GITHUB_TOKEN \
                                                                                                                      $SONAR_TOKEN \
                                                                                                                      $PARALLEL_THREADS
-  build-pr:
+  build-pr-codecov:
     name: Build pull request
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
@@ -45,7 +45,7 @@ jobs:
                                                                                                                      $PR_BRANCH_NAME \
                                                                                                                      $PR_NUMBER
 
-  build-pr:
+  build-pr-colcon:
     name: Build pull request
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
