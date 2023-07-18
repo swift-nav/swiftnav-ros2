@@ -23,20 +23,19 @@ RUN apt-get update && apt-get install --yes \
 # Add a "dockerdev" user with sudo capabilities
 # 1000 is the first user ID issued on Ubuntu; might
 # be different for Mac users. Might need to add more.
-RUN \
-     useradd -u ${UID} -ms /bin/bash -G sudo dockerdev \
-  && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers \
-  && chown -R dockerdev:dockerdev $HOME/
+RUN useradd -u ${UID} -ms /bin/bash -G sudo dockerdev && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers && \
+    chown -R dockerdev:dockerdev $HOME/
 
 USER dockerdev
 
 WORKDIR $HOME/
 
 RUN git clone --depth=1 --branch v4.11.0 --single-branch --recursive --jobs=4 https://github.com/swift-nav/libsbp.git && \
-    mkdir build &&  \
-    cd build && \
-    cmake DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ && \
-    make && \
+    mkdir -p libsbp/c/build &&  \
+    cd libsbp/c/build && \
+    cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ && \
+    make -j4 && \
     sudo make install
 
 # Install code coverage tool
