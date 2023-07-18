@@ -26,7 +26,7 @@ jobs:
                                                                                                                      $SONAR_TOKEN \
                                                                                                                      $PARALLEL_THREADS
   build-pr-codecov:
-    name: Build pull request
+    name: Build pull request (code coverage)
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
     steps:
@@ -46,7 +46,7 @@ jobs:
                                                                                                                      $PR_NUMBER
 
   build-pr-colcon:
-    name: Build pull request
+    name: Build pull request (colcon)
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
     steps:

@@ -25,16 +25,15 @@ RUN apt-get update && apt-get install --yes \
 # be different for Mac users. Might need to add more.
 RUN \
      useradd -u ${UID} -ms /bin/bash -G sudo dockerdev \
-  && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers 
+  && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers \
+  && chown -R dockerdev:dockerdev $HOME/
 
-RUN chown -R dockerdev:dockerdev $HOME/
 USER dockerdev
 
 WORKDIR $HOME/
-RUN git clone https://github.com/swift-nav/libsbp.git && cd libsbp && git checkout v4.11.0
-WORKDIR $HOME/libsbp/c
-RUN git submodule update --init --recursive
-RUN mkdir build &&  \
+
+RUN git clone --depth=1 --branch v4.11.0 --single-branch --recursive --jobs=4 https://github.com/swift-nav/libsbp.git && \
+    mkdir build &&  \
     cd build && \
     cmake DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF ../ && \
     make && \
@@ -44,13 +43,13 @@ RUN mkdir build &&  \
 RUN sudo apt-get -y install gcovr
 
 # Download and set up sonar-scanner
-RUN sudo apt-get -y install unzip
-RUN mkdir -p $HOME/.sonar
-RUN curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip
-RUN unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+RUN sudo apt-get -y install unzip && \
+    mkdir -p $HOME/.sonar && \
+    curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip && \
+    unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+
 ENV PATH="${PATH}:/home/dockerdev/.sonar/sonar-scanner-${SONAR_SCANNER_VERSION}-linux/bin"
 
 WORKDIR /mnt/workspace/src/swiftnav-ros2
-RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/
 
-#CMD ["make", "all"]
+RUN sudo chown -R dockerdev:dockerdev /mnt/workspace/
