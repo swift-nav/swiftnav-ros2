@@ -25,7 +25,7 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
     : state_(nullptr, this), logger_(logger) {
   std::string file_name(file_path);
   time_t now = time(nullptr);
-  std::array<char, FNAME_MAX_LEN> fname = "";
+  std::array<char, FNAME_MAX_LEN> fname{""};
 
   // Create dir
   if (!FileSystem::createDir(file_path)) {
@@ -41,7 +41,7 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
   localtime_r(&now, &local_time);
 #endif  // _WIN32
 
-  std::snprintf(fname, FNAME_MAX_LEN,
+  std::snprintf(fname.data(), FNAME_MAX_LEN,
                "/swiftnav-%d%02d%02d-%02d%02d%02d.sbp",
                local_time.tm_year + 1900,
                local_time.tm_mon + 1,
@@ -50,7 +50,7 @@ SbpFileLogger::SbpFileLogger(const std::string& file_path,
                local_time.tm_min,
                local_time.tm_sec);
 
-  file_name += std::string(fname);
+  file_name += std::string(fname.data());
 
   std::filesystem::path path(file_name);
   file_name = path.lexically_normal().string();
