@@ -7,7 +7,7 @@
 # 4 - pull request branch name
 # 5 - pull request number
 
-# set -e
+set -e
 
 export GITHUB_TOKEN=$1
 export SONAR_TOKEN=$2
