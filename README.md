@@ -11,8 +11,8 @@ ROS 2 driver for Swift Navigation's GNSS/INS receivers and Starling Positioning 
 - [Technical Support](#technical-support)
 
 # Features
-- Designed for ROS 2 Humble but also works with ROS 2 Foxy
-- Developed and tested on Ubuntu 22.04 (ROS 2 Humble) and Ubuntu 20.04 (ROS 2 Foxy) platforms
+- Designed for ROS 2 Humble but also works with ROS 2 Foxy and Galactic
+- Developed and tested on Ubuntu 22.04 (ROS 2 Humble) and Ubuntu 20.04 (ROS 2 Foxy/Galactic) platforms
 - Supports Swift Navigation receivers and Starling Positioning Engine in Swift Binary Protocol (SBP)
 - TCP Client and Serial communication interfaces
 - SBP file playback
