@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install --yes \
     check \
     clang-format-13 \
     libserialport-dev \
-    ros-humble-gps-msgs
+    ros-humble-gps-msgs \
+    # Sonar-scanner dependency
+    openjdk-19-jdk
 
 # Add a "dockerdev" user with sudo capabilities
 # 1000 is the first user ID issued on Ubuntu; might
