@@ -11,6 +11,8 @@
 
 export GITHUB_TOKEN=$1
 export SONAR_TOKEN=$2
+export JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
 
 mkdir -p build
 cd build
