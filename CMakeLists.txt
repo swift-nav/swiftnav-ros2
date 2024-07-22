@@ -76,7 +76,7 @@ add_executable(sbp-to-ros
     DEPENDENCIES std_msgs
   )
 
-if(${FOUND_ROS2_DISTRO} STREQUAL "foxy")
+if((${FOUND_ROS2_DISTRO} STREQUAL "foxy") OR (${FOUND_ROS2_DISTRO} STREQUAL "galactic"))
   rosidl_target_interfaces(sbp-to-ros ${PROJECT_NAME} "rosidl_typesupport_cpp")
 else()
   rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
@@ -148,7 +148,7 @@ if(BUILD_TESTING)
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   )
 
-  if(${FOUND_ROS2_DISTRO} STREQUAL "foxy")
+  if((${FOUND_ROS2_DISTRO} STREQUAL "foxy") OR (${FOUND_ROS2_DISTRO} STREQUAL "galactic"))
     rosidl_target_interfaces(${PROJECT_NAME}_test ${PROJECT_NAME} "rosidl_typesupport_cpp")
   else()
     rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
